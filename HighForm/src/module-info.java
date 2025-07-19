@@ -4,6 +4,7 @@ module HighForm {
 	requires javafx.base;
 	requires java.sql;
 	requires lombok;
+	requires javafx.graphics;
 	
     opens com to javafx.graphics, javafx.fxml;
     opens com.board.controller to javafx.fxml;

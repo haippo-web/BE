@@ -1,18 +1,18 @@
 package com.mypage.domain;
 
-import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Attendance {
+public class Curriculum {
     private Long id;
-    private LocalDateTime checkIn;
-    private LocalDateTime checkOut;
-    private String status;
-    private Long userId;
+    private String name;
+    private Date startDate;
+    private Date endDate;
 }

@@ -13,6 +13,8 @@ import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
+import java.time.LocalDate;
+
 public class ApprovalRequestController {
     @FXML private TextArea reasonArea;
     @FXML private TextField fileField;
@@ -48,8 +50,13 @@ public class ApprovalRequestController {
             AttendanceApprovalRequest req = new AttendanceApprovalRequest();
             req.setReason(reasonArea.getText());
             req.setProofFile(fileField.getText());
-            req.setStartDate(java.sql.Date.valueOf(startDatePicker.getValue()));
-            req.setEndDate(java.sql.Date.valueOf(endDatePicker.getValue()));
+
+            // LocalDate 직접 전달
+            LocalDate start = startDatePicker.getValue();
+            LocalDate end = endDatePicker.getValue();
+            req.setStartDate(start);
+            req.setEndDate(end);
+
             req.setUserId(1L); // 로그인 구현 전이므로 임시값
 
             AttendanceApprovalRequestDAO dao = new AttendanceApprovalRequestDAO();

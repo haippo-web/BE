@@ -1,5 +1,6 @@
 package com.mypage.domain;
 
+
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
@@ -9,10 +10,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Attendance {
+public class Assignment {
     private Long id;
-    private LocalDateTime checkIn;
-    private LocalDateTime checkOut;
-    private String status;
-    private Long userId;
+    private String title;
+    private String content;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
 }

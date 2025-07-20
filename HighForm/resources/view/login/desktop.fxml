@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.login.controller.DesktopController" 
+           style="-fx-background-color: #008080;" prefWidth="1000" prefHeight="750">
+    
+    <!-- 데스크탑 메인 영역 -->
+    <center>
+        <AnchorPane>
+            <!-- 바탕화면 아이콘들 -->
+            <VBox layoutX="20" layoutY="20" spacing="20" alignment="TOP_LEFT">
+                
+                <!-- 내 컴퓨터 아이콘 -->
+                <VBox alignment="CENTER" spacing="5" onMouseClicked="#openMyComputer"
+                      style="-fx-cursor: hand;" maxWidth="60">
+                    <ImageView fitWidth="32" fitHeight="32">
+                        <image>
+                            <Image url="@../../img2/pc_icon.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="내 컴퓨터" 
+                           style="-fx-text-fill: white; -fx-font-family: 'Malgun Gothic'; -fx-font-size: 10px;"
+                           wrapText="true" textAlignment="CENTER"/>
+                </VBox>
+                
+                <!-- 파일 관리자 -->
+                <VBox alignment="CENTER" spacing="5" onMouseClicked="#openFileManager"
+                      style="-fx-cursor: hand;" maxWidth="60">
+                    <ImageView fitWidth="32" fitHeight="32">
+                        <image>
+                            <Image url="@../../img2/folder_icon.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="폴더" 
+                           style="-fx-text-fill: white; -fx-font-family: 'Malgun Gothic'; -fx-font-size: 10px;"
+                           wrapText="true" textAlignment="CENTER"/>
+                </VBox>
+                
+                <!-- 휴지통 -->
+                <VBox alignment="CENTER" spacing="5" onMouseClicked="#openTrash"
+                      style="-fx-cursor: hand;" maxWidth="60">
+                    <ImageView fitWidth="32" fitHeight="32">
+                        <image>
+                            <Image url="@../../img2/trash_icon.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="휴지통" 
+                           style="-fx-text-fill: white; -fx-font-family: 'Malgun Gothic'; -fx-font-size: 10px;"
+                           wrapText="true" textAlignment="CENTER"/>
+                </VBox>
+                
+                <!-- 알림판 (게시판) -->
+                <VBox alignment="CENTER" spacing="5" onMouseClicked="#openBoard"
+                      style="-fx-cursor: hand;" maxWidth="60">
+                    <ImageView fitWidth="32" fitHeight="32">
+                        <image>
+                            <Image url="@../../img2/board_icon.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="알림판" 
+                           style="-fx-text-fill: white; -fx-font-family: 'Malgun Gothic'; -fx-font-size: 10px;"
+                           wrapText="true" textAlignment="CENTER"/>
+                </VBox>
+                
+            </VBox>
+            
+            <!-- 사용자 정보 표시 (우측 상단) -->
+            <HBox layoutX="750" layoutY="20" spacing="10" alignment="CENTER_RIGHT">
+                <Label fx:id="welcomeLabel" text="환영합니다, 사용자님!" 
+                       style="-fx-text-fill: white; -fx-font-family: 'Malgun Gothic'; -fx-font-size: 12px; -fx-background-color: rgba(0,0,0,0.3); -fx-padding: 5 10 5 10; -fx-background-radius: 3;"/>
+            </HBox>
+            
+            <!-- 로그아웃 버튼 (우측 상단) -->
+            <Button fx:id="logoutButton" layoutX="900" layoutY="50" text="로그아웃" 
+                    onAction="#handleLogout"
+                    style="-fx-font-family: 'Malgun Gothic'; -fx-font-size: 10px; -fx-background-color: #c0c0c0; -fx-border-color: #808080; -fx-border-width: 1;"/>
+        </AnchorPane>
+    </center>
+    
+    <!-- 하단 작업 표시줄 -->
+    <bottom>
+        <HBox style="-fx-background-color: linear-gradient(to bottom, #c0c0c0 0%, #a0a0a0 100%); -fx-border-color: #808080; -fx-border-width: 1 0 0 0; -fx-padding: 2;"
+              prefHeight="30" alignment="CENTER_LEFT" spacing="5">
+            
+            <!-- 시작 버튼 -->
+            <Button text="시작" fx:id="startButton" onAction="#showStartMenu"
+                    style="-fx-font-family: 'Malgun Gothic'; -fx-font-size: 11px; -fx-background-color: #c0c0c0; -fx-border-color: #808080; -fx-border-width: 1; -fx-padding: 2 15 2 15;"
+                    prefHeight="24"/>
+            
+            <Separator orientation="VERTICAL"/>
+            
+            <!-- 현재 시간 표시 (우측) -->
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Label fx:id="timeLabel" text="3:43 pm" 
+                   style="-fx-font-family: 'Malgun Gothic'; -fx-font-size: 11px; -fx-text-fill: black;"/>
+        </HBox>
+    </bottom>
+    
+</BorderPane>

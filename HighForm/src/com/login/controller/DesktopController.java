@@ -11,22 +11,38 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 
 public class DesktopController {
     
     @FXML private Label welcomeLabel;
     @FXML private Label timeLabel;
     @FXML private Button startButton;
+    @FXML private AnchorPane desktopPane;
+    
+    // 강아지 캐릭터 관련 변수들
+    private ImageView dogCharacterView;
+    private Label notificationBubble;
     
     private User currentUser;
     private Timeline timeline;
+    private Timeline dogAnimationTimeline;
+    private Timeline randomNotificationTimeline;
     private Popup startMenu;
+    
+    // 강아지 애니메이션용 이미지 배열
+    private Image[] dogAnimationFrames;
+    private Image dogIdleImage; // 기본 고정 이미지
+    private int currentAnimationFrame = 0;
+    private String currentNotification = "안녕하세요!";
+    private boolean isAnimating = false;
     
     @FXML
     public void initialize() {
@@ -34,6 +50,183 @@ public class DesktopController {
         startClock();
         // 시작 메뉴 초기화
         initializeStartMenu();
+        // 강아지 캐릭터 초기화 및 데스크톱에 추가
+        initializeDogCharacter();
+        showDogOnDesktop(); 
+        // 랜덤 알림 시작
+        startRandomNotifications();
+    }
+    
+    // 강아지를 데스크톱에 표시
+    private void showDogOnDesktop() {
+        try {
+            // 기본 이미지로 강아지 생성
+            dogCharacterView = new ImageView(dogIdleImage);
+            dogCharacterView.setFitWidth(250); //가나디 가로
+            dogCharacterView.setFitHeight(200);
+            dogCharacterView.setLayoutX(600);  // 가나디 좌표
+            dogCharacterView.setLayoutY(420);  
+            
+            // 클릭 이벤트 추가
+            dogCharacterView.setOnMouseClicked(e -> onDogCharacterClick());
+            
+            // 알림 버블 생성
+            notificationBubble = new Label(currentNotification);
+            notificationBubble.setStyle(
+                "-fx-background-color: #ffffcc;" +
+                "-fx-border-color: #000000;" +
+                "-fx-border-width: 1;" +
+                "-fx-padding: 5;" +
+                "-fx-font-size: 10px;" +
+                "-fx-font-family: 'Malgun Gothic';" +
+                "-fx-background-radius: 5;" +
+                "-fx-border-radius: 5;"
+            );
+            notificationBubble.setLayoutX(dogCharacterView.getLayoutX() + 90);
+            notificationBubble.setLayoutY(dogCharacterView.getLayoutY() - 20);
+            
+            // 데스크톱에 추가
+            desktopPane.getChildren().addAll(dogCharacterView, notificationBubble);
+
+        } catch (Exception e) {
+            System.err.println("강아지 이미지 로드 실패: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // 강아지 캐릭터 초기화
+    private void initializeDogCharacter() {
+        try {
+            // 기본 고정 이미지 로드
+            dogIdleImage = new Image(getClass().getResourceAsStream("/img2/1.png"));
+            
+            // 애니메이션 프레임 이미지들 로드 (1.png~20.png)
+            dogAnimationFrames = new Image[20];
+            for (int i = 0; i < 20; i++) {
+                dogAnimationFrames[i] = new Image(getClass().getResourceAsStream("/img2/" + (i + 1) + ".png"));
+            }
+            
+        } catch (Exception e) {
+            System.err.println("강아지 캐릭터 이미지를 로드할 수 없습니다: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    // 강아지 클릭 시 랜덤 애니메이션 재생
+    @FXML
+    private void onDogCharacterClick() {
+        if (isAnimating) {
+            return; // 이미 애니메이션 중이면 무시
+        }
+        
+        // 랜덤 응답 메시지
+        String[] responses = {
+            "안녕하세요! 무엇을 도와드릴까요?",
+            "오늘도 화이팅하세요!",
+            "잠깐 쉬어가는 것도 좋아요~",
+            "궁금한 것이 있으면 말씀하세요!",
+            "좋은 하루 되세요!",
+            "멍멍! 반가워요!",
+            "일하느라 수고 많으세요!",
+            "커피 한 잔 어때요?",
+            "스트레칭을 해보세요!",
+            "오늘 날씨가 좋네요!"
+        };
+        
+        Random random = new Random();
+        String response = responses[random.nextInt(responses.length)];
+        showNotification(response);
+        
+        // 랜덤 애니메이션 재생
+        playRandomAnimation();
+    }
+    
+    // 랜덤 애니메이션 재생
+    private void playRandomAnimation() {
+        if (dogAnimationFrames == null || dogAnimationFrames.length == 0) {
+            return;
+        }
+        
+        isAnimating = true;
+        Random random = new Random();
+        
+        // 랜덤으로 5-15프레임 재생
+        int animationLength = 5 + random.nextInt(11); // 5~15
+        int[] randomFrames = new int[animationLength];
+        
+        // 랜덤 프레임 순서 생성
+        for (int i = 0; i < animationLength; i++) {
+            randomFrames[i] = random.nextInt(dogAnimationFrames.length);
+        }
+        
+        // 애니메이션 타임라인 생성
+        Timeline animationTimeline = new Timeline();
+        
+        for (int i = 0; i < animationLength; i++) {
+            final int frameIndex = randomFrames[i];
+            KeyFrame keyFrame = new KeyFrame(
+                Duration.millis(i * 200), // 0.2초 간격
+                e -> dogCharacterView.setImage(dogAnimationFrames[frameIndex])
+            );
+            animationTimeline.getKeyFrames().add(keyFrame);
+        }
+        
+        // 애니메이션 종료 후 기본 이미지로 복귀
+        KeyFrame finalFrame = new KeyFrame(
+            Duration.millis(animationLength * 200),
+            e -> {
+                dogCharacterView.setImage(dogIdleImage);
+                isAnimating = false;
+            }
+        );
+        animationTimeline.getKeyFrames().add(finalFrame);
+        
+        animationTimeline.play();
+    }
+    
+    // 랜덤 알림 생성
+    private void startRandomNotifications() {
+        String[] notifications = {
+            "뭘보세요?",
+            "출석을 확인해주세요~",
+            "오늘도 화이팅!",
+            "휴가 신청을 해보세요",
+            "공지사항을 확인하세요",
+            "퇴근 시간이 다가옵니다",
+            "안녕하세요!",
+            "좋은 하루 되세요!",
+            "물 마실 시간이에요!",
+            "혹시 , 거북이신가요?",
+            "잠시 눈을 쉬어주세요~"
+        };
+        
+        Random random = new Random();
+        randomNotificationTimeline = new Timeline(new KeyFrame(Duration.seconds(30), e -> {
+            String randomNotification = notifications[random.nextInt(notifications.length)];
+            showNotification(randomNotification);
+        }));
+        randomNotificationTimeline.setCycleCount(Timeline.INDEFINITE);
+        randomNotificationTimeline.play();
+    }
+    
+    // 알림 표시
+    public void showNotification(String message) {
+        currentNotification = message;
+        updateNotificationBubble(message);
+        
+        // 알림 버블을 4초간 표시하고 기본 메시지로 돌아감
+        Timeline hideNotificationTimeline = new Timeline(new KeyFrame(Duration.seconds(4), e -> {
+            updateNotificationBubble("안녕하세요!");
+        }));
+        hideNotificationTimeline.play();
+    }
+    
+    // 알림 버블 업데이트
+    private void updateNotificationBubble(String message) {
+        if (notificationBubble != null) {
+            notificationBubble.setText(message);
+            notificationBubble.setVisible(true);
+        }
     }
     
     // 현재 로그인한 사용자 정보 설정
@@ -88,7 +281,7 @@ public class DesktopController {
         }
     }
     
- // 시작 메뉴 초기화
+    // 시작 메뉴 초기화
     private void initializeStartMenu() {
         startMenu = new Popup();
         startMenu.setAutoHide(true);
@@ -108,25 +301,25 @@ public class DesktopController {
         Button newItem = createMenuItemWithIcon("신청(R)", "application.png");
         newItem.setOnAction(e -> {
             startMenu.hide();
-            showAlert("신청", "신청 기능은 아직 구현되지 않았습니다.");
+            showNotification("신청 메뉴를 선택했습니다!");
         });
         
         Button helpItem = createMenuItemWithIcon("도움말(H)", "help.png");
         helpItem.setOnAction(e -> {
             startMenu.hide();
-            showAlert("도움말", "도움말 기능은 아직 구현되지 않았습니다.");
+            showNotification("도움말을 요청했습니다!");
         });
         
         Button settingsItem = createMenuItemWithIcon("설정(S)", "settings.png");
         settingsItem.setOnAction(e -> {
             startMenu.hide();
-            showAlert("설정", "설정 기능은 아직 구현되지 않았습니다.");
+            showNotification("설정 메뉴를 열었습니다!");
         });
         
         Button findItem = createMenuItemWithIcon("찾기(F)", "search.png");
         findItem.setOnAction(e -> {
             startMenu.hide();
-            showAlert("찾기", "찾기 기능은 아직 구현되지 않았습니다.");
+            showNotification("검색을 시작합니다!");
         });
         
         Separator separator1 = new Separator();
@@ -235,37 +428,27 @@ public class DesktopController {
             startMenu.show(stage, x, y);
         }
     }
-//    @FXML
-//    private void showStartMenu() {
-//        if (startMenu.isShowing()) {
-//            startMenu.hide();
-//        } else {
-//            // 시작 버튼의 위치 계산
-//            double x = startButton.getScene().getWindow().getX() + startButton.getScene().getX();
-//            double y = startButton.getScene().getWindow().getY() + startButton.getScene().getY() - 180;
-//            startMenu.show(startButton, x, y);
-//        }
-//    }
     
     // 바탕화면 아이콘 기능들
     @FXML
     private void openMyComputer() {
-        showAlert("내 컴퓨터", "내 컴퓨터 기능은 아직 구현되지 않았습니다.");
+        showNotification("내 컴퓨터를 열었습니다!");
     }
     
     @FXML
     private void openFileManager() {
-        showAlert("폴더", "파일 관리자 기능은 아직 구현되지 않았습니다.");
+        showNotification("폴더를 열었습니다!");
     }
     
     @FXML
     private void openTrash() {
-        showAlert("휴지통", "휴지통 기능은 아직 구현되지 않았습니다.");
+        showNotification("휴지통을 열었습니다!");
     }
     
     @FXML
     private void openBoard() {
         try {
+            showNotification("알림판으로 이동합니다!");
             // 게시판 화면으로 이동
             Stage currentStage = (Stage) startButton.getScene().getWindow();
             Parent board = FXMLLoader.load(getClass().getResource("/view/board/boardList.fxml"));
@@ -279,12 +462,12 @@ public class DesktopController {
     
     @FXML
     private void openNotice() {
-        showAlert("공지사항", "공지사항 기능은 아직 구현되지 않았습니다.");
+        showNotification("공지사항을 확인해주세요!");
     }
     
     @FXML
     private void openVacationRequest() {
-        showAlert("휴가신청", "휴가신청 기능은 아직 구현되지 않았습니다.");
+        showNotification("휴가신청서를 작성해보세요!");
     }
     
     @FXML
@@ -300,6 +483,9 @@ public class DesktopController {
             "-fx-font-family: 'Malgun Gothic';" +
             "-fx-font-size: 11px;"
         );
+        
+        // 강아지에게 출석 알림 표시
+        showNotification("출석 완료! 수고하셨어요~");
         
         attendanceAlert.showAndWait();
     }
@@ -331,6 +517,9 @@ public class DesktopController {
                     "-fx-font-size: 11px;"
                 );
                 
+                // 강아지에게 퇴근 알림 표시
+                showNotification("수고하셨습니다! 안전히 귀가하세요~");
+                
                 confirmAlert.showAndWait();
             }
         });
@@ -338,7 +527,7 @@ public class DesktopController {
     
     @FXML
     private void openCalculator() {
-        showAlert("계산기", "계산기 기능은 아직 구현되지 않았습니다.");
+        showNotification("계산기를 실행했습니다!");
     }
     
     private void handleLogout() {
@@ -380,10 +569,8 @@ public class DesktopController {
         
         shutdownAlert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
-                // 타임라인 정지
-                if (timeline != null) {
-                    timeline.stop();
-                }
+                // 모든 타임라인 정지
+                stopAllTimelines();
                 // 프로그램 종료
                 Platform.exit();
                 System.exit(0);
@@ -393,10 +580,8 @@ public class DesktopController {
     
     private void logout() {
         try {
-            // 타임라인 정지
-            if (timeline != null) {
-                timeline.stop();
-            }
+            // 모든 타임라인 정지
+            stopAllTimelines();
             
             // 현재 스테이지 가져오기
             Stage currentStage = (Stage) startButton.getScene().getWindow();
@@ -418,6 +603,19 @@ public class DesktopController {
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("오류", "로그아웃 처리 중 오류가 발생했습니다.");
+        }
+    }
+    
+    // 모든 타임라인 정지
+    private void stopAllTimelines() {
+        if (timeline != null) {
+            timeline.stop();
+        }
+        if (dogAnimationTimeline != null) {
+            dogAnimationTimeline.stop();
+        }
+        if (randomNotificationTimeline != null) {
+            randomNotificationTimeline.stop();
         }
     }
 

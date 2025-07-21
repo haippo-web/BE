@@ -18,11 +18,11 @@
 	<VBox fx:id="assignmentListBox" layoutX="30" layoutY="160" prefHeight="440" prefWidth="940" style="-fx-background-color: #d4d0c8; -fx-border-color: black; -fx-border-width: 2;">
 		<!-- 헤더 -->
 		<HBox style="-fx-background-color: #e0e0e0; -fx-border-color: black; -fx-border-width: 0 0 2 0;">
-			<Label alignment="CENTER" prefHeight="23.0" prefWidth="62.0" style="-fx-font-size: 18px; -fx-border-color: black; -fx-border-width: 0 1 0 0;" text="No." />
-			<Label alignment="CENTER" prefHeight="23.0" prefWidth="142.0" style="-fx-font-size: 18px; -fx-border-color: black; -fx-border-width: 0 1 0 0;" text="커리큘럼명" />
-			<Label alignment="CENTER" prefHeight="23.0" prefWidth="200.0" style="-fx-font-size: 18px; -fx-border-color: black; -fx-border-width: 0 1 0 0;" text="제목" />
-			<Label alignment="CENTER" prefHeight="23.0" prefWidth="380.0" style="-fx-font-size: 18px; -fx-border-color: black; -fx-border-width: 0 1 0 0;" text="내용" />
-			<Label alignment="CENTER" prefHeight="23.0" prefWidth="168.0" style="-fx-font-size: 18px;" text="제출일" />
+			<Label alignment="CENTER" prefHeight="23.0" prefWidth="60.0" style="-fx-font-size: 18px; -fx-border-color: black; -fx-border-width: 0 1 0 0;" text="No." />
+			<Label alignment="CENTER" prefHeight="23.0" prefWidth="140.0" style="-fx-font-size: 18px; -fx-border-color: black; -fx-border-width: 0 1 0 0;" text="커리큘럼명" />
+			<Label alignment="CENTER" prefHeight="23.0" prefWidth="220.0" style="-fx-font-size: 18px; -fx-border-color: black; -fx-border-width: 0 1 0 0;" text="제목" />
+			<Label alignment="CENTER" prefHeight="23.0" prefWidth="360.0" style="-fx-font-size: 18px; -fx-border-color: black; -fx-border-width: 0 1 0 0;" text="내용" />
+			<Label alignment="CENTER" prefHeight="23.0" prefWidth="160.0" style="-fx-font-size: 18px;" text="제출일" />
 		</HBox>
 		<!-- 데이터 줄(HBox)은 컨트롤러에서 동적 추가 -->
 	</VBox>

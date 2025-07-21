@@ -250,7 +250,7 @@ public class CourseManagementController {
 	        return;
 	    }
 
-	    // 1. 삭제 전 확인 다이얼로그
+	    // 1. 수정 전 확인 다이얼로그
 	    Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
 	    confirmAlert.setTitle("수정 확인");
 	    confirmAlert.setHeaderText("선택한 강의를 수정하시겠습니까?");
@@ -260,7 +260,7 @@ public class CourseManagementController {
 	    Optional<ButtonType> result = confirmAlert.showAndWait();
 
 	    if (result.isPresent() && result.get() == ButtonType.OK) {
-	        // 3. 사용자가 '확인'을 누르면 삭제 진행
+	        // 3. 사용자가 '확인'을 누르면 수정 진행
 	        boolean success = courseService.updateCourse(selectedCourse);
 	        
 	        
@@ -332,6 +332,27 @@ public class CourseManagementController {
 		alert.setHeaderText(null);
 		alert.setContentText(message);
 		alert.showAndWait();
+	}
+	
+	// 이전 화면으로 돌아가기
+	@FXML
+	private void handleBackMenu(ActionEvent event) {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/manager/menuSelect.fxml"));
+			Parent root = loader.load();
+
+			// 현재 이벤트가 발생한 노드에서 Stage 가져오기
+			Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+			// 해당 Stage의 Scene을 바꿈
+			stage.setScene(new Scene(root));
+			stage.setTitle("Management System"); // 타이틀 설정 (선택)
+			stage.show();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			showAlert("오류", "이전 화면으로 돌아가는 데 실패했습니다.");
+		}
 	}
 
 }

@@ -152,6 +152,27 @@ public class CourseDAO {
 		return null;
 	}
 
+	
+	// 멤버 등록시 강의 목록 드롭다운
+	public List<String> getOnlyCourse() {
+	    List<String> course = new ArrayList<>();
+	    String sql = "SELECT COURSE_NAME FROM COURSE";
+
+	    try (Connection conn = getConnection();
+	         PreparedStatement pstmt = conn.prepareStatement(sql);
+	         ResultSet rs = pstmt.executeQuery()) {
+
+	        while (rs.next()) {
+	        	course.add(rs.getString("COURSE_NAME"));
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return course;
+	}
+	
 	// DB 연결 테스트 메서드
 	public boolean testConnection() {
 		try (Connection conn = getConnection()) {

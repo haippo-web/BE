@@ -3,26 +3,16 @@ package com;
 
 
 
-//public class Main extends Application {
-//    @Override
-//    public void start(Stage primaryStage) throws Exception {
-//        Parent root = FXMLLoader.load(getClass().getResource("/view/board/boardList.fxml"));
-//        primaryStage.setTitle("Board");
-//        primaryStage.setScene(new Scene(root, 1000, 750));
-//        primaryStage.show();
-//    }
-//
-//    public static void main(String[] args) {
-//        launch(args);
-//    }
-//}
+import java.sql.SQLException;
+
+import com.board.dao.BoardDao;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.application.Platform;
 
 public class Main extends Application {
     private Stage primaryStage;
@@ -61,9 +51,15 @@ public class Main extends Application {
     }
 
     private void showLogin() throws Exception {
-        Parent login = FXMLLoader.load(getClass().getResource("/view/login/login.fxml"));
-        primaryStage.setScene(new Scene(login, 1000, 750));
+//        Parent login = FXMLLoader.load(getClass().getResource("/view/login/login.fxml"));
+//        primaryStage.setScene(new Scene(login, 1000, 750));
+    	Parent splash = FXMLLoader.load(getClass().getResource("/view/login/login.fxml"));
+    	Scene scene = new Scene(splash, 1000, 750);
+    	scene.getStylesheets().add(getClass().getResource("/fonts/global.css").toExternalForm());
+    	primaryStage.setScene(scene);
     }
+    
+    
 
     public static void main(String[] args) {
         launch(args);

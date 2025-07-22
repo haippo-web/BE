@@ -27,7 +27,11 @@ public class AttendanceDAO {
     // 출결 리스트 조회 (15개씩 페이징, PreparedStatement)
     public List<Attendance> getAttendanceList(Long userId, int offset, int limit) throws SQLException {
         List<Attendance> list = new ArrayList<>();
-        String sql = AttendanceSQL.SELECT_ATTENDANCE_LIST;
+        String sql = "SELECT * FROM ( " +
+                "   SELECT a.*, ROW_NUMBER() OVER (ORDER BY check_in DESC NULLS LAST) rn " +
+                "   FROM attendance a " +
+                "   WHERE user_id = ? " +
+                ") WHERE rn > ? AND rn <= ?";
         System.out.println("[DAO][PreparedStatement] SQL = " + sql);
         System.out.printf("[DAO][PreparedStatement] params: userId=%d, offset=%d, limit=%d%n", userId, offset, limit);
         try (Connection conn = getConnection();
@@ -39,16 +43,38 @@ public class AttendanceDAO {
             int rowCnt = 0;
             while (rs.next()) {
                 rowCnt++;
+
                 Attendance att = new Attendance();
                 att.setId(rs.getLong("ID"));
-                Date inTime = rs.getDate("CHECK_IN");
-                if (inTime != null) att.setCheckIn(inTime);
-                Timestamp outTime = rs.getTimestamp("CHECK_OUT");
-                if (outTime != null) att.setCheckOut(inTime);
-                att.setStatus(rs.getString("STATUS"));
+
+                /* 날짜만 필요한 컬럼 → LocalDate */
+                Date sqlDate = rs.getDate("ATTENDANCE_DATE");
+                if (sqlDate != null) {
+                    att.setAttendanceDate(sqlDate.toLocalDate());
+                }
+
+                /* 체크인/아웃 → LocalDateTime */
+                Timestamp inTs = rs.getTimestamp("CHECK_IN");
+                if (inTs != null) {
+                    att.setCheckIn(inTs.toLocalDateTime());
+                }
+
+                Timestamp outTs = rs.getTimestamp("CHECK_OUT");
+                if (outTs != null) {
+                    att.setCheckOut(outTs.toLocalDateTime());   // ← 버그 수정
+                }
+
+                /* 상태 코드 → enum */
+                String statusCd = rs.getString("STATUS");
+                if (statusCd != null) {
+                    att.setStatus(Attendance.AttendanceStatus.fromCode(statusCd));
+                }
+
                 att.setUserId(rs.getLong("USER_ID"));
+
                 list.add(att);
             }
+
             System.out.println("[DAO][PreparedStatement] Attendance row count: " + rowCnt);
         }
         return list;
@@ -56,7 +82,15 @@ public class AttendanceDAO {
 
     // 출결률 조회 (지각·조퇴 3번=결석 1번으로 환산)
     public double getAttendanceRate(Long userId) throws SQLException {
-        String sql = AttendanceSQL.SELECT_ATTENDANCE_RATE;
+        String sql = "SELECT CASE WHEN COUNT(*) = 0 THEN 0 " +
+        	    " ELSE ROUND(( " +
+        	    "   SUM(CASE " +
+        	    "     WHEN status IN ('PRESENT', 'EXCUSED') THEN 1 " +
+        	    "     WHEN status IN ('LATE', 'EARLY_LEAVE') THEN 1.0/3 " +
+        	    "     ELSE 0 " +
+        	    "   END) / COUNT(*) " +
+        	    " ) * 100, 2) END AS attendance_rate " +
+        	    "FROM attendance WHERE user_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, userId);

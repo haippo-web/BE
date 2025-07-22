@@ -14,6 +14,7 @@ import java.util.List;
 
 import com.mypage.Model.attendance.Attendance;
 import com.mypage.dao.attendance.AttendanceDAO;
+import java.time.format.DateTimeFormatter; 
 
 public class AttendanceController {
 
@@ -49,39 +50,72 @@ public class AttendanceController {
         loadAttendanceRate();   // 출결률 로드
     }
 
-    /**
-     * 출결 리스트를 DB에서 가져와서 VBox에 행(HBox)로 동적 추가
-     */
+    /* -----------------------------------------------------------
+     * 출결 리스트 로드
+     * ----------------------------------------------------------- */
     private void loadAttendanceList() {
         try {
-            int offset = (page - 1) * size;   // 오프셋 계산
-            List<Attendance> list = attendanceDAO.getAttendanceList(userId, offset, size); // 데이터 조회
-            totalCount = attendanceDAO.getAttendanceCount(userId); // 전체 데이터 개수 조회
-            System.out.println("출결 리스트 size = " + list.size());
+            int offset = (page - 1) * size;
 
-            // 0번째 인덱스(헤더)를 제외하고 기존 행(HBox) 모두 제거
-            attendanceListBox.getChildren().remove(1, attendanceListBox.getChildren().size());
+            List<Attendance> list   = attendanceDAO.getAttendanceList(userId, offset, size);
+            totalCount              = attendanceDAO.getAttendanceCount(userId);
 
-            // 조회된 출결 데이터만큼 행(HBox) 생성 후 VBox에 추가
+            /* 헤더(HBox 0번) 제외, 기존 행 제거 */
+            if (attendanceListBox.getChildren().size() > 1) {
+                attendanceListBox.getChildren()
+                                 .remove(1, attendanceListBox.getChildren().size());
+            }
+
+            DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+            /* ▼ 데이터 행 생성 */
             for (int i = 0; i < list.size(); i++) {
                 Attendance att = list.get(i);
                 HBox row = new HBox();
-                row.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: black; -fx-border-width: 0 0 1 0;");
-                row.getChildren().add(makeCell(String.valueOf(offset + i + 1), 90)); // 일련번호
-                row.getChildren().add(makeCell(att.getStatus(), 160));               // 출결 상태
-                row.getChildren().add(makeCell(att.getCheckIn() != null ? att.getCheckIn().toLocalDate().toString() : "", 210)); // 날짜
-                row.getChildren().add(makeCell(att.getCheckIn() != null ? att.getCheckIn().toLocalDate().toString() : "", 255)); // 입실
-                row.getChildren().add(makeCell(att.getCheckOut() != null ? att.getCheckOut().toLocalDate().toString() : "", 255)); // 퇴실
-                attendanceListBox.getChildren().add(row); // VBox에 행 추가
+                row.setStyle("-fx-background-color:#f0f0f0;"
+                           + "-fx-border-color:black;"
+                           + "-fx-border-width:0 0 1 0;");
+
+                /* ① 일련번호 */
+                row.getChildren().add(makeCell(String.valueOf(offset + i + 1),  90));
+
+                /* ② 출결 상태(enum → 한글 설명) */
+                String statusStr = att.getStatus() != null
+                                 ? att.getStatus().getDescription()
+                                 : "";
+                row.getChildren().add(makeCell(statusStr, 160));
+
+                /* ③ 날짜 (attendanceDate) */
+                String dateStr = att.getAttendanceDate() != null
+                               ? att.getAttendanceDate().toString()
+                               : "";
+                row.getChildren().add(makeCell(dateStr, 210));
+
+                /* ④ 입실 시각 */
+                String inStr = att.getCheckIn() != null
+                             ? att.getCheckIn().toLocalTime().format(timeFmt)
+                             : "";
+                row.getChildren().add(makeCell(inStr, 255));
+
+                /* ⑤ 퇴실 시각 */
+                String outStr = att.getCheckOut() != null
+                              ? att.getCheckOut().toLocalTime().format(timeFmt)
+                              : "";
+                row.getChildren().add(makeCell(outStr, 255));
+
+                attendanceListBox.getChildren().add(row);
             }
 
-            updatePagination(); // 페이지네이션 버튼 동적 생성/업데이트
+            /* 페이지네이션 갱신 */
+            updatePagination();
 
             if (pageLabel != null) pageLabel.setText("페이지: " + page);
+
         } catch (SQLException e) {
             showError("출결 내역 불러오기 실패", e.getMessage());
         }
     }
+
 
     /**
      * 동적으로 페이지네이션 버튼(Prev, 1~N, Next) 생성 및 이벤트 등록

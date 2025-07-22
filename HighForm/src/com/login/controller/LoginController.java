@@ -1,7 +1,13 @@
 package com.login.controller;
 
+import java.sql.Connection;
+
+import com.attendance.service.AttendanceCodeService;
+import com.attendance.service.AttendanceService;
 import com.login.model.User;
 import com.login.service.UserService;
+import com.util.DBConnection;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -65,11 +71,21 @@ public class LoginController {
             Parent desktop = loader.load();
 
             DesktopController desktopController = loader.getController();
-            desktopController.setCurrentUser(user);
+            desktopController.setCurrentUser(user); //로그인한 사용자 정보 주입
 
-            Scene desktopScene = new Scene(desktop, 1000, 750);
-            currentStage.setScene(desktopScene);
+            Connection conn = DBConnection.getConnection();    
+            AttendanceService attendanceService = AttendanceService.createInstance(conn, AttendanceCodeService.getInstance());
+            desktopController.setAttendanceService(attendanceService);
+
+            
+            
+     
+            currentStage.setScene(new Scene(desktop, 1000, 750));
             currentStage.setTitle("HighForm Desktop - " + user.getName() + " (" + user.getRole() + ")");
+
+//            Scene desktopScene = new Scene(desktop, 1000, 750);
+//            currentStage.setScene(desktopScene);
+//            currentStage.setTitle("HighForm Desktop - " + user.getName() + " (" + user.getRole() + ")");
 
         } catch (Exception e) {
             e.printStackTrace();

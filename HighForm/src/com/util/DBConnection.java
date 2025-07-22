@@ -21,18 +21,14 @@ public class DBConnection {
 
             // db.properties 읽기 (src/main/resources 등 classpath 기준)
             Properties props = new Properties();
-            try (InputStream in = DBConnection.class.getResourceAsStream("/com/util/db.properties")) {
-                if (in == null) {
-                    throw new RuntimeException("db.properties를 못 찾았습니다!");
-                }
-                try (InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
-                    props.load(reader);
-                    url = props.getProperty("db.url");
-                    user = props.getProperty("db.user");
-                    password = props.getProperty("db.password");
-                }
+            try (InputStream in = DBConnection.class.getResourceAsStream("db.properties");
+                    
+                 InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+                props.load(reader);
+                url = props.getProperty("db.url");
+                user = props.getProperty("db.user");
+                password = props.getProperty("db.password");
             }
-
         } catch (Exception e) {
             throw new RuntimeException("DB 접속정보 로딩 실패: " + e.getMessage(), e);
         }

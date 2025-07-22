@@ -19,6 +19,11 @@ import javafx.util.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
+import com.attendance.service.AttendanceService;
+import com.attendance.service.AttendanceCheckResult;
+import com.attendance.service.AttendanceCodeService;
+import com.attendance.model.Attendance;
+import com.attendance.service.exception.AttendanceServiceException;
 
 public class DesktopController {
     
@@ -44,6 +49,12 @@ public class DesktopController {
     private String currentNotification = "안녕하세요!";
     private boolean isAnimating = false;
     
+    private AttendanceService attendanceService;
+
+    public void setAttendanceService(AttendanceService attendanceService) {
+        this.attendanceService = attendanceService;
+    }
+    
     @FXML
     public void initialize() {
         // 시간 업데이트 타이머 시작
@@ -55,6 +66,9 @@ public class DesktopController {
         showDogOnDesktop(); 
         // 랜덤 알림 시작
         startRandomNotifications();
+        
+     //  오늘의 출석 코드 발급   임시 
+        initDailyAttendanceCode();
     }
     
     // 강아지를 데스크톱에 표시
@@ -472,58 +486,114 @@ public class DesktopController {
     
     @FXML
     private void openAttendanceCheck() {
-        // 출석체크 팝업창
-        Alert attendanceAlert = new Alert(Alert.AlertType.INFORMATION);
-        attendanceAlert.setTitle("출석체크");
-        attendanceAlert.setHeaderText("출석 확인");
-        attendanceAlert.setContentText("출석이 완료되었습니다!\n시간: " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
-        
-        attendanceAlert.getDialogPane().setStyle(
-            "-fx-background-color: #c0c0c0;" +
-            "-fx-font-family: 'Malgun Gothic';" +
-            "-fx-font-size: 11px;"
-        );
+        try {
+        	
+            System.out.println("[DesktopController] openAttendanceCheck 호출됨");
+            System.out.println("[DesktopController] currentUser = " + currentUser);
+
+            if (currentUser == null) {
+                showAlert("오류", "현재 로그인 정보가 없습니다. 다시 로그인해주세요.");
+                return;
+            }
+        	
+            // 출석 가능 여부 확인
+            AttendanceCheckResult result = attendanceService.canCheckIn(currentUser.getId());
+            if (!result.isPossible()) {
+                showAlert("출석 체크", result.getMessage());
+                return;
+            }
+
+            // 출석 코드 입력 받기
+            TextInputDialog codeDialog = new TextInputDialog();
+            codeDialog.setTitle("출석 코드 입력");
+            codeDialog.setHeaderText("출석 코드를 입력하세요");
+            codeDialog.setContentText("출석 코드:");
+
+            codeDialog.getDialogPane().setStyle(
+                "-fx-background-color: #c0c0c0;" +
+                "-fx-font-family: 'Malgun Gothic';" +
+                "-fx-font-size: 11px;"
+            );
+
+            codeDialog.showAndWait().ifPresent(code -> {
+                try {
+                    Attendance attendance = attendanceService.checkIn(currentUser.getId(), code);
+                    showNotification("출석 완료! 상태: " + attendance.getStatus().getDescription());
+                    showAlert("출석 완료", "출석이 완료되었습니다!\n상태: " + attendance.getStatus().getDescription());
+                } catch (AttendanceServiceException e) {
+                    showAlert("출석 오류", e.getMessage());
+                }
+            });
+
+        } catch (Exception e) {
+            showAlert("출석 오류", "출석 처리 중 오류가 발생했습니다.");
+            e.printStackTrace();
+        }
+    
         
         // 강아지에게 출석 알림 표시
-        showNotification("출석 완료! 수고하셨어요~");
-        
-        attendanceAlert.showAndWait();
+//        showNotification("출석 완료! 수고하셨어요~");
+//        
+//        attendanceAlert.showAndWait();
     }
     
     @FXML
     private void openClockOut() {
-        // 퇴근 팝업창
-        Alert clockOutAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        clockOutAlert.setTitle("퇴근하기");
-        clockOutAlert.setHeaderText("퇴근 확인");
-        clockOutAlert.setContentText("정말 퇴근하시겠습니까?");
-        
-        clockOutAlert.getDialogPane().setStyle(
-            "-fx-background-color: #c0c0c0;" +
-            "-fx-font-family: 'Malgun Gothic';" +
-            "-fx-font-size: 11px;"
-        );
-        
-        clockOutAlert.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                Alert confirmAlert = new Alert(Alert.AlertType.INFORMATION);
-                confirmAlert.setTitle("퇴근완료");
-                confirmAlert.setHeaderText(null);
-                confirmAlert.setContentText("수고하셨습니다!\n퇴근 시간: " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
-                
-                confirmAlert.getDialogPane().setStyle(
-                    "-fx-background-color: #c0c0c0;" +
-                    "-fx-font-family: 'Malgun Gothic';" +
-                    "-fx-font-size: 11px;"
-                );
-                
-                // 강아지에게 퇴근 알림 표시
-                showNotification("수고하셨습니다! 안전히 귀가하세요~");
-                
-                confirmAlert.showAndWait();
+        try {
+            AttendanceCheckResult result = attendanceService.canCheckOut(currentUser.getId());
+            if (!result.isPossible()) {
+                showAlert("퇴근 체크", result.getMessage());
+                return;
             }
-        });
+
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("퇴근하기");
+            confirm.setHeaderText("퇴근하시겠습니까?");
+            confirm.setContentText("퇴근을 완료하시겠습니까?");
+            confirm.getDialogPane().setStyle(
+                "-fx-background-color: #c0c0c0;" +
+                "-fx-font-family: 'Malgun Gothic';" +
+                "-fx-font-size: 11px;"
+            );
+
+            confirm.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    try {
+                        Attendance attendance = attendanceService.checkOut(currentUser.getId());
+                        showNotification("퇴근 완료! 근무시간: " + String.format("%.2f", attendance.getWorkingHours()) + "시간");
+                        showAlert("퇴근 완료", "수고하셨습니다!\n퇴근 시간: " + attendance.getCheckOut().toLocalTime());
+                    } catch (AttendanceServiceException e) {
+                        showAlert("퇴근 오류", e.getMessage());
+                    }
+                }
+            });
+
+        } catch (Exception e) {
+            showAlert("퇴근 오류", "퇴근 처리 중 오류가 발생했습니다.");
+            e.printStackTrace();
+        }
     }
+        
+//        clockOutAlert.showAndWait().ifPresent(response -> {
+//            if (response == ButtonType.OK) {
+//                Alert confirmAlert = new Alert(Alert.AlertType.INFORMATION);
+//                confirmAlert.setTitle("퇴근완료");
+//                confirmAlert.setHeaderText(null);
+//                confirmAlert.setContentText("수고하셨습니다!\n퇴근 시간: " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+//                
+//                confirmAlert.getDialogPane().setStyle(
+//                    "-fx-background-color: #c0c0c0;" +
+//                    "-fx-font-family: 'Malgun Gothic';" +
+//                    "-fx-font-size: 11px;"
+//                );
+//                
+//                // 강아지에게 퇴근 알림 표시
+//                showNotification("수고하셨습니다! 안전히 귀가하세요~");
+//                
+//                confirmAlert.showAndWait();
+//            }
+//        });
+//    }
     
     @FXML
     private void openCalculator() {
@@ -633,5 +703,10 @@ public class DesktopController {
         );
         
         alert.showAndWait();
+    }
+    
+    public void initDailyAttendanceCode() {
+        String todayCode = AttendanceCodeService.getInstance().getTodayCode();
+        System.out.println("[DEBUG] 오늘 출석 코드 발급됨 = " + todayCode);
     }
 }

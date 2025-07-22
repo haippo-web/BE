@@ -17,36 +17,36 @@ public class MemberService {
 	public List<Member> getAvailableMembers() {
 		return memberDAO.getAvailableMembers();
 	}
+
 	// 모든 회원 조회
 	public List<Member> getAllMembers() {
 		return memberDAO.getAllMembers();
 	}
 
 	// role 컬럼 제약조건에 맞는 형변환
-    public boolean registerMember(Member member) {
-        String changedPosition = changePositionText(member);
-        member.setPosition(changedPosition);
-        return memberDAO.addMember(member);
-    }
-    
-    private String changePositionText(Member member) {
-        String getPos = member.getPosition();
-        return switch (getPos) {
-            case "학생" -> "STUDENT";
-            case "강사" -> "PROFESSOR";
-            case "매니저" -> "MANAGER";
-            default -> throw new IllegalArgumentException("Unexpected value: " + getPos);
-        };
-    }
+	public int registerMember(Member member) {
+		String changedPosition = changePositionText(member);
+		member.setPosition(changedPosition);
+		return memberDAO.addMemberAndReturnId(member);
+	}
 
-	
+	private String changePositionText(Member member) {
+		String getPos = member.getPosition();
+		return switch (getPos) {
+		case "학생" -> "STUDENT";
+		case "강사" -> "PROFESSOR";
+		case "관리자" -> "MANAGER";
+		default -> throw new IllegalArgumentException("Unexpected value: " + getPos);
+		};
+	}
+
 	// 회원 등록
-	public boolean addMember(Member member) {
+	public int addMember(Member member) {
 		if (member == null || member.getMemberLoginId() == null || member.getMemberName() == null) {
 			System.err.println("회원 정보가 누락되었습니다.");
-			return false;
+			return -1; // 실패 시 -1 반환
 		}
-		return memberDAO.addMember(member);
+		return memberDAO.addMemberAndReturnId(member);
 	}
 
 	// 회원 수정

@@ -1,6 +1,6 @@
 package com.board.model;
 
-import com.common.BaseEntity;
+import com.util.BaseEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

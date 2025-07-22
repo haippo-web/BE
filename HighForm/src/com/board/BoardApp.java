@@ -13,10 +13,8 @@ public class BoardApp extends Application {
     
     @Override
     public void start(Stage primaryStage) throws Exception {
-    	BoardDao dao = BoardDao.getInstance();
-    	dao.createTable();
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/BoardMain2.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/BoardMain.fxml"));
             Scene scene = new Scene(loader.load(), 1000, 750);
             
             primaryStage.setTitle("Board");

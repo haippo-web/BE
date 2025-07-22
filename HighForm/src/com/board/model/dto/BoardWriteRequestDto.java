@@ -48,6 +48,7 @@ public class BoardWriteRequestDto {
     
     public static Board toEntity(BoardWriteRequestDto dto, Long fileId, Long userId) {
     	return Board.builder()
+    			.author(dto.author)
     			.title(dto.title)
     			.content(dto.content)
     			.type(dto.getType())

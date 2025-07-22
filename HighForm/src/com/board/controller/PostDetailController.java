@@ -9,18 +9,19 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import com.board.model.BoardCategory;
-import com.board.model.dto.BoardDto;
+import com.board.dao.BoardDao;
+import com.board.model.Board;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -31,6 +32,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class PostDetailController implements Initializable {
@@ -50,14 +52,22 @@ public class PostDetailController implements Initializable {
     @FXML private Button backButton;
     
     // 데이터 모델
-    private Post currentPost;
+    private static Board boardData;
     private List<Comment> comments;
-    private String currentUser = "yoon.k"; // 현재 로그인한 사용자 (실제로는 세션에서 가져와야 함)
-    private Long boardId;
+    private String currentUser = "교수님"; // 현재 로그인한 사용자 (실제로는 세션에서 가져와야 함)
+    private static Long boardId;
     
-    private BoardController2 boardController;
+    private final BoardDao boardDao;
+
+    // 의존성 주입 
+    public PostDetailController() {
+		this.boardDao = new BoardDao().getInstance();
+        // 반드시 public, 파라미터 없음
+    }
+    
+    private BoardController boardController;
     // BoardController 참조 설정
-    public void setBoardController(BoardController2 boardController) {
+    public void setBoardController(BoardController boardController) {
         this.boardController = boardController;
     }
     
@@ -65,11 +75,13 @@ public class PostDetailController implements Initializable {
         this.boardId = boardId;
     }
     
+    
+    
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         comments = new ArrayList<>();
         
-        // 샘플 데이터 로드
+        // 데이터 로드 
         try {
 			loadData(boardId);
 		} catch (ParseException e) {
@@ -85,23 +97,12 @@ public class PostDetailController implements Initializable {
     
     private void loadData(Long boardId) throws ParseException {
     	
-        String dateStr = "2025-07-21";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        java.util.Date utilDate = sdf.parse(dateStr);
-        java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
-        
     	// TODO :: DB에서 데이터 호출
-        BoardDto dto = new BoardDto(1, "example.java", "youn.K", sqlDate, BoardCategory.NOTICE,1L, 2L);
         System.out.println("게시물 ID : " + boardId);
+        Board board = boardDao.getBoard(boardId);
         
         // 샘플 게시글 데이터
-        currentPost = new Post(
-            "피일입니다",
-            "yoon.k",
-            "25-06-24",
-            "다른 파일 올려주셔요",
-            Arrays.asList("홍길동.txt", "다시 올려드립니다.pdf")
-        );
+        boardData = board;
         
         // 샘플 댓글 데이터
         comments.add(new Comment(1, 0, "홍길동", "25.06.24", "다시 올려드립니다", currentUser.equals("홍길동")));
@@ -110,22 +111,28 @@ public class PostDetailController implements Initializable {
     }
     
     private void displayPost() {
-        titleLabel.setText(currentPost.getTitle());
-        authorLabel.setText(currentPost.getAuthor());
-        dateLabel.setText(currentPost.getDate());
-        contentLabel.setText(currentPost.getContent());
+        titleLabel.setText(boardData.getTitle());
+        authorLabel.setText(boardData.getAuthor());
+        dateLabel.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(boardData.getCreatedAt()));
+        contentLabel.setText(boardData.getContent());
         
-        // 첨부파일 표시
-        if (!currentPost.getAttachments().isEmpty()) {
+        // 첨부파일 표시	
+        if (!(boardData.getFileId() == null)) {
             attachmentBox.setVisible(true);
             attachmentList.getChildren().clear();
             
-            for (String attachment : currentPost.getAttachments()) {
-                Hyperlink fileLink = new Hyperlink(attachment);
-                fileLink.setOnAction(e -> downloadFile(attachment));
-                fileLink.setStyle("-fx-text-fill: #007bff;");
-                attachmentList.getChildren().add(fileLink);
-            }
+          Hyperlink fileLink = new Hyperlink("file test");
+          fileLink.setOnAction(e -> downloadFile("file test"));
+          fileLink.setStyle("-fx-text-fill: #007bff;");
+          attachmentList.getChildren().add(fileLink);
+            
+            // TODO :: 첨부파일 테이블 연동시  첨부파일 이름 출력 
+//            for (Long attachment : boardData.getFileId()) {
+//                Hyperlink fileLink = new Hyperlink(attachment);
+//                fileLink.setOnAction(e -> downloadFile(attachment));
+//                fileLink.setStyle("-fx-text-fill: #007bff;");
+//                attachmentList.getChildren().add(fileLink);
+//            }
         }
     }
     
@@ -197,18 +204,57 @@ public class PostDetailController implements Initializable {
         return commentBox;
     }
     
+    // 본인이 작성한 게시물에서만 수정/삭제 버튼 출력 
     private void checkAuthorPermissions() {
-        if (currentPost.getAuthor().equals(currentUser)) {
+        if (boardData.getAuthor().equals(currentUser)) {
             actionButtonsBox.setVisible(true);
         }
     }
     
+    // 게시글 수정 
     @FXML
     private void handleEditPost() {
         // 게시글 수정 페이지로 이동 (미구현)
+    	// TODO :: 유저 연동 시 권한 체크  
+    	String userRole = "MANAGER";
+//    	String userRole = "STUDENT";
+        try {
+        	// 권한이 매니저나 교수일 경우
+        	if(userRole.equals("MANAGER") || userRole.equals( "PROFESSOR")) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/PostWrite.fxml"));
+                Stage stage = new Stage();
+                stage.setTitle("공지사항 및 과제 작성");
+                stage.setScene(new Scene(loader.load()));
+                stage.initModality(Modality.APPLICATION_MODAL);
+
+                
+                PostWriteController controller = loader.getController();
+                controller.setPostDetailController(this);
+
+                stage.showAndWait();
+        	}else {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/BoardWrite.fxml"));
+                Stage stage = new Stage();
+                stage.setTitle("게시글 작성");
+                stage.setScene(new Scene(loader.load()));
+                stage.initModality(Modality.APPLICATION_MODAL);
+
+                BoardWriteController controller = loader.getController();
+                controller.setPostDetailController(this);
+
+                stage.showAndWait();
+        	}
+ 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    	
+    	
         showAlert("수정", "게시글 수정 기능은 아직 구현되지 않았습니다.");
     }
     
+    
+    // 게시글 삭제  
     @FXML
     private void handleDeletePost(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -310,29 +356,6 @@ public class PostDetailController implements Initializable {
     }
 }
 
-// 데이터 모델 클래스들
-class Post {
-    private String title;
-    private String author;
-    private String date;
-    private String content;
-    private List<String> attachments;
-    
-    public Post(String title, String author, String date, String content, List<String> attachments) {
-        this.title = title;
-        this.author = author;
-        this.date = date;
-        this.content = content;
-        this.attachments = attachments != null ? attachments : new ArrayList<>();
-    }
-    
-    // Getters
-    public String getTitle() { return title; }
-    public String getAuthor() { return author; }
-    public String getDate() { return date; }
-    public String getContent() { return content; }
-    public List<String> getAttachments() { return attachments; }
-}
 
 class Comment {
     private int id;

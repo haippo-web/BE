@@ -1,33 +1,24 @@
 package com.board.dao;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import com.board.model.Board;
 import com.board.model.BoardCategory;
+import com.board.model.dto.BoardDto;
 import com.util.DBConnection;
 
 public class BoardDao {
-   private final String DBURL = "";
-   private final String DBUSER = "";
-   private final String DBPASSWORD = "";
 
    // 1. Singleton & DB connection
    private static BoardDao instance;
-   
-   private Connection getConnection() throws SQLException {
-       return DBConnection.getConnection();
-   }
+  
    
 
    public static BoardDao getInstance() {
@@ -36,8 +27,11 @@ public class BoardDao {
       }
       return instance;
    }
+  
    
-   
+   private Connection getConnection() throws SQLException {
+       return DBConnection.getConnection();
+   }
    
    // 테이블 생성
    public void createTable() throws SQLException{
@@ -55,25 +49,30 @@ public class BoardDao {
 	   
 	   String createBoardSQL = BoardSQL.CREATE_BOARD;
 	   try(Connection conn = getConnection();
-			   PreparedStatement psmt = conn.prepareStatement(createBoardSQL)){
+			   PreparedStatement psmt = conn.prepareStatement(createBoardSQL, new String[] { "ID" })){
 		   
 		   psmt.setString(1, board.getTitle());
 		   psmt.setString(2, board.getContent());
 		   psmt.setString(3,  board.getType().name());
 		   psmt.setLong(4, board.getUserId());
 		   psmt.setLong(5, board.getFileId());
+		   psmt.setString(6, board.getAuthor());
 		   
 		   psmt.executeUpdate();
 		   
 		   // 2. 생성된 ID 가져오기
-		    ResultSet rs = psmt.getGeneratedKeys();
-		    long generatedId = 0;
-		    if (rs.next()) {
-		        generatedId = rs.getLong(1);
-		    }
+		    
+	        ResultSet rs = psmt.getGeneratedKeys();
+	        long generatedId = 0;
+
+	        if (rs.next()) {
+	            generatedId = rs.getLong(1);  // 이제 안전하게 동작 가능
+//	          또는 rs.getLong("ID");
+	        }
 		   
 		   return generatedId;
-		   
+	        
+	        
 	   }catch(Exception e) {
 		   e.getStackTrace();
 		   e.printStackTrace();
@@ -88,18 +87,34 @@ public class BoardDao {
 	   try(Connection conn = getConnection();
 			PreparedStatement psmt = conn.prepareStatement(getBoardSQL)){
 		   
+		   psmt.setLong(1, boardId);
+		   
 		    ResultSet selectRs = psmt.executeQuery();
 		    Board entity = null;
 			
 		    if (selectRs.next()) {
-		        entity = Board.builder()
-		        		.title(selectRs.getString("title"))
-		        		.content(selectRs.getString("content"))
-		        		.type(selectRs.getString("type").equals(BoardCategory.BOARD) ? BoardCategory.BOARD : selectRs.getString("type").equals(BoardCategory.DATA_ROOM) ? BoardCategory.DATA_ROOM :  BoardCategory.NOTICE )
-		        		.fileId(selectRs.getLong("file_id"))
-		        		.userId(selectRs.getLong("user_id"))
-		        		.build();
+		        entity = new Board();
+		        entity.setBoardId(boardId);
+		        entity.setAuthor(selectRs.getString("author"));
+		        entity.setTitle(selectRs.getString("title"));
+		        entity.setContent(selectRs.getString("content"));
+		        entity.setType(selectRs.getString("type").equals(BoardCategory.BOARD.name())  ? BoardCategory.BOARD : 
+		        	selectRs.getString("type").equals(BoardCategory.DATA_ROOM.name()) ? BoardCategory.DATA_ROOM :  BoardCategory.NOTICE );
+		        entity.setFileId(selectRs.getLong("file_id"));
+		        entity.setUserId(selectRs.getLong("user_id"));
+		        entity.setCreatedAt(selectRs.getDate("created_at"));
 		    }
+		    
+//		    if (selectRs.next()) {
+//		        entity = Board.builder()
+//		        		.author(selectRs.getString("author"))
+//		        		.title(selectRs.getString("title"))
+//		        		.content(selectRs.getString("content"))
+//		        		.type(selectRs.getString("type").equals(BoardCategory.BOARD.name())  ? BoardCategory.BOARD : selectRs.getString("type").equals(BoardCategory.DATA_ROOM.name()) ? BoardCategory.DATA_ROOM :  BoardCategory.NOTICE )
+//		        		.fileId(selectRs.getLong("file_id"))
+//		        		.userId(selectRs.getLong("user_id"))
+//		        		.build();
+//		    }
 		   
 		   psmt.executeUpdate();
 		   
@@ -113,30 +128,49 @@ public class BoardDao {
 	
    
    
-   //게시물 호출
-   public List<Board> getBoard(BoardCategory type) {
-	   String getBoardSQL = BoardSQL.GET_BOARD_FROM_TYPE;
+   //게시물 리스트 호출
+   public List<BoardDto> getBoardList(BoardCategory type) {
+	    String getBoardSQL = BoardSQL.GET_BOARD_FROM_TYPE; // 순번 포함 쿼리
+	    List<BoardDto> boardList = new ArrayList<>();
+	    
+	    try {
+			Connection conn2 = getConnection();
+			System.out.println(conn2);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println("오류");
+		}
+	    
+	    
+	    
 	   try(Connection conn = getConnection();
 			PreparedStatement psmt = conn.prepareStatement(getBoardSQL)){
 		   
-		    ResultSet selectRs = psmt.executeQuery();
-		    List<Board> boardList = new ArrayList<Board>();
+	        // 바인딩: type (enum이거나 String 형태로 처리)
+	        psmt.setString(1, type.name());  // 또는 type.toString()
+	        
+		    ResultSet rs = psmt.executeQuery();
 		    
-		    Board entity = null;
-			
-		    if (selectRs.next()) {
-		        entity = Board.builder()
-		        		.title(selectRs.getString("title"))
-		        		.content(selectRs.getString("content"))
-		        		.type(selectRs.getString("type").equals(BoardCategory.BOARD) ? BoardCategory.BOARD : selectRs.getString("type").equals(BoardCategory.DATA_ROOM) ? BoardCategory.DATA_ROOM :  BoardCategory.NOTICE )
-		        		.fileId(selectRs.getLong("file_id"))
-		        		.userId(selectRs.getLong("user_id"))
-		        		.build();
+		    while(rs.next()) {
+		    	BoardDto dto = new BoardDto(
+		    			rs.getInt("no"),
+		    			rs.getString("title"),
+		    			rs.getString("author"),
+		    			rs.getDate("created_at"),
+		        		rs.getString("type").equals(BoardCategory.BOARD.name()) ? BoardCategory.BOARD : rs.getString("type").equals(BoardCategory.DATA_ROOM.name()) ? BoardCategory.DATA_ROOM :  BoardCategory.NOTICE,
+		    			rs.getString("content"),
+		    			rs.getLong("id"),
+		    			rs.getLong("user_id")
+		    			);
+
+	            boardList.add(dto);
 		    }
+		
 		   
 		   psmt.executeUpdate();
 		   
-		   return entity;
+		   return boardList;
 	   }catch(Exception e) {
 		   e.getStackTrace();
 		   e.printStackTrace();

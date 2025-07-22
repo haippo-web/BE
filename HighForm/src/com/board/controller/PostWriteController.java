@@ -4,25 +4,47 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import com.board.dao.BoardDao;
+import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.dto.BoardDto;
+import com.board.model.dto.BoardWriteRequestDto;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-public class PostWriteController2 {
+public class PostWriteController {
     @FXML private ComboBox<String> typeComboBox;
     @FXML private TextField titleField;
     @FXML private TextArea contentArea;
     @FXML private TextField attachmentField;
     @FXML private Button browseBtn, submitBtn;
 
-    private BoardController2 boardController;
+    private BoardController boardController;
+    private PostDetailController postDetailController;
     private BoardCategory selectedType = BoardCategory.DATA_ROOM;
     private String attachmentPath = "";
-
+    private final BoardDao boardDao;
+    
+    
+    public PostWriteController() {
+		this.boardDao = new BoardDao().getInstance();
+        // 반드시 public, 파라미터 없음
+    }
+    
+    public void setBoardController(BoardController boardController) {
+        this.boardController = boardController;
+    }
+    
+    public void setPostDetailController(PostDetailController postDetailController) {
+    	this.postDetailController = postDetailController;
+    }
+    
+    
+    
     @FXML
     public void initialize() {
         typeComboBox.getItems().addAll("과제", "공지사항");
@@ -30,9 +52,7 @@ public class PostWriteController2 {
         typeComboBox.setOnAction(e -> selectedType = typeComboBox.getValue().equals("과제") ? BoardCategory.DATA_ROOM : BoardCategory.NOTICE);
     }
 
-    public void setBoardController(BoardController2 boardController2) {
-        this.boardController = boardController2;
-    }
+
 
     @FXML
     private void handleBrowseBtn(ActionEvent event) {
@@ -52,25 +72,34 @@ public class PostWriteController2 {
     private void handleSubmitBtn(ActionEvent event) throws ParseException {
         String title = titleField.getText().trim();
         String content = contentArea.getText().trim();
+        String author = "교수님"; // 실제로는 로그인한 사용자 정보를 가져와야 함
         if (title.isEmpty() || content.isEmpty()) {
             showAlert("제목과 내용을 입력하세요.");
             return;
         }
         // TODO :: DB 저장하고 ID값 반환
         // TODO :: User 연동하고 ID값 반환 
-        Long BoardId = 2L; 
-        Long UserId = 3L;
+      
+//        newItem.setAttachmentPath(attachmentPath);
+    
+        Long fileId = 1L;
+        Long userId = 1L;
+        BoardWriteRequestDto newPost = new BoardWriteRequestDto(1, title, author,  selectedType,content,fileId );
         
-        String dateStr = "2025-07-21";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        java.util.Date utilDate = sdf.parse(dateStr);
-        java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+       
+        Board board = newPost.toEntity(newPost, fileId, userId);
         
-        BoardDto newItem = new BoardDto(0, title, "작성자",sqlDate, selectedType,BoardId, UserId);
-        newItem.setContent(content);
-        newItem.setAttachmentPath(attachmentPath);
+        // DB 데이터 저장 
+        Long boardId = boardDao.createBoard(board);
+        
+        
+        // DB 데이터 호출
+        Board boardEntity = boardDao.getBoard(boardId);
+        
+        
+
         if (boardController != null) {
-            boardController.addNewPost(newItem);
+            boardController.addNewPost(boardEntity);
         }
         ((Stage) submitBtn.getScene().getWindow()).close();
     }

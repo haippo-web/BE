@@ -19,8 +19,6 @@ import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-
 @AllArgsConstructor
 public class BoardWriteController {
     
@@ -30,25 +28,33 @@ public class BoardWriteController {
     @FXML private CheckBox aiQuestionCheck;
     @FXML private Button browseBtn, submitBtn, closeBtn;
     
-    private BoardController2 boardController;
+    private BoardController boardController;
+    private PostDetailController postDetailController;
     private File selectedFile;
     
     private final BoardDao boardDao;
 
     public BoardWriteController() {
-		this.boardDao = new BoardDao();
+		this.boardDao = new BoardDao().getInstance();
         // 반드시 public, 파라미터 없음
     }
+    
+    // BoardController 참조 설정
+    public void setBoardController(BoardController boardController) {
+        this.boardController = boardController;
+    }
+    
+    public void setPostDetailController(PostDetailController postDetailController) {
+    	this.postDetailController = postDetailController;
+    }
+    
     
     @FXML
     public void initialize() {
         // 초기화 코드 (필요시)
     }
     
-    // BoardController 참조 설정
-    public void setBoardController(BoardController2 boardController) {
-        this.boardController = boardController;
-    }
+
     
     @FXML
     private void handleBrowseBtn(ActionEvent event) {
@@ -109,11 +115,11 @@ public class BoardWriteController {
  
             Board board = newPost.toEntity(newPost, fileId, userId);
             
-            // DB 데이터 저장 
+            // DB 데이터 저장 Entity 값을 반환받을 수가 없기에 boardId값을 반환받아 사용 
             Long boardId = boardDao.createBoard(board);
             
             
-            // DB 데이터 호출
+            // DB 데이터 호출 - DB에 저장하는 시점에 시간 저장이 되기 때문에 다시 게시물에 대한 값을 받아와야함 
             Board boardEntity = boardDao.getBoard(boardId);
             
             

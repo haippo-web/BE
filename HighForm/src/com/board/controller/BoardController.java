@@ -3,8 +3,8 @@ package com.board.controller;
 import java.io.IOException;
 import java.sql.Date;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
+import com.board.dao.BoardDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.dto.BoardDto;
@@ -28,7 +28,7 @@ import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class BoardController2 {
+public class BoardController {
     @FXML private Label pathLabel;
     @FXML private Button noticeBtn, resourceBtn, boardBtn, backBtn, uploadBtn;
     @FXML private TableView<BoardDto> boardTable;
@@ -44,7 +44,13 @@ public class BoardController2 {
     private static final int ROWS_PER_PAGE = 16;
     private static final double ROW_HEIGHT = 32.0;
     private static final double HEADER_HEIGHT = 32.0;
-    private static Date sqlDate = null;
+
+    private final BoardDao boardDao;
+
+    public BoardController() {
+		this.boardDao = new BoardDao().getInstance();
+        // 반드시 public, 파라미터 없음
+    }
     
     @FXML
     public void initialize() throws ParseException {
@@ -55,36 +61,12 @@ public class BoardController2 {
         boardTable.setMinHeight(tableHeight);
         boardTable.setMaxHeight(tableHeight);
 
-        // 샘플 데이터
-        String dateStr = "2025-07-21";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        java.util.Date utilDate = sdf.parse(dateStr);
-        sqlDate = new java.sql.Date(utilDate.getTime());
         
-        allItems.addAll(
-                new BoardDto(1, "example.java", "youn.K", sqlDate, BoardCategory.NOTICE,1L, 2L),
-                new BoardDto(2, "프로젝트 계획서", "admin", sqlDate, BoardCategory.NOTICE,1L, 2L),
-                new BoardDto(3, "과제 제출 안내", "youn.K",sqlDate, BoardCategory.NOTICE,1L, 2L),
-                new BoardDto(4, "샘플 코드", "user1", sqlDate, BoardCategory.DATA_ROOM,1L, 2L),
-                new BoardDto(5, "시스템 점검 공지", "admin", sqlDate, BoardCategory.DATA_ROOM,1L, 3L),
-                new BoardDto(6, "데이터베이스 설계", "user2", sqlDate, BoardCategory.DATA_ROOM,1L, 4L),
-                new BoardDto(7, "example.java", "youn.K", sqlDate, BoardCategory.DATA_ROOM,1L, 3L),
-                new BoardDto(8, "프로젝트 계획서", "admin", sqlDate, BoardCategory.BOARD,1L, 3L),
-                new BoardDto(9, "과제 제출 안내", "youn.K", sqlDate, BoardCategory.BOARD,1L, 3L),
-                new BoardDto(10, "샘플 코드", "user1", sqlDate, BoardCategory.BOARD,1L, 4L),
-                new BoardDto(11, "시스템 점검 공지", "admin", sqlDate, BoardCategory.BOARD,1L, 5L),
-                new BoardDto(12, "데이터베이스 설계", "user2", sqlDate, BoardCategory.BOARD,1L, 5L),
-                new BoardDto(13, "example.java", "youn.K", sqlDate,BoardCategory.BOARD,1L, 5L),
-                new BoardDto(14, "프로젝트 계획서", "admin", sqlDate, BoardCategory.BOARD,1L, 5L),
-                new BoardDto(15, "프로젝트 계획서", "admin", sqlDate, BoardCategory.BOARD,1L, 3L),
-                new BoardDto(16, "과제 제출 안내", "youn.K", sqlDate, BoardCategory.BOARD,1L, 3L),
-                new BoardDto(17, "샘플 코드", "user1", sqlDate, BoardCategory.BOARD,1L, 4L),
-                new BoardDto(18, "시스템 점검 공지", "admin", sqlDate, BoardCategory.BOARD,1L, 5L),
-                new BoardDto(19, "데이터베이스 설계", "user2", sqlDate, BoardCategory.BOARD,1L, 5L),
-                new BoardDto(20, "example.java", "youn.K", sqlDate,BoardCategory.BOARD,1L, 5L),
-                new BoardDto(21, "프로젝트 계획서", "admin", sqlDate, BoardCategory.BOARD,1L, 5L)
-
-        );
+        // DB 게시물 데이터 호출 후 저장
+        allItems.addAll (boardDao.getBoardList(BoardCategory.BOARD));
+        allItems.addAll (boardDao.getBoardList(BoardCategory.DATA_ROOM));
+        allItems.addAll (boardDao.getBoardList(BoardCategory.NOTICE));
+        
 
         // 컬럼 바인딩
         noColumn.setCellValueFactory(cellData -> cellData.getValue().noProperty().asObject());
@@ -107,7 +89,7 @@ public class BoardController2 {
 	                    // PostDetailController 인스턴스 얻기
 	                    PostDetailController detailController = new PostDetailController();
 	                    // boardId 전달
-		                    detailController.setBoardId(clicked.getBoardId());
+		                detailController.setBoardId(clicked.getBoardId());
 	                    
 						root = loader.load();
 	                    Scene scene = new Scene(root, 1000, 750);
@@ -129,9 +111,10 @@ public class BoardController2 {
             return row;
         });
 
+        
         // 초기화 - PageFactory는 한 번만 설정
-        pagination.setPageFactory(this::createPage);
         filterByType(BoardCategory.NOTICE);
+        pagination.setPageFactory(this::createPage);
         updatePagination();
     }
 
@@ -171,19 +154,20 @@ public class BoardController2 {
 
     @FXML
     private void handleUploadBtn(ActionEvent event) {
-//    	String userRole = "MANAGER";
-    	String userRole = "STUDENT";
+    	// TODO :: 유저 연동 시 권한 체크  
+    	String userRole = "MANAGER";
+//    	String userRole = "STUDENT";
         try {
         	// 권한이 매니저나 교수일 경우
         	if(userRole.equals("MANAGER") || userRole.equals( "PROFESSOR")) {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/PostWrite2.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/PostWrite.fxml"));
                 Stage stage = new Stage();
                 stage.setTitle("공지사항 및 과제 작성");
                 stage.setScene(new Scene(loader.load()));
                 stage.initModality(Modality.APPLICATION_MODAL);
 
                 
-                PostWriteController2 controller = loader.getController();
+                PostWriteController controller = loader.getController();
                 controller.setBoardController(this);
 
                 stage.showAndWait();
@@ -211,7 +195,12 @@ public class BoardController2 {
             allItems.stream().filter(item -> BoardCategory.BOARD.equals(item.getType()))
             .forEach(currentItems::add);
         } else if (type.equals(BoardCategory.NOTICE)) {
-            allItems.stream().filter(item -> BoardCategory.NOTICE.equals(item.getType()))
+        	System.out.println(allItems.getFirst().getType().toString());
+        	System.out.println(BoardCategory.NOTICE == allItems.getFirst().getType());
+        	System.out.println(BoardCategory.NOTICE.equals(allItems.getFirst().getType()));
+        	
+        	
+            allItems.stream().filter(item -> BoardCategory.NOTICE == item.getType())
                     .forEach(currentItems::add);
         } else if (type.equals(BoardCategory.DATA_ROOM)) {
             allItems.stream().filter(item -> BoardCategory.DATA_ROOM.equals(item.getType()))
@@ -232,7 +221,7 @@ public class BoardController2 {
         
         // 빈 행으로 채우기 (항상 10개 행이 표시되도록)
         for (int i = pageItems.size(); i < ROWS_PER_PAGE; i++) {
-            pageItems.add(new BoardDto(0, "", "", sqlDate,null,null,null));
+            pageItems.add(new BoardDto(0, "", "", null,null,"",null,null));
         }
         
         // TableView에 데이터 설정
@@ -259,24 +248,13 @@ public class BoardController2 {
         createPage(0);
     }
 
-    // 게시글 작성 후 리스트에 추가 (공지사항 , 과제)
-    // TODO :: DB에 저장하는 로직 추가 
-    public void addNewPost(BoardDto item) {
-        item.setNo(allItems.size() + 1);
-        allItems.add(item);
-        filterByType(currentBoardType);
-        updatePagination();
-    }
     
-    // 게시글 작성 후 리스트에 추가 ( 자유 게시물 )
-    // TODO :: DB에 저장하는 로직 추가 
-    // TODO :: DB에 저장 후 생성되는 ID값 반
+    // 게시글 작성 후 리스트에 추가
     // TODO :: User 연동되면 USerId 추가
     public void addNewPost(Board board) {
         int no = allItems.size() + 1;
-        Long BoardId = 3L;
         Long userId = 2L;
-        BoardDto dto =  new BoardDto(no, board.getTitle(), "test", board.getCreatedAt() , board.getType() ,BoardId,userId);
+        BoardDto dto =  new BoardDto(no, board.getTitle(), "test", board.getCreatedAt() , board.getType() ,board.getContent(), board.getBoardId(),userId);
         allItems.add(dto);
         filterByType(currentBoardType);
         updatePagination();

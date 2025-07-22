@@ -28,13 +28,13 @@ public class BoardDto {
 	private Long boardId;
 	private Long userId;
     
-    public BoardDto(int no, String title, String author, Date date, BoardCategory type, Long boardId, Long userId) {
+    public BoardDto(int no, String title, String author, Date date, BoardCategory type,  String content, Long boardId, Long userId) {
         this.no = new SimpleIntegerProperty(no);
         this.title = new SimpleStringProperty(title);
         this.author = new SimpleStringProperty(author);
-        this.date = new SimpleStringProperty(new SimpleDateFormat("yyyy-MM-dd").format(date));
+        this.date = new SimpleStringProperty(date != null ? new SimpleDateFormat("yyyy-MM-dd").format(date) : null);
         this.type = type;
-        this.content = new SimpleStringProperty("");
+        this.content = new SimpleStringProperty(content);
         this.attachmentPath = new SimpleStringProperty("");
         this.boardId = boardId;
         this.userId = userId;

@@ -8,22 +8,22 @@ public class BoardSQL {
 				    title     VARCHAR2(255),
 				    content   VARCHAR2(255),
 				    type      VARCHAR2(255) CHECK (type IN ('NOTICE', 'DATA_ROOM', 'BOARD')),
+				    author 	  VARCHAR2(255),
 				    user_id   NUMBER,
 				    file_id   NUMBER,
-                      created_at DATE,
-                      updated_at DATE,
-                      deleted CHAR(1) DEFAULT 'N' CHECK (deleted IN ('Y', 'N')),
-				      CONSTRAINT fk_board_user FOREIGN KEY (user_id) REFERENCES users(id),
-				      CONSTRAINT fk_board_file FOREIGN KEY (file_id) REFERENCES files(id)
+				    created_at DATE,
+				    updated_at DATE,
+				    del_yn CHAR(1) DEFAULT 'N' CHECK (del_yn IN ('Y', 'N'))
+				    CONSTRAINT fk_board_user FOREIGN KEY (user_id) REFERENCES users(id),
+				    CONSTRAINT fk_board_file FOREIGN KEY (file_id) REFERENCES files(id)
 				)
-                
 			""";
 
 	
 	public static final String CREATE_BOARD = 
 			"""
-				INSERT INTO BOARD (title, content, type, user_id, file_id, created_at, updated_at, deleted) 
-				VALUES (?, ?, ?, ?, ?, SYSDATE, SYSDATE, 'N')
+				INSERT INTO BOARD (title, content, type, user_id, file_id, created_at, updated_at, del_yn ,author) 
+				VALUES (?, ?, ?, ?, ?, SYSDATE, SYSDATE, 'N', ?)
 			""";
 
 	
@@ -35,6 +35,12 @@ public class BoardSQL {
 	
 	public static final String GET_BOARD_FROM_TYPE =
 			"""
-				SELECT * FROM BOARD WHERE type = ?
+				SELECT 
+				    ROW_NUMBER() OVER (ORDER BY created_at DESC) AS no,
+				    b.*
+				FROM 
+			    	BOARD b
+				WHERE 
+			    	type = ?
 			""";
 }

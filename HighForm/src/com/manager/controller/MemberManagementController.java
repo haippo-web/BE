@@ -190,7 +190,8 @@ public class MemberManagementController {
 
 			// 데이터 확인용 디버깅
 			for (Member member : members) {
-				System.out.println("로드된 유저: " + member.getMemberName() + " | " + member.getAffiliation());
+				System.out.println("로드된 유저: " + member.getMemberName() + " | " + member.getAffiliation() + "|"
+						+ member.getPosition());
 			}
 
 			memberList.addAll(members);
@@ -339,8 +340,7 @@ public class MemberManagementController {
 		alert.setContentText(message);
 		alert.showAndWait();
 	}
-	
-	
+
 	// 이전 화면으로 돌아가기
 	@FXML
 	private void handleBackMenu(ActionEvent event) {

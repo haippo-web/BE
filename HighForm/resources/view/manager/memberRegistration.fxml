@@ -67,7 +67,7 @@
 							</font>
 						</Label>
 						<TextField fx:id="loginIdField" prefHeight="25.0"
-							text="ks371" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+							text="" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
 						<!-- 이름 -->
 						<Label text="이름 :" GridPane.columnIndex="0"

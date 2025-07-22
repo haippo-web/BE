@@ -16,6 +16,7 @@ import lombok.Setter;
 public class Board extends BaseEntity{
 	
 	private Long boardId;
+	private String author;
 	private String title;
 	private String content;
 	private BoardCategory type;

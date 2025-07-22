@@ -1,16 +1,20 @@
 package com.manager.dao;
 
-import com.manager.model.Course;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.sql.*;
+
+import com.manager.model.Course;
+import com.util.DBConnection;
 
 public class CourseDAO {
 
-	// Oracle DB 연결 정보
-	private static final String URL = "jdbc:oracle:thin:@localhost:1521/xepdb1";
-	private static final String USERNAME = "high4";
-	private static final String PASSWORD = "high4";
+	private Connection getConnection() throws SQLException {
+		return DBConnection.getConnection();
+	}
 
 	static {
 		try {
@@ -18,11 +22,6 @@ public class CourseDAO {
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Oracle JDBC 드라이버를 찾을 수 없습니다.", e);
 		}
-	}
-
-	// DB 연결 메서드
-	private Connection getConnection() throws SQLException {
-		return DriverManager.getConnection(URL, USERNAME, PASSWORD);
 	}
 
 	// 모든 강의 조회
@@ -124,6 +123,21 @@ public class CourseDAO {
 	}
 
 	// 특정 강의 조회 (필요시 사용)
+	public int getCourseIdByName(String courseName) {
+		String sql = "SELECT COURSE_ID FROM COURSE WHERE COURSE_NAME = ?";
+		try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, courseName);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				return rs.getInt("COURSE_ID");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return -1; // 못 찾으면 -1 반환
+	}
+
 	public Course getCourseById(int courseId) {
 		String sql = "SELECT COURSE_ID, COURSE_NAME, START_DATE, END_DATE, INSTRUCTOR, MANAGER, NOTE FROM COURSE WHERE COURSE_ID = ?";
 
@@ -152,27 +166,26 @@ public class CourseDAO {
 		return null;
 	}
 
-	
 	// 멤버 등록시 강의 목록 드롭다운
 	public List<String> getOnlyCourse() {
-	    List<String> course = new ArrayList<>();
-	    String sql = "SELECT COURSE_NAME FROM COURSE";
+		List<String> course = new ArrayList<>();
+		String sql = "SELECT COURSE_NAME FROM COURSE";
 
-	    try (Connection conn = getConnection();
-	         PreparedStatement pstmt = conn.prepareStatement(sql);
-	         ResultSet rs = pstmt.executeQuery()) {
+		try (Connection conn = getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				ResultSet rs = pstmt.executeQuery()) {
 
-	        while (rs.next()) {
-	        	course.add(rs.getString("COURSE_NAME"));
-	        }
+			while (rs.next()) {
+				course.add(rs.getString("COURSE_NAME"));
+			}
 
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
-	    return course;
+		return course;
 	}
-	
+
 	// DB 연결 테스트 메서드
 	public boolean testConnection() {
 		try (Connection conn = getConnection()) {

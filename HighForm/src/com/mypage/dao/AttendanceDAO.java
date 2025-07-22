@@ -1,7 +1,8 @@
 package com.mypage.dao;
 
-import com.DBConnection;
-import com.mypage.domain.Attendance;
+import com.mypage.Model.Attendance;
+import com.util.DBConnection;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,10 +41,10 @@ public class AttendanceDAO {
                 rowCnt++;
                 Attendance att = new Attendance();
                 att.setId(rs.getLong("ID"));
-                Timestamp inTime = rs.getTimestamp("CHECK_IN");
-                if (inTime != null) att.setCheckIn(inTime.toLocalDateTime());
+                Date inTime = rs.getDate("CHECK_IN");
+                if (inTime != null) att.setCheckIn(inTime);
                 Timestamp outTime = rs.getTimestamp("CHECK_OUT");
-                if (outTime != null) att.setCheckOut(outTime.toLocalDateTime());
+                if (outTime != null) att.setCheckOut(inTime);
                 att.setStatus(rs.getString("STATUS"));
                 att.setUserId(rs.getLong("USER_ID"));
                 list.add(att);

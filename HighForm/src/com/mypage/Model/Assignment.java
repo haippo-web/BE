@@ -1,4 +1,4 @@
-package com.mypage.domain;
+package com.mypage.Model;
 
 
 import java.time.LocalDateTime;
@@ -16,4 +16,5 @@ public class Assignment {
     private String content;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    
 }

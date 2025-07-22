@@ -11,8 +11,9 @@ import javafx.stage.Stage;
 
 import java.sql.SQLException;
 import java.util.List;
+
+import com.mypage.Model.Attendance;
 import com.mypage.dao.AttendanceDAO;
-import com.mypage.domain.Attendance;
 
 public class AttendanceController {
 
@@ -69,8 +70,8 @@ public class AttendanceController {
                 row.getChildren().add(makeCell(String.valueOf(offset + i + 1), 90)); // 일련번호
                 row.getChildren().add(makeCell(att.getStatus(), 160));               // 출결 상태
                 row.getChildren().add(makeCell(att.getCheckIn() != null ? att.getCheckIn().toLocalDate().toString() : "", 210)); // 날짜
-                row.getChildren().add(makeCell(att.getCheckIn() != null ? att.getCheckIn().toLocalTime().toString() : "", 255)); // 입실
-                row.getChildren().add(makeCell(att.getCheckOut() != null ? att.getCheckOut().toLocalTime().toString() : "", 255)); // 퇴실
+                row.getChildren().add(makeCell(att.getCheckIn() != null ? att.getCheckIn().toLocalDate().toString() : "", 255)); // 입실
+                row.getChildren().add(makeCell(att.getCheckOut() != null ? att.getCheckOut().toLocalDate().toString() : "", 255)); // 퇴실
                 attendanceListBox.getChildren().add(row); // VBox에 행 추가
             }
 

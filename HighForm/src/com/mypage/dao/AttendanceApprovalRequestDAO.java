@@ -4,8 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.DBConnection;
-import com.mypage.domain.AttendanceApprovalRequest;
+import com.mypage.Model.AttendanceApprovalRequest;
+import com.util.DBConnection;
 
 public class AttendanceApprovalRequestDAO {
     public void insert(AttendanceApprovalRequest req) throws SQLException {

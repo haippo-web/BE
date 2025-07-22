@@ -1,7 +1,7 @@
 package com.mypage.controller;
 
+import com.mypage.Model.AttendanceApprovalRequest;
 import com.mypage.dao.AttendanceApprovalRequestDAO;
-import com.mypage.domain.AttendanceApprovalRequest;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

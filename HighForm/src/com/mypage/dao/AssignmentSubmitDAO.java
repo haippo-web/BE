@@ -1,12 +1,21 @@
 package com.mypage.dao;
 
-import com.DBConnection;
-import com.mypage.domain.AssignmentSubmit;
+import com.mypage.Model.AssignmentSubmit;
+import com.util.DBConnection;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * AssignmentSubmitDAO
@@ -53,18 +62,21 @@ public class AssignmentSubmitDAO {
     }
 
     /* ==========================================================
-     * 4) 내가 제출한 과제 목록 + 커리큘럼명
+     * 4) 내가 제출한 과제 목록 
      * ======================================================== */
     public List<AssignmentSubmit> getSubmitList(Long userId, int offset, int limit) throws SQLException {
-        String sql =
-            "SELECT * FROM ( " +
-            "  SELECT s.*, a.title AS assignment_title, c.name AS curriculum_name, " +
-            "         ROW_NUMBER() OVER (ORDER BY s.submitted_at DESC) rn " +
-            "    FROM assignment_submit s " +
-            "    JOIN assignment a   ON s.assignment_id = a.id " +
-            "    JOIN curriculum c   ON a.curriculum_id = c.id " +
-            "   WHERE s.user_id = ? " +
-            ") WHERE rn > ? AND rn <= ?";
+    	String sql =
+    		    "SELECT * FROM ( " +
+    		    "  SELECT s.*,                      " +
+    		    "         a.title AS assignment_title, " +  // ★ 추가
+    		    "         c.name  AS curriculum_name,  " +
+    		    "         ROW_NUMBER() OVER (ORDER BY s.submitted_at DESC) rn " +
+    		    "    FROM assignment_submit s " +
+    		    "    JOIN assignment a ON s.assignment_id = a.id " +
+    		    "    JOIN curriculum c ON a.curriculum_id = c.id " +
+    		    "   WHERE s.user_id = ? " +
+    		    ") WHERE rn > ? AND rn <= ?";
+
         List<AssignmentSubmit> list = new ArrayList<>();
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -73,14 +85,18 @@ public class AssignmentSubmitDAO {
             ps.setInt(3, offset + limit - 1);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    AssignmentSubmit sub = new AssignmentSubmit();
-                    sub.setUserId(rs.getLong("user_id"));
-                    sub.setAssignmentId(rs.getLong("assignment_id"));
-                    sub.setTitle(rs.getString("title"));
-                    sub.setContent(rs.getString("content"));
-                    Timestamp ts = rs.getTimestamp("submitted_at");
-                    if (ts != null) sub.setSubmittedAt(ts.toLocalDateTime());
-                    sub.setCurriculumName(rs.getString("curriculum_name"));
+                	AssignmentSubmit sub = new AssignmentSubmit();
+                	sub.setUserId(rs.getLong("user_id"));
+                	sub.setAssignmentId(rs.getLong("assignment_id"));
+
+                	sub.setSubmitTitle(rs.getString("title"));          // 제출 제목
+                	sub.setContent(rs.getString("content"));
+                	Timestamp ts = rs.getTimestamp("submitted_at");
+                	if (ts != null) sub.setSubmittedAt(ts.toLocalDateTime());
+
+                	sub.setAssignmentTitle(rs.getString("assignment_title")); 
+                	sub.setCurriculumName(rs.getString("curriculum_name"));
+
                     list.add(sub);
                 }
             }
@@ -100,7 +116,7 @@ public class AssignmentSubmitDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, submit.getUserId());
             ps.setLong(2, submit.getAssignmentId());
-            ps.setString(3, submit.getTitle());
+            ps.setString(3, submit.getSubmitTitle());
             ps.setString(4, submit.getContent());
             ps.setTimestamp(5,
                     submit.getSubmittedAt() != null ? Timestamp.valueOf(submit.getSubmittedAt()) : null);
@@ -223,5 +239,104 @@ public class AssignmentSubmitDAO {
             }
         }
     }
+    
+    public String getIdTitle(Long assignmentId) {
+        final String sql = "SELECT title FROM assignment WHERE id = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, assignmentId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("title");
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();          
+        }
+        return null;                       
+    }
+
+    /* ====================================================================
+     *  과제 제출 + 첨부파일 INSERT 
+     * ==================================================================== */
+
+    public void insertWithFile(AssignmentSubmit submit, File file) throws Exception {
+
+        try (Connection conn = getConnection()) {
+
+            conn.setAutoCommit(false);
+
+            /* ── 1) 시퀀스에서 새 PK(id) 확보 ───────────────────────────── */
+            long submitId;
+            try (Statement st = conn.createStatement();
+                 ResultSet rs = st.executeQuery(
+                         "SELECT assignment_submit_seq.NEXTVAL FROM dual")) {
+                rs.next();
+                submitId = rs.getLong(1);
+            }
+
+            /* ── 2) assignment_submit INSERT  ▶ 컬럼명 id 로 통일 ───────── */
+            final String sqlSubmit =
+                "INSERT INTO assignment_submit " +
+                "(id, user_id, assignment_id, title, content, submitted_at) " +
+                "VALUES (?, ?, ?, ?, ?, SYSDATE)";
+
+            try (PreparedStatement ps = conn.prepareStatement(sqlSubmit)) {
+                ps.setLong  (1, submitId);
+                ps.setLong  (2, submit.getUserId());
+                ps.setLong  (3, submit.getAssignmentId());
+                ps.setString(4, submit.getSubmitTitle());
+                ps.setString(5, submit.getContent());
+                ps.executeUpdate();
+            }
+
+            /* ── 3) 첨부파일이 있을 때 file_location INSERT ───────────── */
+            if (file != null) {
+
+                Path saved = saveFileToServer(file);   // 서버 디렉터리로 복사
+
+                final String sqlFile =
+                    "INSERT INTO file_location " +
+                    "(id, file_path, file_type, file_size, uploaded_at, submit_id, user_id) " +
+                    "VALUES (file_location_seq.NEXTVAL, ?, ?, ?, SYSDATE, ?, ?)";
+
+                try (PreparedStatement psFile = conn.prepareStatement(sqlFile)) {
+                    psFile.setString(1, saved.toString());
+                    psFile.setString(2, Files.probeContentType(saved));
+                    psFile.setLong  (3, Files.size(saved));
+                    psFile.setLong  (4, submitId);           // FK → assignment_submit.id
+                    psFile.setLong  (5, submit.getUserId());
+                    psFile.executeUpdate();
+                }
+            }
+
+            conn.commit();
+
+        } catch (Exception ex) {
+            /* 여기서 ROLLBACK 은 try-with-resources 밖에서 다시 연결을 열 필요 없음 */
+            throw ex;  // 컨트롤러에서 catch 후 Alert 으로 표시
+        }
+    }
+
+
+    
+    /* ----------------------------------------------------------
+     * 서버 업로드 폴더로 파일 복사  (원하는 경로/규칙으로 수정)
+     * ---------------------------------------------------------- */
+    private Path saveFileToServer(File src) throws IOException {
+        String dateDir = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        Path destDir   = Paths.get("/opt/uploads", dateDir);      // ← 업로드 루트
+        Files.createDirectories(destDir);
+
+        Path dest = destDir.resolve(UUID.randomUUID() + "_" + src.getName());
+        Files.copy(src.toPath(), dest, StandardCopyOption.REPLACE_EXISTING);
+        return dest;   // DB에 저장할 경로
+    }
+
+
+
     
 }

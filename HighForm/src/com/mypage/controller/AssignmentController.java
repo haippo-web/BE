@@ -1,8 +1,9 @@
 package com.mypage.controller;
 
+import com.mypage.Model.AssignmentSubmit;
 import com.mypage.dao.AssignmentSubmitDAO;
 import com.mypage.dao.AssignmentSubmitDAO.AssignmentOption;
-import com.mypage.domain.AssignmentSubmit;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,6 +15,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import com.mypage.dao.CourseAssignmentDTO;
+
+import java.io.File;
 import java.util.List;
 
 /**
@@ -37,12 +40,16 @@ public class AssignmentController {
     @FXML private Button    browseBtn;
     @FXML private Button    submitBtn_form;
 
+    
     /* ───────── 상태 필드 ───────── */
     private int  currentPage   = 1;
     private int  pageSize      = 10;
-    private long loginUserId   = 1L;   // 실제 로그인 사용자 ID 주입 필요
+    private long loginUserId   = 3L;   // 실제 로그인 사용자 ID 주입 필요
     private boolean isCourseListMode   = false;
+    private File attachedFile;  
+    
 
+    private AssignmentSubmitDAO assignmentSubmitDAO;
     /* ================================================================
      *  (A) 초기화  (뷰 로드 직후 자동 호출)
      * ============================================================ */
@@ -74,15 +81,16 @@ public class AssignmentController {
 
             int no = offset + 1;
             for (AssignmentSubmit sub : submitList) {
+            
                 HBox row = new HBox();
                 row.setStyle("-fx-border-color:black; -fx-border-width:0 0 1 0; -fx-alignment:center;");
 
                 row.getChildren().addAll(
-                    createTableCell(String.valueOf(no++),  60, false),   // No
-                    createTableCell(sub.getCurriculumName(), 140, false),// 커리큘럼
-                    createTableCell(sub.getTitle(),          220, false),// 제목
-                    createTableCell(sub.getContent(),        360, false),// 내용
-                    createTableCell(formatDate(sub.getSubmittedAt()), 160, true) // 마지막 컬럼
+                	    createTableCell(String.valueOf(no++), 60, false),          // No
+                	    createTableCell(sub.getAssignmentTitle(), 140, false),     // 과제명
+                	    createTableCell(sub.getSubmitTitle(), 220, false),         // 제출 제목
+                	    createTableCell(sub.getContent(), 360, false),             // 내용
+                	    createTableCell(formatDate(sub.getSubmittedAt()), 160, true) // 제출일
                 );
                 assignmentListBox.getChildren().add(row);
             }
@@ -212,6 +220,7 @@ public class AssignmentController {
     /* ================================================================
      *  (G) 과제 제출 모달 (메인 화면)
      * ============================================================ */
+    
     private void openSubmitForm() {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -224,24 +233,28 @@ public class AssignmentController {
             TextField  fileTF   = (TextField) root.lookup("#fileField");
             Button     browseB  = (Button)    root.lookup("#browseBtn");
             Button     submitB  = (Button)    root.lookup("#submitBtn");
+            
 
-            /* 콤보 */
+            /* ▼ 1. 과제 선택 콤보 초기화 */
             if (combo != null) {
                 combo.getItems().setAll(
                     AssignmentSubmitDAO.getInstance().getAvailableAssignmentsForUser(loginUserId));
                 combo.setPromptText("과제 선택");
             }
 
-            /* 파일 선택 */
+            /* ▼ 2. 파일 선택 */
             if (browseB != null && fileTF != null) {
                 browseB.setOnAction(e -> {
                     FileChooser fc = new FileChooser();
-                    java.io.File f = fc.showOpenDialog(null);
-                    if (f != null) fileTF.setText(f.getAbsolutePath());
+                    File f = fc.showOpenDialog(null);
+                    if (f != null) {
+                        fileTF.setText(f.getName());
+                        attachedFile = f;            // 선택된 파일 보관
+                    }
                 });
             }
 
-            /* INSERT */
+            /* ▼ 3. 제출 버튼 */
             if (submitB != null) submitB.setOnAction(e -> {
                 AssignmentOption sel = combo.getValue();
                 String title   = titleTF.getText();
@@ -253,18 +266,24 @@ public class AssignmentController {
                 AssignmentSubmit sub = new AssignmentSubmit();
                 sub.setUserId(loginUserId);
                 sub.setAssignmentId(sel.getId());
-                sub.setTitle(title);
+                sub.setSubmitTitle(title);
                 sub.setContent(content);
                 sub.setSubmittedAt(java.time.LocalDateTime.now());
 
                 try {
-                    AssignmentSubmitDAO.getInstance().insert(sub);
+                    /* ★ 파일 포함 INSERT */
+                    AssignmentSubmitDAO.getInstance()
+                                       .insertWithFile(sub, attachedFile);
                     msg("제출 완료!");
                     submitB.getScene().getWindow().hide();
+
                     /* 제출 후 메인 화면 새로고침 */
                     isCourseListMode = false;
                     loadMySubmitList(currentPage);
-                } catch (Exception ex) { msg("제출 실패: " + ex.getMessage(), Alert.AlertType.ERROR); }
+                } catch (Exception ex) {
+                	ex.printStackTrace(); 
+                    msg("제출 실패: " + ex.getMessage(), Alert.AlertType.ERROR);
+                }
             });
 
             Stage st = new Stage();
@@ -277,6 +296,15 @@ public class AssignmentController {
         } catch (Exception ex) { ex.printStackTrace(); }
     }
 
-    private void msg(String txt) { msg(txt, Alert.AlertType.INFORMATION); }
-    private void msg(String txt, Alert.AlertType tp) { new Alert(tp, txt).showAndWait(); }
+
+    private void msg(String txt) {
+        msg(txt, Alert.AlertType.INFORMATION);
+    }
+
+    /** 타입 지정 알림 */
+    private void msg(String txt, Alert.AlertType tp) {
+        new Alert(tp, txt).showAndWait();
+    }
+    
+
 }

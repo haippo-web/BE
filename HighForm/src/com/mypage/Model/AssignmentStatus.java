@@ -1,4 +1,4 @@
-package com.mypage.domain;
+package com.mypage.Model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

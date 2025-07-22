@@ -415,6 +415,9 @@ public class DesktopController {
         return button;
     }
 
+    
+    
+    
     @FXML
     private void showStartMenu() {
         if (startMenu.isShowing()) {
@@ -531,10 +534,39 @@ public class DesktopController {
         }
     
         
-        // 강아지에게 출석 알림 표시
-//        showNotification("출석 완료! 수고하셨어요~");
-//        
-//        attendanceAlert.showAndWait();
+
+    }
+    
+    private void showRetroInfoDialog(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.getDialogPane().setStyle(
+            "-fx-background-color: #c0c0c0;" +
+            "-fx-font-family: 'Malgun Gothic';" +
+            "-fx-font-size: 11px;"
+        );
+        alert.showAndWait();
+    }
+
+    private boolean showRetroConfirmationDialog(String title, String message) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle(title);
+        confirm.setHeaderText(null);
+        confirm.setContentText(message);
+        confirm.getDialogPane().setStyle(
+            "-fx-background-color: #c0c0c0;" +
+            "-fx-font-family: 'Malgun Gothic';" +
+            "-fx-font-size: 11px;"
+        );
+        
+        Button yesButton = (Button) confirm.getDialogPane().lookupButton(ButtonType.OK);
+        yesButton.setText("예");
+        Button noButton = (Button) confirm.getDialogPane().lookupButton(ButtonType.CANCEL);
+        noButton.setText("아니오");
+
+        return confirm.showAndWait().filter(response -> response == ButtonType.OK).isPresent();
     }
     
     @FXML
@@ -542,58 +574,27 @@ public class DesktopController {
         try {
             AttendanceCheckResult result = attendanceService.canCheckOut(currentUser.getId());
             if (!result.isPossible()) {
-                showAlert("퇴근 체크", result.getMessage());
+                showRetroInfoDialog("퇴근 체크", result.getMessage());
                 return;
             }
 
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("퇴근하기");
-            confirm.setHeaderText("퇴근하시겠습니까?");
-            confirm.setContentText("퇴근을 완료하시겠습니까?");
-            confirm.getDialogPane().setStyle(
-                "-fx-background-color: #c0c0c0;" +
-                "-fx-font-family: 'Malgun Gothic';" +
-                "-fx-font-size: 11px;"
-            );
-
-            confirm.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    try {
-                        Attendance attendance = attendanceService.checkOut(currentUser.getId());
-                        showNotification("퇴근 완료! 근무시간: " + String.format("%.2f", attendance.getWorkingHours()) + "시간");
-                        showAlert("퇴근 완료", "수고하셨습니다!\n퇴근 시간: " + attendance.getCheckOut().toLocalTime());
-                    } catch (AttendanceServiceException e) {
-                        showAlert("퇴근 오류", e.getMessage());
-                    }
+            boolean confirmed = showRetroConfirmationDialog("퇴근하기", "진짜 퇴실 처리하시겠습니까?");
+            if (confirmed) {
+                try {
+                    Attendance attendance = attendanceService.checkOut(currentUser.getId());
+                    showNotification("퇴근 완료! 근무시간: " + String.format("%.2f", attendance.getWorkingHours()) + "시간");
+                    showRetroInfoDialog("퇴근 완료", "수고하셨습니다!\n퇴근 시간: " + attendance.getCheckOut().toLocalTime());
+                } catch (AttendanceServiceException e) {
+                    showRetroInfoDialog("퇴근 오류", e.getMessage());
                 }
-            });
-
+            }
         } catch (Exception e) {
-            showAlert("퇴근 오류", "퇴근 처리 중 오류가 발생했습니다.");
+            showRetroInfoDialog("퇴근 오류", "퇴근 처리 중 오류가 발생했습니다.");
             e.printStackTrace();
         }
     }
         
-//        clockOutAlert.showAndWait().ifPresent(response -> {
-//            if (response == ButtonType.OK) {
-//                Alert confirmAlert = new Alert(Alert.AlertType.INFORMATION);
-//                confirmAlert.setTitle("퇴근완료");
-//                confirmAlert.setHeaderText(null);
-//                confirmAlert.setContentText("수고하셨습니다!\n퇴근 시간: " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
-//                
-//                confirmAlert.getDialogPane().setStyle(
-//                    "-fx-background-color: #c0c0c0;" +
-//                    "-fx-font-family: 'Malgun Gothic';" +
-//                    "-fx-font-size: 11px;"
-//                );
-//                
-//                // 강아지에게 퇴근 알림 표시
-//                showNotification("수고하셨습니다! 안전히 귀가하세요~");
-//                
-//                confirmAlert.showAndWait();
-//            }
-//        });
-//    }
+
     
     @FXML
     private void openCalculator() {

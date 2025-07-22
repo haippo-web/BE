@@ -27,11 +27,17 @@ public class AttendanceDAO {
     // 출결 리스트 조회 (15개씩 페이징, PreparedStatement)
     public List<Attendance> getAttendanceList(Long userId, int offset, int limit) throws SQLException {
         List<Attendance> list = new ArrayList<>();
-        String sql = "SELECT * FROM ( " +
-                "   SELECT a.*, ROW_NUMBER() OVER (ORDER BY check_in DESC NULLS LAST) rn " +
-                "   FROM attendance a " +
-                "   WHERE user_id = ? " +
-                ") WHERE rn > ? AND rn <= ?";
+        String sql =
+        		"SELECT * FROM ( " +
+        		"  SELECT  a.id, a.user_id,                     " +
+        		"          a.check_in, a.check_out, a.status,   " +
+        		"          /* check_in이 NULL이면 테이블 컬럼,            */ " +
+        		"          /* check_in이 존재하면 그 날짜를 사용         */ " +
+        		"          COALESCE( a.attendance_date, TRUNC(a.check_in) ) AS ATTENDANCE_DATE," +
+        		"          ROW_NUMBER() OVER (ORDER BY a.attendance_date DESC) rn " +  // ← 정렬도 날짜 기준
+        		"  FROM    attendance a                       " +
+        		"  WHERE   a.user_id = ?                      " +
+        		") WHERE rn > ? AND rn <= ?";
         System.out.println("[DAO][PreparedStatement] SQL = " + sql);
         System.out.printf("[DAO][PreparedStatement] params: userId=%d, offset=%d, limit=%d%n", userId, offset, limit);
         try (Connection conn = getConnection();

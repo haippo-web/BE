@@ -322,20 +322,20 @@ public class AssignmentSubmitDAO {
     }
 
 
-    
-    /* ----------------------------------------------------------
-     * 서버 업로드 폴더로 파일 복사  (원하는 경로/규칙으로 수정)
-     * ---------------------------------------------------------- */
+    /* 1) 업로드 루트 디렉터리 지정 → 홈 디렉터리 아래로 */
+    private static final Path UPLOAD_ROOT =
+            Paths.get(System.getProperty("user.home"), "uploads");   // ~/uploads
+
+    /* 2) 파일 저장 메서드 수정 */
     private Path saveFileToServer(File src) throws IOException {
         String dateDir = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-        Path destDir   = Paths.get("/opt/uploads", dateDir);      // ← 업로드 루트
-        Files.createDirectories(destDir);
+        Path destDir   = UPLOAD_ROOT.resolve(dateDir);
+        Files.createDirectories(destDir);           // 권한 문제 없음
 
         Path dest = destDir.resolve(UUID.randomUUID() + "_" + src.getName());
         Files.copy(src.toPath(), dest, StandardCopyOption.REPLACE_EXISTING);
-        return dest;   // DB에 저장할 경로
+        return dest;
     }
-
 
 
     

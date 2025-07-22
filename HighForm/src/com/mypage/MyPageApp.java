@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 public class MyPageApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/view/mypage/assignment/my_assignment_list.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/view/mypage/TodoDialog.fxml"));
         primaryStage.setTitle("My assignment List");
         primaryStage.setScene(new Scene(root, 1000, 750));
         primaryStage.show();

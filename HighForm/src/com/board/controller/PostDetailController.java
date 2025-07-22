@@ -223,23 +223,23 @@ public class PostDetailController implements Initializable {
         	if(userRole.equals("MANAGER") || userRole.equals( "PROFESSOR")) {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/PostWrite.fxml"));
                 Stage stage = new Stage();
-                stage.setTitle("공지사항 및 과제 작성");
+                stage.setTitle("공지사항 및 과제 수정");
                 stage.setScene(new Scene(loader.load()));
                 stage.initModality(Modality.APPLICATION_MODAL);
 
                 
-                PostWriteController controller = loader.getController();
+                PostUpdateController controller = loader.getController();
                 controller.setPostDetailController(this);
 
                 stage.showAndWait();
         	}else {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/BoardWrite.fxml"));
                 Stage stage = new Stage();
-                stage.setTitle("게시글 작성");
+                stage.setTitle("게시글 수정");
                 stage.setScene(new Scene(loader.load()));
                 stage.initModality(Modality.APPLICATION_MODAL);
 
-                BoardWriteController controller = loader.getController();
+                BoardUpdateController controller = loader.getController();
                 controller.setPostDetailController(this);
 
                 stage.showAndWait();

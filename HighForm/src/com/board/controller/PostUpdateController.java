@@ -16,7 +16,7 @@ import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-public class PostWriteController {
+public class PostUpdateController {
     @FXML private ComboBox<String> typeComboBox;
     @FXML private TextField titleField;
     @FXML private TextArea contentArea;
@@ -24,18 +24,23 @@ public class PostWriteController {
     @FXML private Button browseBtn, submitBtn;
 
     private BoardController boardController;
+    private PostDetailController postDetailController;
     private BoardCategory selectedType = BoardCategory.DATA_ROOM;
     private String attachmentPath = "";
     private final BoardDao boardDao;
     
     
-    public PostWriteController() {
+    public PostUpdateController() {
 		this.boardDao = new BoardDao().getInstance();
         // 반드시 public, 파라미터 없음
     }
     
     public void setBoardController(BoardController boardController) {
         this.boardController = boardController;
+    }
+    
+    public void setPostDetailController(PostDetailController postDetailController) {
+    	this.postDetailController = postDetailController;
     }
     
     

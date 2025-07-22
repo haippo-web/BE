@@ -19,8 +19,9 @@ import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.AllArgsConstructor;
+
 @AllArgsConstructor
-public class BoardWriteController {
+public class BoardUpdateController {
     
     @FXML private TextField titleField;
     @FXML private TextArea contentArea;
@@ -29,11 +30,12 @@ public class BoardWriteController {
     @FXML private Button browseBtn, submitBtn, closeBtn;
     
     private BoardController boardController;
+    private PostDetailController postDetailController;
     private File selectedFile;
     
     private final BoardDao boardDao;
 
-    public BoardWriteController() {
+    public BoardUpdateController() {
 		this.boardDao = new BoardDao().getInstance();
         // 반드시 public, 파라미터 없음
     }
@@ -43,6 +45,9 @@ public class BoardWriteController {
         this.boardController = boardController;
     }
     
+    public void setPostDetailController(PostDetailController postDetailController) {
+    	this.postDetailController = postDetailController;
+    }
     
     
     @FXML
@@ -106,7 +111,7 @@ public class BoardWriteController {
 
             Long fileId = 1L;
             Long userId = 1L;
-            BoardWriteRequestDto newPost = new BoardWriteRequestDto(1, title, author,  type,content,fileId );
+            BoardWriteRequestDto newPost = new BoardWriteRequestDto(1, title, author,  type,content, fileId);
             
  
             Board board = newPost.toEntity(newPost, fileId, userId);

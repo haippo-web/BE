@@ -1,8 +1,9 @@
 package com.mypage.controller;
 
-import com.mypage.Model.AssignmentSubmit;
-import com.mypage.dao.AssignmentSubmitDAO;
-import com.mypage.dao.AssignmentSubmitDAO.AssignmentOption;
+import com.mypage.Model.assignment.AssignmentSubmit;
+import com.mypage.dao.assignment.AssignmentSubmitDAO;
+import com.mypage.dao.assignment.CourseAssignmentDTO;
+import com.mypage.dao.assignment.AssignmentSubmitDAO.AssignmentOption;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,7 +15,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import com.mypage.dao.CourseAssignmentDTO;
 
 import java.io.File;
 import java.util.List;

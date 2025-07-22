@@ -1,4 +1,4 @@
-package com.mypage.Model;
+package com.mypage.Model.attendance;
 
 import java.time.LocalDate;
 import lombok.Data;

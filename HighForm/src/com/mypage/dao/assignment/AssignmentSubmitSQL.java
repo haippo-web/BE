@@ -1,4 +1,4 @@
-package com.mypage.dao;
+package com.mypage.dao.assignment;
 
 public class AssignmentSubmitSQL {
     // 나의 제출 리스트 페이징

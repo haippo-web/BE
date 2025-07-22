@@ -1,6 +1,6 @@
-package com.mypage.dao;
+package com.mypage.dao.attendance;
 
-import com.mypage.Model.Attendance;
+import com.mypage.Model.attendance.Attendance;
 import com.util.DBConnection;
 
 import java.sql.*;

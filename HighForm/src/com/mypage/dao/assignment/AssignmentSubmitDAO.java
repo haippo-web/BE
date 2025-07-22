@@ -1,6 +1,6 @@
-package com.mypage.dao;
+package com.mypage.dao.assignment;
 
-import com.mypage.Model.AssignmentSubmit;
+import com.mypage.Model.assignment.AssignmentSubmit;
 import com.util.DBConnection;
 
 import java.io.File;

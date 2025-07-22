@@ -1,10 +1,10 @@
-package com.mypage.dao;
+package com.mypage.dao.attendance;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.mypage.Model.AttendanceApprovalRequest;
+import com.mypage.Model.attendance.AttendanceApprovalRequest;
 import com.util.DBConnection;
 
 public class AttendanceApprovalRequestDAO {

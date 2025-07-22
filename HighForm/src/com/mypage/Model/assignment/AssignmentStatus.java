@@ -1,4 +1,4 @@
-package com.mypage.Model;
+package com.mypage.Model.assignment;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

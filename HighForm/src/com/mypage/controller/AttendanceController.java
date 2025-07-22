@@ -12,8 +12,8 @@ import javafx.stage.Stage;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.mypage.Model.Attendance;
-import com.mypage.dao.AttendanceDAO;
+import com.mypage.Model.attendance.Attendance;
+import com.mypage.dao.attendance.AttendanceDAO;
 
 public class AttendanceController {
 

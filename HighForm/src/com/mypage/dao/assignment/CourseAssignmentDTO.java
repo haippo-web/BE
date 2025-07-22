@@ -1,4 +1,4 @@
-package com.mypage.dao;
+package com.mypage.dao.assignment;
 
 import lombok.Data;
 

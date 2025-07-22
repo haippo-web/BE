@@ -1,4 +1,4 @@
-package com.mypage.dao;
+package com.mypage.dao.attendance;
 
 public class AttendanceSQL {
     // 출결 리스트 (Oracle 페이징, ROW_NUMBER 사용, NULLS LAST 추가)

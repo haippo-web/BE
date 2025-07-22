@@ -40,7 +40,7 @@ public class Main extends Application {
 
         // 3초 후 로딩 화면으로 전환
         new Thread(() -> {
-            try { Thread.sleep(3000); } catch (InterruptedException e) {}
+            try { Thread.sleep(1000); } catch (InterruptedException e) {}
             Platform.runLater(() -> {
                 try { showLoading(); } catch (Exception e) { e.printStackTrace(); }
             });
@@ -53,9 +53,12 @@ public class Main extends Application {
 
         // 5초 후 로그인 화면으로 전환
         new Thread(() -> {
-            try { Thread.sleep(3000); } catch (InterruptedException e) {}
+            try { Thread.sleep(1000); } catch (InterruptedException e) {}
             Platform.runLater(() -> {
-                try { showLogin(); } catch (Exception e) { e.printStackTrace(); }
+                try { 
+                	showManagerMenuAfterLogin();
+                	//showLogin(); 
+                	} catch (Exception e) { e.printStackTrace(); }
             });
         }).start();
     }
@@ -64,8 +67,24 @@ public class Main extends Application {
         Parent login = FXMLLoader.load(getClass().getResource("/view/login/login.fxml"));
         primaryStage.setScene(new Scene(login, 1000, 750));
     }
+    
+    //
+    
+    public void showManagerMenuAfterLogin() throws Exception {
+		Parent managerMenu = FXMLLoader.load(getClass().getResource("/view/manager/menuSelect.fxml"));
+		//Parent managerMenu = FXMLLoader.load(getClass().getResource("/view/manager/courseManagement.fxml"));
+    	//Parent managerMenu = FXMLLoader.load(getClass().getResource("/view/manager/memberManagement.fxml"));
+		primaryStage.setTitle("Manager System");
+		primaryStage.setScene(new Scene(managerMenu, 1000, 750));
+	}
 
     public static void main(String[] args) {
+    	
+        // JavaFX 버전 출력
+        System.out.println("JavaFX Version: " + System.getProperty("javafx.version"));
+        System.out.println("JavaFX Runtime Version: " + System.getProperty("javafx.runtime.version"));
+        
+    	
         launch(args);
     }
 }

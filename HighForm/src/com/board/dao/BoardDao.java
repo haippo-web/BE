@@ -9,6 +9,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import com.board.model.Board;
@@ -21,6 +23,23 @@ public class BoardDao {
 
    // 1. Singleton & DB connection
    private static BoardDao instance;
+   
+//   public class DBConnectionUtil {
+//	   private static final Properties messages = new Properties();
+//
+//	   static {
+//	      try (InputStream in = ClassLoader.getSystemResourceAsStream("com/common/util/db.properties");
+//	              InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+//	             messages.load(reader);
+//	      } catch (Exception e) {
+//	         System.err.println("Error loading error messages: " + e.getMessage());
+//	      }
+//	   }
+//
+//	   public static String get(String key) {
+//	      return messages.getProperty(key, key + "를 찾을 수 없습니다.");
+//	   }
+//	}
    
    public BoardDao() {
       // Properties 값 가져오기
@@ -84,7 +103,6 @@ public class BoardDao {
 		        generatedId = rs.getLong(1);
 		    }
 		   
-		    conn.commit();
 		   return generatedId;
 		   
 	   }catch(Exception e) {
@@ -103,8 +121,6 @@ public class BoardDao {
 		   
 		    ResultSet selectRs = psmt.executeQuery();
 		    Board entity = null;
-		    
-			
 			
 		    if (selectRs.next()) {
 		        entity = Board.builder()
@@ -126,4 +142,36 @@ public class BoardDao {
 	   return null;
    }
 	
+   
+   
+   //게시물 호출
+   public List<Board> getBoard(BoardCategory type) {
+	   String getBoardSQL = BoardSQL.GET_BOARD_FROM_TYPE;
+	   try(Connection conn = getConnection();
+			PreparedStatement psmt = conn.prepareStatement(getBoardSQL)){
+		   
+		    ResultSet selectRs = psmt.executeQuery();
+		    List<Board> boardList = new ArrayList<Board>();
+		    
+		    Board entity = null;
+			
+		    if (selectRs.next()) {
+		        entity = Board.builder()
+		        		.title(selectRs.getString("title"))
+		        		.content(selectRs.getString("content"))
+		        		.type(selectRs.getString("type").equals(BoardCategory.BOARD) ? BoardCategory.BOARD : selectRs.getString("type").equals(BoardCategory.DATA_ROOM) ? BoardCategory.DATA_ROOM :  BoardCategory.NOTICE )
+		        		.fileId(selectRs.getLong("file_id"))
+		        		.userId(selectRs.getLong("user_id"))
+		        		.build();
+		    }
+		   
+		   psmt.executeUpdate();
+		   
+		   return entity;
+	   }catch(Exception e) {
+		   e.getStackTrace();
+		   e.printStackTrace();
+	   }
+	   return null;
+   }
 }

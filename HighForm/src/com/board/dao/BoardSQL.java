@@ -32,4 +32,9 @@ public class BoardSQL {
 				SELECT * FROM BOARD WHERE id = ?
 			""";
 
+	
+	public static final String GET_BOARD_FROM_TYPE =
+			"""
+				SELECT * FROM BOARD WHERE type = ?
+			""";
 }

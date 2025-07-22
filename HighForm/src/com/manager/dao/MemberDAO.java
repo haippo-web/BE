@@ -2,6 +2,7 @@ package com.manager.dao;
 
 import com.manager.model.Member;
 import com.manager.service.MemberService;
+import com.util.DBConnection;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -12,11 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MemberDAO {
-
-	// Oracle DB 연결 정보
-	private static final String URL = "jdbc:oracle:thin:@localhost:1521/xepdb1";
-	private static final String USERNAME = "high4";
-	private static final String PASSWORD = "high4";
+	private Connection getConnection() throws SQLException {
+		return DBConnection.getConnection();
+	}
 
 	static {
 		try {
@@ -26,15 +25,12 @@ public class MemberDAO {
 		}
 	}
 
-	// DB 연결 메서드
-	private Connection getConnection() throws SQLException {
-		return DriverManager.getConnection(URL, USERNAME, PASSWORD);
-	}
-
 	// 유효한 회원만 조회
 	public List<Member> getAvailableMembers() {
 		List<Member> members = new ArrayList<>();
-		String sql = "SELECT ID, LOGIN_ID, PHONE, EMAIL, NAME, ROLE FROM MEMBERS " + "WHERE DEL_YN = 'N' ORDER BY ID";
+		String sql = "SELECT M.ID, M.LOGIN_ID, M.PHONE, M.EMAIL, M.NAME, C.COURSE_NAME, M.ROLE " + "FROM MEMBERS M "
+				+ "LEFT JOIN ENROLLMENT E ON M.ID = E.MEMBER_ID " + "LEFT JOIN COURSE C ON E.COURSE_ID = C.COURSE_ID "
+				+ "WHERE M.DEL_YN = 'N' " + "ORDER BY M.ID, C.COURSE_NAME";
 
 		try (Connection conn = getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -43,17 +39,18 @@ public class MemberDAO {
 			while (rs.next()) {
 				Member member = new Member();
 
-				member.setMemberId(rs.getInt("id"));
-				member.setMemberLoginId(rs.getString("login_id"));
-				member.setPhoneNumber(rs.getString("phone"));
-				member.setEmail(rs.getString("email"));
-				member.setMemberName(rs.getString("name"));
-				member.setAffiliation(rs.getString("role"));
+				member.setMemberId(rs.getInt("ID"));
+				member.setMemberLoginId(rs.getString("LOGIN_ID"));
+				member.setPhoneNumber(rs.getString("PHONE"));
+				member.setEmail(rs.getString("EMAIL"));
+				member.setMemberName(rs.getString("NAME"));
+				member.setAffiliation(rs.getString("COURSE_NAME")); // 추가
+				member.setPosition(rs.getString("ROLE"));
 
 				members.add(member);
 			}
 
-			System.out.println("회원 목록 조회 완료: " + members.size() + "건");
+			System.out.println("회원 목록 전체 조회 완료: " + members.size() + "건");
 
 		} catch (SQLException e) {
 			System.err.println("회원 목록 조회 중 오류 발생: " + e.getMessage());
@@ -66,8 +63,10 @@ public class MemberDAO {
 	// 모든 회원 조회
 	public List<Member> getAllMembers() {
 		List<Member> members = new ArrayList<>();
-		// String sql = "SELECT ID, LOGIN_ID, PHONE, EMAIL, NAME, ROLE, DEL_YN FROM MEMBERS ORDER BY ID";
-		String sql = "SELECT ID, LOGIN_ID, PHONE, EMAIL, NAME, ROLE FROM MEMBERS ORDER BY ID";
+		
+		String sql = "SELECT M.ID, M.LOGIN_ID, M.PHONE, M.EMAIL, M.NAME, C.COURSE_NAME, M.ROLE " + "FROM MEMBERS M "
+				+ "LEFT JOIN ENROLLMENT E ON M.ID = E.MEMBER_ID " + "LEFT JOIN COURSE C ON E.COURSE_ID = C.COURSE_ID "
+				+ "ORDER BY M.ID, C.COURSE_NAME";
 
 		try (Connection conn = getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -76,14 +75,13 @@ public class MemberDAO {
 			while (rs.next()) {
 				Member member = new Member();
 
-				member.setMemberId(rs.getInt("id"));
-				member.setMemberLoginId(rs.getString("login_id"));
-				// member.setPassword(rs.getString("password"));
-				member.setPhoneNumber(rs.getString("phone"));
-				member.setEmail(rs.getString("email"));
-				member.setMemberName(rs.getString("name"));
-				member.setAffiliation(rs.getString("role"));
-				// member.setState(rs.getString("del_yn"));
+				member.setMemberId(rs.getInt("ID"));
+				member.setMemberLoginId(rs.getString("LOGIN_ID"));
+				member.setPhoneNumber(rs.getString("PHONE"));
+				member.setEmail(rs.getString("EMAIL"));
+				member.setMemberName(rs.getString("NAME"));
+				member.setAffiliation(rs.getString("COURSE_NAME")); // 추가
+				member.setPosition(rs.getString("ROLE"));
 
 				members.add(member);
 			}
@@ -118,21 +116,19 @@ public class MemberDAO {
 	}
 
 	// 회원 등록
-	public boolean addMember(Member member) {
-		long nextId = getNextMemberId();
-		if (nextId == -1)
-			return false;
+	public int addMemberAndReturnId(Member member) {
 
-		String loginIdWithPrefix = "ks" + nextId; // 자동 생성 아이디
 		String password = "1234"; // 초기 비밀번호
 
-		String sql = "INSERT INTO MEMBERS (ID, LOGIN_ID, PASSWORD, PHONE, EMAIL, NAME, ROLE, CREATED_AT)"
-				+ " VALUES (?, ?, ?, ?, ?, ?, ?, SYSTIMESTAMP)";
+		String sql = "INSERT INTO MEMBERS (ID, LOGIN_ID, PASSWORD, PHONE, EMAIL, NAME, ROLE, CREATED_AT, UPDATED_AT)"
+				+ " VALUES (?, ?, ?, ?, ?, ?, ?, SYSDATE, SYSDATE)";
+		String[] generatedColumns = { "ID" };
 
-		try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+		try (Connection conn = getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(sql, generatedColumns)) {
 
-			pstmt.setLong(1, nextId); // id
-			pstmt.setString(2, loginIdWithPrefix); // login_id
+			pstmt.setLong(1, member.getMemberId()); // id
+			pstmt.setString(2, member.getMemberLoginId()); // login_id
 			pstmt.setString(3, password);
 			pstmt.setString(4, member.getPhoneNumber());
 			pstmt.setString(5, member.getEmail());
@@ -140,25 +136,32 @@ public class MemberDAO {
 			pstmt.setString(7, member.getPosition());
 
 			int result = pstmt.executeUpdate();
-			return result > 0;
 
-		} catch (Exception e) {
+			if (result > 0) {
+				try (ResultSet rs = pstmt.getGeneratedKeys()) {
+					if (rs.next()) {
+						return rs.getInt(1); // 생성된 ID 반환
+					}
+				}
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
-			return false;
 		}
+		return -1; // 실패 시
 	}
 
+	// 회원 수정
 	public boolean updateMember(Member member) {
-		String sql = "UPDATE MEMBERS SET PASSWORD = ?, PHONE = ?, EMAIL = ?, NAME = ?, ROLE = ? WHERE ID = ?";
+		String sql = "UPDATE MEMBERS SET PHONE = ?, EMAIL = ?, NAME = ?, ROLE = ?, UPDATED_AT = SYSDATE "
+				+ "WHERE ID = ?";
 
 		try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-			pstmt.setString(1, member.getPassword());
-			pstmt.setString(2, member.getPhoneNumber());
-			pstmt.setString(3, member.getEmail());
-			pstmt.setString(4, member.getMemberName());
-			pstmt.setString(5, member.getPosition());
-			pstmt.setLong(6, member.getMemberId());
+			pstmt.setString(1, member.getPhoneNumber());
+			pstmt.setString(2, member.getEmail());
+			pstmt.setString(3, member.getMemberName());
+			pstmt.setString(4, member.getPosition());
+			pstmt.setLong(5, member.getMemberId());
 
 			int result = pstmt.executeUpdate();
 			System.out.println("회원 수정 결과: " + result + "건 수정");
@@ -212,9 +215,6 @@ public class MemberDAO {
 				member.setEmail(rs.getString("email"));
 				member.setMemberName(rs.getString("name"));
 				member.setPosition(rs.getString("role"));
-				// member.setCreatedAt(rs.getTimestamp("created_at") != null ?
-				// rs.getTimestamp("created_at").toString() : null);
-				// member.setState(rs.getString("del_yn"));
 
 				members.add(member);
 			}

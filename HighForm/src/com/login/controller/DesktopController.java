@@ -311,7 +311,7 @@ public class DesktopController {
             "-fx-pref-width: 300;"
         );
         
-        // 메뉴 아이템들 (이미지 파일명으로 변경)
+        // 메뉴 아이템들 
         Button newItem = createMenuItemWithIcon("신청(R)", "application.png");
         newItem.setOnAction(e -> {
             startMenu.hide();
@@ -642,7 +642,7 @@ public class DesktopController {
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Log Off HighForm");
         confirmAlert.setHeaderText(null);
-        confirmAlert.setContentText("Are you sure you want log off?");
+        confirmAlert.setContentText("정말 로그오프 하시겠습니까?");
         
         // 윈도우 98 스타일 적용
         confirmAlert.getDialogPane().setStyle(
@@ -652,8 +652,8 @@ public class DesktopController {
         );
         
         // 버튼 텍스트 변경
-        ((Button) confirmAlert.getDialogPane().lookupButton(ButtonType.OK)).setText("Yes");
-        ((Button) confirmAlert.getDialogPane().lookupButton(ButtonType.CANCEL)).setText("No");
+        ((Button) confirmAlert.getDialogPane().lookupButton(ButtonType.OK)).setText("네");
+        ((Button) confirmAlert.getDialogPane().lookupButton(ButtonType.CANCEL)).setText("아니오");
         
         confirmAlert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
@@ -698,7 +698,7 @@ public class DesktopController {
             Parent loginPage = loader.load();
             
             // 로그인 화면으로 전환
-            Scene loginScene = new Scene(loginPage, 400, 300);
+            Scene loginScene = new Scene(loginPage, 1000, 750);
             currentStage.setScene(loginScene);
             currentStage.setTitle("HighForm Login");
             

@@ -13,6 +13,7 @@ public class DBConnection {
     private static String user;
     private static String password;
     private static String geminiKey;
+
     private static final String DRIVER = "oracle.jdbc.driver.OracleDriver";
 
     static {
@@ -22,7 +23,9 @@ public class DBConnection {
 
             // db.properties 읽기 (src/main/resources 등 classpath 기준)
             Properties props = new Properties();
+
             try (InputStream in = DBConnection.class.getResourceAsStream("db.properties");
+
                  InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
                 props.load(reader);
                 url = props.getProperty("db.url");
@@ -31,7 +34,7 @@ public class DBConnection {
                 geminiKey = props.getProperty("API_KEY");
                 
                 System.out.println(url);
-                
+
             }
         } catch (Exception e) {
             throw new RuntimeException("DB 접속정보 로딩 실패: " + e.getMessage(), e);

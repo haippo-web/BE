@@ -4,7 +4,8 @@ module HighForm {
 	requires javafx.base;
 	requires lombok;
 	requires java.sql;
-
+	requires jakarta.mail;
+	requires redis.clients.jedis;
     opens com to javafx.graphics, javafx.fxml;
     opens com.board.controller to javafx.fxml;
     opens com.login.controller to javafx.fxml;

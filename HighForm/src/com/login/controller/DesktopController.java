@@ -486,11 +486,40 @@ public class DesktopController {
     private void openVacationRequest() {
         showNotification("휴가신청서를 작성해보세요!");
     }
-    
+    /**
+     * 오늘의 출석 코드가 있는지 확인만 함 (생성하지 않음)
+     * 스케줄러가 별도로 실행되어야 코드가 존재함
+     */
+    private void checkTodayAttendanceCode() {
+        try {
+            AttendanceCodeService service = AttendanceCodeService.getInstance();
+            
+            // Redis 연결 확인
+            if (!service.isRedisConnected()) {
+                System.err.println("[앱] Redis 연결 실패 - 출석 코드 조회 불가");
+                showNotification("출석 코드 서비스에 연결할 수 없습니다.");
+                return;
+            }
+            
+            // 오늘의 코드 조회만 (생성하지 않음)
+            String todayCode = service.getTodayCode();
+            
+            if (todayCode != null) {
+                System.out.println("[앱] 오늘의 출석 코드 확인됨: " + todayCode);
+                showNotification("오늘의 출석 코드가 준비되었습니다!");
+            } else {
+                System.out.println("[앱] 오늘의 출석 코드가 없습니다. 스케줄러 실행 상태를 확인하세요.");
+                showNotification("출석 코드가 아직 발급되지 않았습니다.");
+            }
+            
+        } catch (Exception e) {
+            System.err.println("[앱] 출석 코드 확인 중 오류: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
     @FXML
     private void openAttendanceCheck() {
         try {
-        	
             System.out.println("[DesktopController] openAttendanceCheck 호출됨");
             System.out.println("[DesktopController] currentUser = " + currentUser);
 
@@ -498,7 +527,18 @@ public class DesktopController {
                 showAlert("오류", "현재 로그인 정보가 없습니다. 다시 로그인해주세요.");
                 return;
             }
-        	
+            
+            // 먼저 오늘의 출석 코드가 있는지 확인
+            AttendanceCodeService codeService = AttendanceCodeService.getInstance();
+            String todayCode = codeService.getTodayCode();
+            
+            if (todayCode == null) {
+                showAlert("출석 코드 없음", 
+                    "오늘의 출석 코드가 발급되지 않았습니다.\n" +
+                    "스케줄러가 실행 중인지 확인하거나 관리자에게 문의하세요.");
+                return;
+            }
+            
             // 출석 가능 여부 확인
             AttendanceCheckResult result = attendanceService.canCheckIn(currentUser.getId());
             if (!result.isPossible()) {
@@ -532,11 +572,7 @@ public class DesktopController {
             showAlert("출석 오류", "출석 처리 중 오류가 발생했습니다.");
             e.printStackTrace();
         }
-    
-        
-
     }
-    
     private void showRetroInfoDialog(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);

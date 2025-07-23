@@ -141,11 +141,11 @@ public class DailyListController {
 
 
     private boolean confirm(String msg) {
-        return Alert.AlertType.CONFIRMATION.equals(
-                new Alert(Alert.AlertType.CONFIRMATION, msg,
-                          ButtonType.OK, ButtonType.CANCEL).showAndWait().orElse(ButtonType.CANCEL))
-                && Alert.AlertType.CONFIRMATION != null;
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, msg,
+                                ButtonType.OK, ButtonType.CANCEL);
+        return alert.showAndWait().filter(btn -> btn == ButtonType.OK).isPresent();
     }
+
     private void alert(String msg) {
         new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK).showAndWait();
     }

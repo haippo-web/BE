@@ -19,7 +19,8 @@ public class MyPageApp extends Application {
             try { return type.getDeclaredConstructor().newInstance(); }
             catch (Exception e) { throw new RuntimeException(e); }
         });
-        Scene scene = new Scene(loader.load(), 800, 600);
+        Scene scene = new Scene(loader.load(), 1000, 750);
+        scene.getStylesheets().add(getClass().getResource("/css/win98.css").toExternalForm());
         stage.setTitle("Calendar Test");
         stage.setScene(scene);
         stage.show();

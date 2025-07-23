@@ -150,7 +150,7 @@ public class ScheduleDaoImpl implements ScheduleDAO {
     public void delete(long schedId) throws SQLException {
         String sql = "DELETE FROM CAL_SCHEDULE WHERE SCHED_ID = ?";
 
-        try (Connection con = DBConnection.getConnection();      // ★ 변경
+        try (Connection con = DBConnection.getConnection();      
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setLong(1, schedId);

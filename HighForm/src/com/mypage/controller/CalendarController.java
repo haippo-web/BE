@@ -120,14 +120,27 @@ public class CalendarController implements Initializable {
             dlg.initOwner(calendarGrid.getScene().getWindow());
             dlg.initModality(Modality.WINDOW_MODAL);
             dlg.setTitle("일정 목록: " + date);
-            dlg.setScene(new Scene(root));
+
+            /* ★ Scene은 딱 한 번 생성하고 그걸 Stage에 지정 */
+            Scene scene = new Scene(root, 1000, 750);
+            scene.getStylesheets().add(
+                    getClass().getResource("/css/win98.css").toExternalForm());
+
+            dlg.setScene(scene);          // ← 두 번째 new Scene(root) 삭제
+
+            dlg.setMinWidth(1000);
+            dlg.setMinHeight(750);
+            dlg.setResizable(false);      // 창 크기 고정(선택)
+
             dlg.showAndWait();
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            new Alert(Alert.AlertType.ERROR, "목록 표시 오류:\n" + ex.getMessage()).showAndWait();
+            new Alert(Alert.AlertType.ERROR,
+                      "목록 표시 오류:\n" + ex.getMessage()).showAndWait();
         }
     }
+
 
     
     private void openAddDialog() {

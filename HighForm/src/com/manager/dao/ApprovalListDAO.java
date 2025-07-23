@@ -26,11 +26,15 @@ public class ApprovalListDAO {
 	// 모든 결재 조회
 	public List<Approval> getAllApproval() {
 	    List<Approval> approvals = new ArrayList<>();
-	    String sql = "SELECT A.ID, A.USER_ID, '휴가' AS REQUEST_TYPE, A.REASON, M.NAME, A.PROOF_FILE, "
-	               + "A.START_DATE, A.END_DATE, A.REQUESTED_AT, A.STATUS "
-	               + "FROM attendance_approval_request A INNER JOIN Members M "
-	               + "ON A.USER_ID = M.ID "
-	               + "ORDER BY CASE WHEN A.STATUS = 'progressing' THEN 0 ELSE 1 END, A.REQUESTED_AT DESC";
+	    String sql ="SELECT A.ID, '휴가' AS REQUEST_TYPE, A.REASON, "
+	    		+ "M.NAME AS USER_NAME, "
+	    		+ "A.PROOF_FILE, A.START_DATE, A.END_DATE, A.REQUESTED_AT, A.STATUS, "
+	    		+ "C.COURSE_NAME "
+	    		+ "FROM attendance_approval_request A "
+	    		+ "INNER JOIN Members M ON A.USER_ID = M.ID "
+	    		+ "LEFT JOIN enrollment E ON A.USER_ID = E.MEMBER_ID "
+	    		+ "LEFT JOIN course C ON E.COURSE_ID = C.COURSE_ID "
+	    		+ "ORDER BY CASE WHEN A.STATUS = 'progressing' THEN 0 ELSE 1 END, A.REQUESTED_AT DESC";
 
 	    try (Connection conn = getConnection();
 	         PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -47,7 +51,8 @@ public class ApprovalListDAO {
 	            approval.setRequested_at(rs.getString("REQUESTED_AT"));
 	            approval.setStart_date(rs.getString("START_DATE"));
 	            approval.setEnd_date(rs.getString("END_DATE"));
-	            approval.setUser_id(rs.getInt("USER_ID"));
+	            approval.setUserName(rs.getString("USER_NAME"));
+	            approval.setUserAffiliation(rs.getString("COURSE_NAME"));
 
 	            approvals.add(approval);
 	        }
@@ -64,13 +69,12 @@ public class ApprovalListDAO {
 	
 	// 결재 확인(결정)
 	public boolean updateApproval(Approval approval) {
-		String sql = "UPDATE attendance_approval_request SET STATUS=?, DECISION_AT=? WHERE ID=?";
+		String sql = "UPDATE attendance_approval_request SET STATUS=?, DECISION_AT=SYSDATE WHERE ID=?";
 
 		try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
 			pstmt.setString(1, approval.getStatus());
-			pstmt.setString(2, approval.getDecision_at());
-			pstmt.setInt(3, approval.getApprovalId());
+			pstmt.setInt(2, approval.getApprovalId());
 
 			int result = pstmt.executeUpdate();
 			System.out.println("결재 승인 결과: " + result + "건 완료");

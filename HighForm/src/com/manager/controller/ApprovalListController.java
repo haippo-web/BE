@@ -1,5 +1,8 @@
 package com.manager.controller;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,8 +12,14 @@ import com.manager.service.ApprovalListService;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 
 public class ApprovalListController {
 	// 네비게이션 컨트롤들
@@ -68,8 +77,6 @@ public class ApprovalListController {
 	private TextField endDateField; // 종료일
 	@FXML
 	private TextField requestDateField; // 신청일
-	@FXML
-	private TextField confirmField; // 신청일
 
 	// 버튼들
 	@FXML
@@ -117,12 +124,12 @@ public class ApprovalListController {
 			}
 			return new SimpleStringProperty("");
 		});
-		// 결재자
+		// 신청자
 		requesterColumn.setCellValueFactory(cellData -> {
 			Approval approval = cellData.getValue();
 			if (approval != null) {
-				String confirm = "임시";
-				return new SimpleStringProperty(confirm != null ? confirm : "");
+				String request = approval.getUserName();
+				return new SimpleStringProperty(request != null ? request : "");
 			}
 			return new SimpleStringProperty("");
 		});
@@ -200,14 +207,37 @@ public class ApprovalListController {
 			approvalList.clear();
 			List<Approval> approvals = approvalService.getAllApprovals();
 
-			// 데이터 확인용 디버깅
+			DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd[ HH:mm:ss][.S]");
+			DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
 			for (Approval approval : approvals) {
+				// 날짜 필드들이 String 형태라면 → 날짜만 추출해서 다시 저장
+				try {
+					if (approval.getRequested_at() != null) {
+						String formattedRequestedAt = LocalDate.parse(approval.getRequested_at(), inputFormatter)
+								.format(outputFormatter);
+						approval.setRequested_at(formattedRequestedAt);
+					}
+					if (approval.getStart_date() != null) {
+						String formattedStartDate = LocalDate.parse(approval.getStart_date(), inputFormatter)
+								.format(outputFormatter);
+						approval.setStart_date(formattedStartDate);
+					}
+					if (approval.getEnd_date() != null) {
+						String formattedEndDate = LocalDate.parse(approval.getEnd_date(), inputFormatter)
+								.format(outputFormatter);
+						approval.setEnd_date(formattedEndDate);
+					}
+				} catch (Exception dateEx) {
+					System.err.println("날짜 파싱 오류: " + dateEx.getMessage());
+				}
+
+				// 디버깅 로그
 				System.out.println("로드된 결재: " + approval.getApprovalId() + " | " + approval.getReason());
 			}
 
 			approvalList.addAll(approvals);
 			approvalTable.refresh();
-
 			System.out.println("결재 데이터 로드 완료: " + approvalList.size() + "건");
 
 		} catch (Exception e) {
@@ -215,20 +245,19 @@ public class ApprovalListController {
 			e.printStackTrace();
 		}
 	}
-		
+
 	// 선택한 데이터를 (하단) 필드에 채우기
 	private void populateFields(Approval approval) {
 		approvalNoField.setText(String.valueOf(approval.getApprovalId()));
 		categoryField.setText("휴가");
-		affiliationField.setText("소속"); //
-		aplicantField.setText("신청자"); // 신청자
+		affiliationField.setText(approval.getUserAffiliation()); // 소속
+		aplicantField.setText(approval.getUserName()); // 신청자
 		titleDetailField.setText(approval.getReason()); // 제목
 		contentArea.setText(approval.getReason()); // 내용
-		proofFileField.setText(approval.getProof_file()); 
+		proofFileField.setText(approval.getProof_file());
 		startDateField.setText(approval.getStart_date());
 		endDateField.setText(approval.getEnd_date());
 		requestDateField.setText(approval.getRequested_at());
-		confirmField.setText("로그인");
 	}
 
 	private void clearFields() {
@@ -240,94 +269,91 @@ public class ApprovalListController {
 		startDateField.clear();
 		endDateField.clear();
 		requestDateField.clear();
-		confirmField.clear();
 		approvalTable.getSelectionModel().clearSelection();
 	}
-	
-	
+
 	// 결재 승인
 	@FXML
 	private void handleApproval() {
 		Approval selectedApproval = approvalTable.getSelectionModel().getSelectedItem();
 
-	    if (selectedApproval == null) {
-	    	showAlert("선택 오류", "승인할 결재를 선택하세요.");
-	        return;
-	    }
+		if (selectedApproval == null) {
+			showAlert("선택 오류", "승인할 결재를 선택하세요.");
+			return;
+		}
 
-	    // 1. 수정 전 확인 다이얼로그
-	    Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-	    confirmAlert.setTitle("승인 확인");
-	    confirmAlert.setHeaderText("선택한 결재를 승인하시겠습니까?");
-	    confirmAlert.setContentText(selectedApproval.getReason());
+		// 1. 수정 전 확인 다이얼로그
+		Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+		confirmAlert.setTitle("승인 확인");
+		confirmAlert.setHeaderText("선택한 결재를 승인하시겠습니까?");
+		confirmAlert.setContentText(selectedApproval.getReason());
 
-	    // 2. 확인/취소 버튼 대기
-	    Optional<ButtonType> result = confirmAlert.showAndWait();
+		// 2. 확인/취소 버튼 대기
+		Optional<ButtonType> result = confirmAlert.showAndWait();
 
-	    if (result.isPresent() && result.get() == ButtonType.OK) {
-	        // 3. 사용자가 '확인'을 누르면 수정 진행
-	        boolean success = approvalService.updateApproval(selectedApproval);
-	        
-	        
-	        if (success) {
-	        	selectedApproval.setStatus("approve");
-	    
-	        	approvalService.updateApproval(selectedApproval);
-	    		
-	            Alert successAlert = new Alert(Alert.AlertType.INFORMATION, "결재가 승인되었습니다.");
-	            successAlert.show();
-	        } else {
-	            Alert errorAlert = new Alert(Alert.AlertType.ERROR, "결재 승인 중 오류가 발생했습니다.");
-	            errorAlert.show();
-	        }
-	        loadCourseData();
-	        clearFields();
-	    } else {
-	        System.out.println("결재 승인이 취소되었습니다.");
-	    }
+		if (result.isPresent() && result.get() == ButtonType.OK) {
+			// 3. 사용자가 '확인'을 누르면 수정 진행
+			boolean success = approvalService.updateApproval(selectedApproval);
+
+			if (success) {
+				selectedApproval.setStatus("approve");
+
+				approvalService.updateApproval(selectedApproval);
+
+				Alert successAlert = new Alert(Alert.AlertType.INFORMATION, "결재가 승인되었습니다.");
+				successAlert.show();
+			} else {
+				Alert errorAlert = new Alert(Alert.AlertType.ERROR, "결재 승인 중 오류가 발생했습니다.");
+				errorAlert.show();
+			}
+			loadCourseData();
+			clearFields();
+		} else {
+			System.out.println("결재 승인이 취소되었습니다.");
+		}
 	}
-	
+
 	// 결재 거절
-	@FXML	
+	@FXML
 	private void handleRejection() {
 		Approval selectedApproval = approvalTable.getSelectionModel().getSelectedItem();
 
-	    if (selectedApproval == null) {
-	    	showAlert("선택 오류", "반려할 결재를 선택하세요.");
-	        return;
-	    }
+		if (selectedApproval == null) {
+			showAlert("선택 오류", "반려할 결재를 선택하세요.");
+			return;
+		}
 
-	    // 1. 수정 전 확인 다이얼로그
-	    Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-	    confirmAlert.setTitle("반려 확인");
-	    confirmAlert.setHeaderText("선택한 결재를 반려하시겠습니까?");
-	    confirmAlert.setContentText(selectedApproval.getReason());
+		// 1. 수정 전 확인 다이얼로그
+		Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+		confirmAlert.setTitle("반려 확인");
+		confirmAlert.setHeaderText("선택한 결재를 반려하시겠습니까?");
+		confirmAlert.setContentText(selectedApproval.getReason());
 
-	    // 2. 확인/취소 버튼 대기
-	    Optional<ButtonType> result = confirmAlert.showAndWait();
+		// 2. 확인/취소 버튼 대기
+		Optional<ButtonType> result = confirmAlert.showAndWait();
 
-	    if (result.isPresent() && result.get() == ButtonType.OK) {
-	        // 3. 사용자가 '확인'을 누르면 수정 진행
-	        boolean success = approvalService.updateApproval(selectedApproval);
-	        
-	        
-	        if (success) {
-	        	selectedApproval.setStatus("reject");
-	    
-	        	approvalService.updateApproval(selectedApproval);
-	    		
-	            Alert successAlert = new Alert(Alert.AlertType.INFORMATION, "결재가 반려되었습니다.");
-	            successAlert.show();
-	        } else {
-	            Alert errorAlert = new Alert(Alert.AlertType.ERROR, "결재 반려 중 오류가 발생했습니다.");
-	            errorAlert.show();
-	        }
-	        loadCourseData();
-	        clearFields();
-	    } else {
-	        System.out.println("결재 반려가 취소되었습니다.");
-	    }
+		if (result.isPresent() && result.get() == ButtonType.OK) {
+			// 3. 사용자가 '확인'을 누르면 수정 진행
+			boolean success = approvalService.updateApproval(selectedApproval);
+
+			if (success) {
+				selectedApproval.setStatus("reject");
+
+				approvalService.updateApproval(selectedApproval);
+
+				Alert successAlert = new Alert(Alert.AlertType.INFORMATION, "결재가 반려되었습니다.");
+				successAlert.show();
+			} else {
+				Alert errorAlert = new Alert(Alert.AlertType.ERROR, "결재 반려 중 오류가 발생했습니다.");
+				errorAlert.show();
+			}
+			loadCourseData();
+			clearFields();
+		} else {
+			System.out.println("결재 반려가 취소되었습니다.");
+		}
 	}
+
 	// 경고창 출력 유틸
 	private void showAlert(String title, String message) {
 		Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -335,6 +361,26 @@ public class ApprovalListController {
 		alert.setHeaderText(null);
 		alert.setContentText(message);
 		alert.showAndWait();
+	}
+
+	@FXML
+	private void handleBackBtn(ActionEvent event) {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/manager/menuSelect.fxml"));
+			Parent root = loader.load();
+
+			// 현재 이벤트가 발생한 노드에서 Stage 가져오기
+			Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+			// 해당 Stage의 Scene을 바꿈
+			stage.setScene(new Scene(root));
+			stage.setTitle("Management System"); // 타이틀 설정 (선택)
+			stage.show();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			showAlert("오류", "이전 화면으로 돌아가는 데 실패했습니다.");
+		}
 	}
 
 }

@@ -10,12 +10,8 @@ import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 public class MenuSelectController {
-
 	@FXML
 	private Button courseManagementButton;
-
-	@FXML
-	private Button settingsButton;
 
 	@FXML
 	private Button paymentApprovalButton;

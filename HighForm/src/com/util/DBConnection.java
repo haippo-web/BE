@@ -22,7 +22,6 @@ public class DBConnection {
             // db.properties 읽기 (src/main/resources 등 classpath 기준)
             Properties props = new Properties();
             try (InputStream in = DBConnection.class.getResourceAsStream("db.properties");
-            		
                  InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
                 props.load(reader);
                 url = props.getProperty("db.url");
@@ -41,5 +40,4 @@ public class DBConnection {
         System.out.println("[DB] User: " + conn.getMetaData().getUserName());
         return conn;
     }
-
 }

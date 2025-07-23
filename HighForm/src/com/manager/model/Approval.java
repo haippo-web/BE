@@ -11,12 +11,15 @@ public class Approval {
 	private String start_date;
 	private String end_date;
 	private int user_id;
+	
+	private String userName;
+	private String userAffiliation;
 
 	public Approval() {
 	}
 
 	public Approval(int approvalId, String category, String reason, String proof_file, String status, String requested_at,
-			String decision_at, String start_date, String end_date, int user_id) {
+			String decision_at, String start_date, String end_date, int user_id, String userName, String userAffiliation) {
 		super();
 		this.approvalId = approvalId;
 		this.setCategory(category);
@@ -28,6 +31,8 @@ public class Approval {
 		this.start_date = start_date;
 		this.end_date = end_date;
 		this.user_id = user_id;
+		this.userName = userName;
+		this.setUserAffiliation(userAffiliation);
 	}
 
 	public int getApprovalId() {
@@ -108,6 +113,22 @@ public class Approval {
 
 	public void setCategory(String category) {
 		this.category = category;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getUserAffiliation() {
+		return userAffiliation;
+	}
+
+	public void setUserAffiliation(String userAffiliation) {
+		this.userAffiliation = userAffiliation;
 	}
 
 }

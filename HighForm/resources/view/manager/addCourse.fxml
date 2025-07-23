@@ -12,7 +12,7 @@
    <top>
       <HBox alignment="CENTER_LEFT" prefHeight="40.0" style="-fx-background-color: #4472C4;">
          <children>
-            <Label prefHeight="25.0" text="● 강의 등록" textFill="WHITE">
+            <Label prefHeight="25.0" text="🎓 강의 등록" textFill="WHITE" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 20px;">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>

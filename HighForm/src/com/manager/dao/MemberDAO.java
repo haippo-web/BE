@@ -63,10 +63,8 @@ public class MemberDAO {
 	// 모든 회원 조회
 	public List<Member> getAllMembers() {
 		List<Member> members = new ArrayList<>();
-		// String sql = "SELECT ID, LOGIN_ID, PHONE, EMAIL, NAME, ROLE, DEL_YN FROM
-		// MEMBERS ORDER BY ID";
-		// String sql = "SELECT ID, LOGIN_ID, PHONE, EMAIL, NAME, ROLE FROM MEMBERS
-		// ORDER BY ID";
+
+
 		String sql = "SELECT M.ID, M.LOGIN_ID, M.PHONE, M.EMAIL, M.NAME, C.COURSE_NAME, M.ROLE " + "FROM MEMBERS M "
 				+ "LEFT JOIN ENROLLMENT E ON M.ID = E.MEMBER_ID " + "LEFT JOIN COURSE C ON E.COURSE_ID = C.COURSE_ID "
 				+ "ORDER BY M.ID, C.COURSE_NAME";
@@ -179,7 +177,7 @@ public class MemberDAO {
 
 	// 회원 삭제(실제 삭제가 아니라 del_yn='Y'로 처리)
 	public boolean deleteMember(long memberId) {
-		String sql = "UPDATE MEMBERS SET DEL_YN = 'Y' WHERE ID = ?";
+		String sql = "UPDATE MEMBERS SET DEL_YN = 'Y', UPDATED_AT = SYSDATE WHERE ID = ?";
 
 		try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 

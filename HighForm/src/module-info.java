@@ -23,3 +23,4 @@ module HighForm {
     opens com.board.controller to javafx.fxml;
     opens com.mypage.controller to javafx.fxml;
 }
+

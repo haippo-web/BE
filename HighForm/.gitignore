@@ -4,7 +4,6 @@
 .classpath
 .settings/
 .metadata/
-bin/
 target/
 
 # 운영체제에 따라 무시할 파일 예시

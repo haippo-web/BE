@@ -13,6 +13,7 @@ public class DBConnection {
     private static String user;
     private static String password;
     private static String geminiKey;
+
     private static final String DRIVER = "oracle.jdbc.driver.OracleDriver";
 
     static {
@@ -53,3 +54,4 @@ public class DBConnection {
     }
 
 }
+

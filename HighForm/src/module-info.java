@@ -6,7 +6,8 @@ module HighForm {
 	requires javafx.graphics;
 	requires lombok;
 	requires java.sql;
-
+	requires jakarta.mail;
+	requires redis.clients.jedis;
     
 
     /* ───── 런처에서 접근해야 하는 패키지 ───── */
@@ -15,7 +16,7 @@ module HighForm {
     /* JavaFX 런처가 리플렉션으로 new 할 때 접근 허용 */
     opens com.mypage to javafx.graphics;      
     
-    
+
     opens com to javafx.graphics, javafx.fxml;
     opens com.manager.controller to javafx.fxml; 
     opens com.login.controller to javafx.fxml;

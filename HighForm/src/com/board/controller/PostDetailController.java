@@ -6,15 +6,15 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 import com.board.dao.BoardDao;
+import com.board.dao.CommentDao;
 import com.board.model.Board;
+import com.board.model.Comment;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -28,6 +28,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -58,10 +59,12 @@ public class PostDetailController implements Initializable {
     private static Long boardId;
     
     private final BoardDao boardDao;
-
+    private final CommentDao commentDao;
+    
     // 의존성 주입 
     public PostDetailController() {
 		this.boardDao = new BoardDao().getInstance();
+		this.commentDao = new CommentDao().getInstance();
         // 반드시 public, 파라미터 없음
     }
     
@@ -101,13 +104,10 @@ public class PostDetailController implements Initializable {
         System.out.println("게시물 ID : " + boardId);
         Board board = boardDao.getBoard(boardId);
         
-        // 샘플 게시글 데이터
         boardData = board;
         
         // 샘플 댓글 데이터
-        comments.add(new Comment(1, 0, "홍길동", "25.06.24", "다시 올려드립니다", currentUser.equals("홍길동")));
-        comments.add(new Comment(2, 1, "김철수", "25.06.24", "감사합니다!", currentUser.equals("김철수")));
-        comments.add(new Comment(3, 0, "이영희", "25.06.25", "좋은 자료네요", currentUser.equals("이영희")));
+        comments = commentDao.getCommentsByBoardId(boardId, currentUser);
     }
     
     private void displayPost() {
@@ -146,7 +146,7 @@ public class PostDetailController implements Initializable {
                 
                 // 대댓글 찾기
                 for (Comment reply : comments) {
-                    if (reply.getParentId() == comment.getId()) {
+                    if (reply.getParentId().equals(comment.getId())) {
                         VBox replyBox = createCommentBox(reply, true);
                         commentsContainer.getChildren().add(replyBox);
                     }
@@ -168,7 +168,7 @@ public class PostDetailController implements Initializable {
         HBox authorInfo = new HBox(10);
         Label authorLabel = new Label(comment.getAuthor());
         authorLabel.setFont(Font.font("DungGeunMo", 14));
-        Label dateLabel = new Label(comment.getDate());
+        Label dateLabel = new Label(comment.getCreatedAt().toString());
         dateLabel.setStyle("-fx-text-fill: #666;");
         
         authorInfo.getChildren().addAll(authorLabel, dateLabel);
@@ -266,20 +266,51 @@ public class PostDetailController implements Initializable {
             return;
         }
         
+        // 새 댓글 생성
+        Comment newComment = Comment.builder()
+                .boardId(boardId)
+                .parentId(0L)  // 최상위 댓글
+                .author(currentUser)
+                .content(commentText)
+                .userId(1L)  // TODO: 실제 사용자 ID로 변경
+                .build();
         
-        // 새 댓글 추가
-        int newId = comments.stream().mapToInt(Comment::getId).max().orElse(0) + 1;
-        String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yy.MM.dd"));
-        Comment newComment = new Comment(newId, 0, currentUser, currentDate, commentText, true);
+        // DB에 저장
+        Long commentId = commentDao.createComment(newComment);
+        if (commentId != null) {
+            commentTextArea.clear();
+            // 댓글 목록 새로고침
+            comments = commentDao.getCommentsByBoardId(boardId, currentUser);
+            displayComments();
+            showAlert("성공", "댓글이 작성되었습니다.");
+        } else {
+            showAlert("오류", "댓글 작성 중 오류가 발생했습니다.");
+        }
         
-        comments.add(newComment);
-        commentTextArea.clear();
-        displayComments();
     }
     
     private void handleEditComment(Comment comment) {
-        // 댓글 수정 (미구현)
-        showAlert("수정", "댓글 수정 기능은 아직 구현되지 않았습니다.");
+        // 댓글 수정 다이얼로그 표시
+        TextInputDialog dialog = new TextInputDialog(comment.getContent());
+        dialog.setTitle("댓글 수정");
+        dialog.setHeaderText("댓글을 수정하세요");
+        dialog.setContentText("내용:");
+        
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent() && !result.get().trim().isEmpty()) {
+            String newContent = result.get().trim();
+            
+            // DB 업데이트
+            boolean success = commentDao.updateComment(comment.getId(), newContent);
+            if (success) {
+                // 댓글 목록 새로고침
+                comments = commentDao.getCommentsByBoardId(boardId, currentUser);
+                displayComments();
+                showAlert("성공", "댓글이 수정되었습니다.");
+            } else {
+                showAlert("오류", "댓글 수정 중 오류가 발생했습니다.");
+            }
+        }
     }
     
     private void handleDeleteComment(Comment comment) {
@@ -290,9 +321,17 @@ public class PostDetailController implements Initializable {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             // 댓글과 대댓글 모두 삭제
-            comments.removeIf(c -> c.getId() == comment.getId() || c.getParentId() == comment.getId());
-            displayComments();
+            boolean success = commentDao.deleteCommentWithReplies(comment.getId());
+            if (success) {
+                // 댓글 목록 새로고침
+                comments = commentDao.getCommentsByBoardId(boardId, currentUser);
+                displayComments();
+                showAlert("성공", "댓글이 삭제되었습니다.");
+            } else {
+                showAlert("오류", "댓글 삭제 중 오류가 발생했습니다.");
+            }
         }
+        
     }
     
     private void handleReplyComment(Comment parentComment) {
@@ -302,14 +341,26 @@ public class PostDetailController implements Initializable {
             return;
         }
         
-        // 대댓글 추가
-        int newId = comments.stream().mapToInt(Comment::getId).max().orElse(0) + 1;
-        String currentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yy.MM.dd"));
-        Comment reply = new Comment(newId, parentComment.getId(), currentUser, currentDate, replyText, true);
+        // 대댓글 생성
+        Comment reply = Comment.builder()
+                .boardId(boardId)
+                .parentId(parentComment.getId())  // 부모 댓글 ID
+                .author(currentUser)
+                .content(replyText)
+                .userId(1L)  // TODO: 실제 사용자 ID로 변경
+                .build();
         
-        comments.add(reply);
-        commentTextArea.clear();
-        displayComments();
+        // DB에 저장
+        Long replyId = commentDao.createComment(reply);
+        if (replyId != null) {
+            commentTextArea.clear();
+            // 댓글 목록 새로고침
+            comments = commentDao.getCommentsByBoardId(boardId, currentUser);
+            displayComments();
+            showAlert("성공", "답글이 작성되었습니다.");
+        } else {
+            showAlert("오류", "답글 작성 중 오류가 발생했습니다.");
+        }
     }
     
     private void downloadFile(String fileName) {
@@ -344,31 +395,4 @@ public class PostDetailController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
-}
-
-
-class Comment {
-    private int id;
-    private int parentId;
-    private String author;
-    private String date;
-    private String content;
-    private boolean isOwner;
-    
-    public Comment(int id, int parentId, String author, String date, String content, boolean isOwner) {
-        this.id = id;
-        this.parentId = parentId;
-        this.author = author;
-        this.date = date;
-        this.content = content;
-        this.isOwner = isOwner;
-    }
-    
-    // Getters
-    public int getId() { return id; }
-    public int getParentId() { return parentId; }
-    public String getAuthor() { return author; }
-    public String getDate() { return date; }
-    public String getContent() { return content; }
-    public boolean isOwner() { return isOwner; }
 }

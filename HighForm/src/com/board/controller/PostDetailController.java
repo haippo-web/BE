@@ -213,44 +213,31 @@ public class PostDetailController implements Initializable {
     
     // 게시글 수정 
     @FXML
-    private void handleEditPost() {
+    private void handleEditPost(ActionEvent event) {
         // 게시글 수정 페이지로 이동 (미구현)
     	// TODO :: 유저 연동 시 권한 체크  
     	String userRole = "MANAGER";
 //    	String userRole = "STUDENT";
         try {
-        	// 권한이 매니저나 교수일 경우
-        	if(userRole.equals("MANAGER") || userRole.equals( "PROFESSOR")) {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/PostWrite.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/PostUpdate.fxml"));
                 Stage stage = new Stage();
-                stage.setTitle("공지사항 및 과제 수정");
+
+                stage.setTitle("게시물 수정");
                 stage.setScene(new Scene(loader.load()));
                 stage.initModality(Modality.APPLICATION_MODAL);
-
-                
+          
                 PostUpdateController controller = loader.getController();
+
                 controller.setPostDetailController(this);
-
+                controller.setBoardId(boardId);
+                                  
                 stage.showAndWait();
-        	}else {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/BoardWrite.fxml"));
-                Stage stage = new Stage();
-                stage.setTitle("게시글 수정");
-                stage.setScene(new Scene(loader.load()));
-                stage.initModality(Modality.APPLICATION_MODAL);
-
-                BoardUpdateController controller = loader.getController();
-                controller.setPostDetailController(this);
-
-                stage.showAndWait();
+                handleBack(event);
         	}
- 
-        } catch (Exception e) {
+        catch (Exception e) {
             e.printStackTrace();
         }
-    	
-    	
-        showAlert("수정", "게시글 수정 기능은 아직 구현되지 않았습니다.");
+    
     }
     
     
@@ -264,11 +251,13 @@ public class PostDetailController implements Initializable {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             // 게시글 삭제 로직 (미구현)
+        	boardDao.deleteBoard(boardId);
             showAlert("삭제", "게시글이 삭제되었습니다.");
             handleBack(event);
         }
     }
     
+    // 댓글 작성		
     @FXML
     private void handleSubmitComment() {
         String commentText = commentTextArea.getText().trim();
@@ -276,6 +265,7 @@ public class PostDetailController implements Initializable {
             showAlert("경고", "댓글 내용을 입력해주세요.");
             return;
         }
+        
         
         // 새 댓글 추가
         int newId = comments.stream().mapToInt(Comment::getId).max().orElse(0) + 1;

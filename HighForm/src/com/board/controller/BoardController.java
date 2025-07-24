@@ -10,6 +10,7 @@ import com.board.dao.BoardDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.dto.BoardDto;
+import com.login.controller.DesktopController;
 import com.login.model.User;
 
 import javafx.collections.FXCollections;
@@ -61,6 +62,46 @@ public class BoardController {
         System.out.println("[BoardController] 로그인된 사용자: " + user.getName());
     }
     @FXML
+    private Button closeButton;
+    
+    @FXML
+    private void handleCloseButton() {
+        try {
+            // 현재 스테이지 가져오기
+            Stage stage = (Stage) closeButton.getScene().getWindow();
+
+            // FXML 로드
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login/Desktop.fxml"));
+            Parent root = loader.load();
+
+            // 컨트롤러 가져와 사용자 정보 전달
+            DesktopController desktopController = loader.getController();
+            if (desktopController != null && currentUser != null) {
+                desktopController.setCurrentUser(currentUser);
+                System.out.println("[DEBUG] 데스크탑으로 사용자 정보 전달: " + currentUser.getName());
+            } else {
+                System.err.println("[ERROR] DesktopController 또는 currentUser가 null입니다.");
+            }
+
+            // 씬 전환
+            Scene scene = new Scene(root, 1000, 750);
+            stage.setScene(scene);
+            stage.setTitle("HighForm - 데스크탑");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("페이지 이동 오류", "데스크탑으로 이동할 수 없습니다.");
+        }
+    }
+
+
+    private void showError(String string, String string2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@FXML
     public void initialize() throws ParseException {
         // 테이블 높이 고정 설정
         boardTable.setFixedCellSize(ROW_HEIGHT);

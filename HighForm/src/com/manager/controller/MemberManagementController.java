@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import com.manager.model.Course;
 import com.manager.model.Member;
 import com.manager.service.MemberService;
 
@@ -190,7 +189,9 @@ public class MemberManagementController {
 
 			// 데이터 확인용 디버깅
 			for (Member member : members) {
-				System.out.println("로드된 유저: " + member.getMemberName() + " | " + member.getAffiliation());
+
+				System.out.println("로드된 유저: " + member.getMemberName() + " | " + member.getAffiliation() + "|"
+						+ member.getPosition());
 			}
 
 			memberList.addAll(members);
@@ -339,8 +340,7 @@ public class MemberManagementController {
 		alert.setContentText(message);
 		alert.showAndWait();
 	}
-	
-	
+
 	// 이전 화면으로 돌아가기
 	@FXML
 	private void handleBackMenu(ActionEvent event) {

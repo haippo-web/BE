@@ -6,7 +6,6 @@
 
 <StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.login.controller.LoginController"
            style="-fx-background-color: #188492;" prefWidth="1000" prefHeight="750">
-
     <VBox alignment="CENTER" spacing="0">
         <StackPane alignment="CENTER">
             <VBox style="-fx-background-color: #eaeaea; -fx-border-color: #222; -fx-border-width: 2; -fx-background-radius: 4; -fx-border-radius: 4; -fx-effect: dropshadow(gaussian, #222, 8, 0.2, 0, 2);" 
@@ -27,7 +26,6 @@
                 <!-- 안내 문구 -->
                 <Label text="Type a user name and password to log on"
                        style="-fx-font-family: 'Consolas'; -fx-font-size: 12; -fx-text-fill: #222; -fx-padding: 8 0 0 12; -fx-alignment: CENTER_LEFT;"/>
-
                 <!-- 입력 폼 -->
                 <GridPane hgap="8" vgap="8" alignment="CENTER_LEFT" style="-fx-padding: 8 0 0 24;">
 

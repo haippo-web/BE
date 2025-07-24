@@ -3,9 +3,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
+
 <StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.login.controller.LoginController"
            style="-fx-background-color: #188492;" prefWidth="1000" prefHeight="750">
-
     <VBox alignment="CENTER" spacing="0">
         <StackPane alignment="CENTER">
             <VBox style="-fx-background-color: #eaeaea; -fx-border-color: #222; -fx-border-width: 2; -fx-background-radius: 4; -fx-border-radius: 4; -fx-effect: dropshadow(gaussian, #222, 8, 0.2, 0, 2);" 

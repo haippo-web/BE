@@ -12,7 +12,6 @@ public abstract class BaseEntity {
     protected Date updatedAt;
     protected char del_yn;
 
-
     public void markAsDeleted() { this.del_yn = 'Y'; }
 }
 

@@ -50,7 +50,7 @@ public class Main extends Application {
     	scene.getStylesheets().add(getClass().getResource("/fonts/global.css").toExternalForm());
     	primaryStage.setScene(scene);
     }
-    
+
 
     public static void main(String[] args) {
         launch(args);

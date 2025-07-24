@@ -556,21 +556,27 @@ public class DesktopController {
         try {
             showNotification("관리자 페이지에 접근합니다!");
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/manager/MenuSelect.fxml")); // FXML 경로 주의!
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/manager/MenuSelect.fxml"));
             Parent root = loader.load();
 
+            // 컨트롤러에 현재 사용자 정보 주입
             MenuSelectController controller = loader.getController();
-            controller.setCurrentUser(currentUser);  // 로그인 사용자 정보 주입 (setCurrentUser 메서드 필요 시)
+            controller.setCurrentUser(currentUser);
 
-            Stage stage = (Stage) startButton.getScene().getWindow();
-            stage.setScene(new Scene(root, 1000, 750));
-            stage.setTitle("HighForm - 관리자 페이지");
+            // 새 Stage 생성 (팝업창)
+            Stage popupStage = new Stage();
+            popupStage.setTitle("HighForm - 관리자 페이지");
+            popupStage.setScene(new Scene(root, 630, 460)); // 원하는 팝업 크기 지정
+            popupStage.initOwner(startButton.getScene().getWindow()); // 부모 창 설정
+            popupStage.setResizable(false);
+            popupStage.show(); // 또는 showAndWait() → 모달 형태
 
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("오류", "관리자 페이지를 열 수 없습니다.");
         }
     }
+
 
     /**
      * 오늘의 출석 코드가 있는지 확인만 함 (생성하지 않음)

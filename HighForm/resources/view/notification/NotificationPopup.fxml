@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.notification.controller.NotificationPopupController"
+      style="-fx-background-color: #ffffcc; -fx-border-color: #000000; -fx-border-width: 1;"
+      prefWidth="400" prefHeight="500">
+    
+    <!-- 헤더 -->
+    <HBox style="-fx-background-color: #c0c0c0; -fx-padding: 5;" alignment="CENTER_RIGHT">
+        <Label text="알림" style="-fx-font-weight: bold; -fx-font-size: 14;" HBox.hgrow="ALWAYS"/>
+        <Button fx:id="closeButton" text="X" onAction="#handleClose"
+                style="-fx-background-color: #ff0000; -fx-text-fill: white; -fx-font-weight: bold;"/>
+    </HBox>
+    
+    <!-- 알림 목록 -->
+    <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true">
+        <VBox fx:id="notificationList" spacing="5" style="-fx-padding: 10;">
+            <!-- 알림 아이템들이 동적으로 추가됨 -->
+        </VBox>
+    </ScrollPane>
+</VBox>

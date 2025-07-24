@@ -23,5 +23,11 @@ module HighForm {
     opens com.board to javafx.graphics, javafx.fxml;  // 이 줄 추가
     opens com.board.controller to javafx.fxml;
     opens com.mypage.controller to javafx.fxml;
+
+    // 알림 관련 패키지 추가
+    opens com.notification.controller to javafx.fxml;
+    opens com.notification.dao to javafx.fxml;
+    opens com.notification.model to javafx.fxml;
+    
 }
 

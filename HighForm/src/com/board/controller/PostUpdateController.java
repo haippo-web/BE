@@ -4,12 +4,14 @@ import java.io.File;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 
 import com.board.dao.BoardDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.dto.BoardDto;
 import com.board.model.dto.BoardWriteRequestDto;
+import com.util.RedisLoginService;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -30,8 +32,12 @@ public class PostUpdateController {
     private BoardCategory selectedType = BoardCategory.DATA_ROOM;
     private String attachmentPath = "";
     private final BoardDao boardDao;
-    
     private static Long boardId;
+    private RedisLoginService redisService = new RedisLoginService();
+    private String UserName = ""; // 현재 로그인한 사용자 (실제로는 세션에서 가져와야 함)
+    private String UserRole = "";
+    private Long UserId = null;
+    
     
     public void setBoardId(Long boardId) {
         this.boardId = boardId;
@@ -54,6 +60,10 @@ public class PostUpdateController {
     
     @FXML
     public void initialize() {
+        Map<String, String> userInfo = redisService.getLoginUserFromRedis();
+        UserName = userInfo.get("name");
+        UserRole = userInfo.get("role");
+        UserId = Long.valueOf(userInfo.get("id"));
     }
 
     @FXML
@@ -86,8 +96,6 @@ public class PostUpdateController {
         // TODO :: File DB 연동  
         Long fileId = 3L;
         Long updateFileId = selectedFile != null ? fileId : null;
-        
-        String author = "교수님"; 
         
         
         // 수정된 데이터만 담은 Board 객체 생성

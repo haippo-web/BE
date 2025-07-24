@@ -463,11 +463,13 @@ public class DesktopController {
         try {
             showNotification("출결리스트를 열었습니다!");
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/Attendance.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/attendance/attendance_list.fxml"));
+
             Parent root = loader.load();
 
             com.mypage.controller.AttendanceController controller = loader.getController();
             controller.setCurrentUser(currentUser);
+
 
             Stage stage = (Stage) startButton.getScene().getWindow();
             stage.setScene(new Scene(root, 1000, 750));
@@ -485,8 +487,9 @@ public class DesktopController {
         try {
             showNotification("과제 페이지를 열었습니다!");
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/Assignment.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/assignment/my_assignment_list.fxml"));
             Parent root = loader.load();
+
 
             AssignmentController controller = loader.getController();
             controller.setCurrentUser(currentUser);

@@ -52,6 +52,7 @@ public class AttendanceController {
     }
     private User currentUser;
 
+    
     public void setCurrentUser(User user) {
         this.currentUser = user;
         System.out.println("[AttendanceController] 로그인 사용자: " + user.getName());

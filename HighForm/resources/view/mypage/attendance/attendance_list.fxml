@@ -22,8 +22,7 @@
             style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold; -fx-border-color: transparent; -fx-cursor: hand;" />
 </HBox>
     <!-- '병결 /공결 신청' 버튼 -->
-    <Button fx:id="applyBtn" layoutX="30" layoutY="80" prefHeight="60" prefWidth="290"
-    	style="-fx-font-size: 24px; -fx-font-family: 'Malgun Gothic', 'Arial', 'SansSerif'; -fx-font-weight: bold; -fx-background-color: #e0e0e0; -fx-border-color: black; -fx-border-width: 2; -fx-effect: dropshadow(three-pass-box, #fff, 1, 0, 2, 2);" text="병가/ 공결 신청" onAction="#handleApplyBtn" />
+    <Button fx:id="applyBtn" layoutX="30" layoutY="80" onAction="#handleApplyBtn" prefHeight="60" prefWidth="290" style="-fx-font-size: 24px; -fx-font-family: 'Malgun Gothic', 'Arial', 'SansSerif'; -fx-font-weight: bold; -fx-background-color: #e0e0e0; -fx-border-color: black; -fx-border-width: 2; -fx-effect: dropshadow(three-pass-box, #fff, 1, 0, 2, 2);" text="병가/ 공결 신청" />
 
 	
     <!-- 출결률 라벨 (오른쪽) -->
@@ -44,4 +43,7 @@
 
     <!-- 페이지네이션 (가운데로!) -->
     <HBox fx:id="paginationBox" alignment="CENTER" layoutY="630" prefWidth="940" spacing="8" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" />
+
+ <!-- 닫기 버튼 -->
+ <Button fx:id="closeButton" layoutX="954.0" layoutY="20.0" onAction="#handleCloseButton" prefHeight="16" prefWidth="16" styleClass="button close-button" text="X" />
 </AnchorPane>

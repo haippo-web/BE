@@ -45,39 +45,29 @@ public class BoardDao {
    
    // 게시물 작성
    public Long createBoard(Board board) {
-	   
-	   String createBoardSQL = BoardSQL.CREATE_BOARD;
-	   try(Connection conn = getConnection();
-			   PreparedStatement psmt = conn.prepareStatement(createBoardSQL, new String[] { "ID" })){
-		   
-		   psmt.setString(1, board.getTitle());
-		   psmt.setString(2, board.getContent());
-		   psmt.setString(3,  board.getType().name());
-		   psmt.setLong(4, board.getUserId());
-		   psmt.setLong(5, board.getFileId());
-		   psmt.setString(6, board.getAuthor());
-		   
-		   psmt.executeUpdate();
-		   
-		   // 2. 생성된 ID 가져오기
-		    
+	    String sql = BoardSQL.CREATE_BOARD;
+	    try (Connection conn = getConnection();
+	         PreparedStatement psmt = conn.prepareStatement(sql, new String[] { "ID" })) {
+	        
+	        psmt.setString(1, board.getTitle());
+	        psmt.setString(2, board.getContent());
+	        psmt.setString(3, board.getType().name());
+	        psmt.setLong(4, board.getUserId());
+	        psmt.setLong(5, board.getFileId() != null ? board.getFileId() : 0); // file_id가 null이면 0으로 설정
+	        psmt.setString(6, board.getAuthor());
+	        
+	        psmt.executeUpdate();
+	        
+	        // 생성된 ID 반환
 	        ResultSet rs = psmt.getGeneratedKeys();
-	        long generatedId = 0;
-
 	        if (rs.next()) {
-	            generatedId = rs.getLong(1);  // 이제 안전하게 동작 가능
-//	          또는 rs.getLong("ID");
+	            return rs.getLong(1);
 	        }
-		   
-		   return generatedId;
-	        
-	        
-	   }catch(Exception e) {
-		   e.getStackTrace();
-		   e.printStackTrace();
-	   }
-	   return null;
-   }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
    
    
    //게시물 호출
@@ -121,16 +111,7 @@ public class BoardDao {
    public List<BoardDto> getBoardList(BoardCategory type) {
 	    String getBoardSQL = BoardSQL.GET_BOARD_FROM_TYPE; // 순번 포함 쿼리
 	    List<BoardDto> boardList = new ArrayList<>();
-	    
-	    try {
-			Connection conn2 = getConnection();
-			System.out.println(conn2);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println("오류");
-		}
-	    
+	   
 	    
 	    
 	   try(Connection conn = getConnection();

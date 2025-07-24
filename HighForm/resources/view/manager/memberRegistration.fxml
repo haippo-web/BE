@@ -1,114 +1,120 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.collections.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.text.*?>
+<?import java.lang.String?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
-<?import java.lang.String?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8"
-	xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="com.manager.controller.AddMemberController">
+<BorderPane xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.manager.controller.AddMemberController">
 	<top>
-		<HBox alignment="CENTER_LEFT" prefHeight="40.0"
-			style="-fx-background-color: #4472C4;">
+		<HBox alignment="CENTER_LEFT" prefHeight="50.0" style="-fx-background-color: #000080;">
+			<padding>
+				<Insets left="15.0" right="20.0" />
+			</padding>
 			<children>
-				<Label prefHeight="25.0" prefWidth="123.0" text="● 회원 등록"
-					textFill="WHITE">
-					<font>
-						<Font name="System Bold" size="14.0" />
-					</font>
+				<Label prefHeight="25.0" prefWidth="123.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 20px;" text="회원 등록" textFill="WHITE">
 					<HBox.margin>
 						<Insets left="10.0" />
 					</HBox.margin>
 				</Label>
-				<Region prefHeight="40.0" prefWidth="326.0" />
-				<Button mnemonicParsing="false" prefHeight="33.0"
-					prefWidth="0.0" text="x" />
 			</children>
 		</HBox>
 	</top>
 	<center>
-		<VBox prefHeight="450.0" prefWidth="500.0" spacing="15.0">
+		<VBox prefHeight="435.0" prefWidth="500.0" spacing="15.0">
 			<children>
 				<GridPane hgap="10.0" vgap="15.0">
 					<columnConstraints>
-						<ColumnConstraints hgrow="NEVER" minWidth="80.0"
-							prefWidth="80.0" />
+						<ColumnConstraints hgrow="NEVER" minWidth="80.0" prefWidth="80.0" />
 						<ColumnConstraints hgrow="ALWAYS" />
 					</columnConstraints>
 					<rowConstraints>
-						<RowConstraints minHeight="30.0" prefHeight="30.0"
-							vgrow="SOMETIMES" />
-						<RowConstraints minHeight="30.0" prefHeight="30.0"
-							vgrow="SOMETIMES" />
-						<RowConstraints minHeight="30.0" prefHeight="30.0"
-							vgrow="SOMETIMES" />
-						<RowConstraints minHeight="30.0" prefHeight="30.0"
-							vgrow="SOMETIMES" />
-						<RowConstraints minHeight="30.0" prefHeight="30.0"
-							vgrow="SOMETIMES" />
-						<RowConstraints minHeight="30.0" prefHeight="30.0"
-							vgrow="SOMETIMES" />
-						<RowConstraints minHeight="80.0" prefHeight="80.0"
-							vgrow="SOMETIMES" />
+						<RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+						<RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+						<RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+						<RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+						<RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+						<RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+						<RowConstraints minHeight="80.0" prefHeight="80.0" vgrow="SOMETIMES" />
 					</rowConstraints>
+
 					<children>
 						<!-- ID -->
-						<Label text="ID :" GridPane.columnIndex="0"
-							GridPane.rowIndex="0">
-							<font>
-								<Font size="12.0" />
-							</font>
-						</Label>
-						<TextField fx:id="loginIdField" prefHeight="25.0"
-							text="ks371" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+						<HBox alignment="CENTER" prefHeight="100.0" prefWidth="180.0" GridPane.rowIndex="0">
+							<children>
+								<Label alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="I" />
+								<Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="D" />
+							</children>
+							<padding>
+								<Insets right="5.0" />
+							</padding>
+						</HBox>
+
+						<TextField fx:id="loginIdField" prefHeight="30.0" text="" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
 
 						<!-- 이름 -->
-						<Label text="이름 :" GridPane.columnIndex="0"
-							GridPane.rowIndex="1">
-							<font>
-								<Font size="12.0" />
-							</font>
-						</Label>
-						<TextField fx:id="nameField" prefHeight="25.0"
-							GridPane.columnIndex="1" GridPane.rowIndex="1" />
+						<HBox alignment="CENTER" prefHeight="100.0" prefWidth="180.0" GridPane.rowIndex="1">
+							<children>
+								<Label alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="이" />
+								<Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="름" />
+							</children>
+							<padding>
+								<Insets right="5.0" />
+							</padding>
+						</HBox>
+						<TextField fx:id="nameField" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
 						<!-- 연락처 -->
-						<Label text="연락처 :" GridPane.columnIndex="0"
-							GridPane.rowIndex="2">
-							<font>
-								<Font size="12.0" />
-							</font>
-						</Label>
-						<TextField fx:id="phoneField" prefHeight="25.0"
-							GridPane.columnIndex="1" GridPane.rowIndex="2" />
+						<HBox alignment="CENTER" prefHeight="100.0" prefWidth="180.0" GridPane.rowIndex="2">
+							<children>
+								<Label alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="연" />
+								<Label alignment="CENTER" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="락" />
+								<Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="처" />
+							</children>
+							<padding>
+								<Insets right="5.0" />
+							</padding>
+						</HBox>
+						<TextField fx:id="phoneField" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
 						<!-- e-mail -->
-						<Label text="e-mail :" GridPane.columnIndex="0"
-							GridPane.rowIndex="3">
-							<font>
-								<Font size="12.0" />
-							</font>
-						</Label>
-						<TextField fx:id="emailField" prefHeight="25.0"
-							GridPane.columnIndex="1" GridPane.rowIndex="3" />
+						<HBox alignment="CENTER" prefHeight="100.0" prefWidth="180.0" GridPane.rowIndex="3">
+							<children>
+								<Label alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="e" />
+								<Label alignment="CENTER" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="-" />
+								<Label alignment="CENTER" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="m" />
+								<Label alignment="CENTER" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="a" />
+								<Label alignment="CENTER" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="i" />
+								<Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="l" />
+							</children>
+							<padding>
+								<Insets right="5.0" />
+							</padding>
+						</HBox>
+						<TextField fx:id="emailField" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
 						<!-- 소속 -->
-						<Label text="소속 :" GridPane.columnIndex="0"
-							GridPane.rowIndex="4">
-							<font>
-								<Font size="12.0" />
-							</font>
-						</Label>
-						<ComboBox fx:id="courseCombo" prefHeight="33.0"
-							prefWidth="345.0" promptText="시스템 16기" GridPane.columnIndex="1"
-							GridPane.rowIndex="4">
+						<HBox alignment="CENTER" prefHeight="100.0" prefWidth="180.0" GridPane.rowIndex="4">
+							<children>
+								<Label alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="소" />
+								<Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="속" />
+							</children>
+							<padding>
+								<Insets right="5.0" />
+							</padding>
+						</HBox>
+						<ComboBox fx:id="courseCombo" prefHeight="33.0" prefWidth="345.0" promptText="시스템 16기" GridPane.columnIndex="1" GridPane.rowIndex="4">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
 									<String fx:value="시스템 16기" />
@@ -124,15 +130,16 @@
 						</ComboBox>
 
 						<!-- 직급 -->
-						<Label text="직급 :" GridPane.columnIndex="0"
-							GridPane.rowIndex="5">
-							<font>
-								<Font size="12.0" />
-							</font>
-						</Label>
-						<ComboBox fx:id="positionCombo" prefHeight="33.0"
-							prefWidth="345.0" promptText="--" GridPane.columnIndex="1"
-							GridPane.rowIndex="5">
+						<HBox alignment="CENTER" prefHeight="100.0" prefWidth="180.0" GridPane.rowIndex="5">
+							<children>
+								<Label alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="직" />
+								<Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="급" />
+							</children>
+							<padding>
+								<Insets right="5.0" />
+							</padding>
+						</HBox>
+						<ComboBox fx:id="positionCombo" prefHeight="33.0" prefWidth="345.0" promptText="--" GridPane.columnIndex="1" GridPane.rowIndex="5">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
 									<String fx:value="--" />
@@ -147,39 +154,32 @@
 						</ComboBox>
 
 						<!-- 비고 -->
-						<Label alignment="TOP_LEFT" text="비고 :"
-							GridPane.columnIndex="0" GridPane.rowIndex="6"
-							GridPane.valignment="TOP">
-							<font>
-								<Font size="12.0" />
-							</font>
-							<GridPane.margin>
-								<Insets top="5.0" />
-							</GridPane.margin>
-						</Label>
-						<TextArea fx:id="noteArea" prefHeight="80.0"
-							text="개인사정으로 2028.07.23 부터 등원 가능" wrapText="true"
-							GridPane.columnIndex="1" GridPane.rowIndex="6" />
+						<HBox alignment="CENTER" prefHeight="100.0" prefWidth="180.0" style="-fx-alignment: top-center;" GridPane.rowIndex="6">
+							<children>
+								<Label alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="비" />
+								<Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="고" />
+							</children>
+							<padding>
+								<Insets right="5.0" />
+							</padding>
+						</HBox>
+						<TextArea fx:id="noteArea" prefHeight="80.0" text="" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="6" />
 					</children>
 				</GridPane>
 			</children>
 			<padding>
-				<Insets bottom="20.0" left="30.0" right="30.0" top="30.0" />
+				<Insets bottom="10.0" left="30.0" right="30.0" top="30.0" />
 			</padding>
 		</VBox>
 	</center>
 	<bottom>
 		<HBox alignment="CENTER_RIGHT" spacing="10.0">
 			<children>
-				<Button fx:id="registerBtn" prefHeight="30.0"
-					prefWidth="60.0" text="등록">
-					<font>
-						<Font size="12.0" />
-					</font>
-				</Button>
+				<Button fx:id="registerBtn" prefHeight="30.0" prefWidth="60.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px;" text="등록" />
+
 			</children>
 			<padding>
-				<Insets bottom="20.0" left="20.0" right="30.0" top="10.0" />
+				<Insets bottom="30.0" right="30.0" top="10.0" />
 			</padding>
 		</HBox>
 	</bottom>

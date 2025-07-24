@@ -1,29 +1,50 @@
 package com.login.controller;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Random;
+
+import com.attendance.model.Attendance;
+import com.attendance.service.AttendanceCheckResult;
+import com.attendance.service.AttendanceCodeService;
+import com.attendance.service.AttendanceService;
+import com.attendance.service.exception.AttendanceServiceException;
+import com.board.controller.BoardController;
 import com.login.model.User;
+import com.manager.controller.MenuSelectController;
+import com.mypage.controller.AssignmentController;
+import com.mypage.controller.CalendarController;
+
 import javafx.animation.Timeline;
+import com.notification.dao.NotificationDao;
+import com.notification.model.Notification;
+import com.util.RedisLoginService;
+
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Random;
-import com.attendance.service.AttendanceService;
-import com.attendance.service.AttendanceCheckResult;
-import com.attendance.service.AttendanceCodeService;
-import com.attendance.model.Attendance;
-import com.attendance.service.exception.AttendanceServiceException;
 
 public class DesktopController {
     
@@ -35,8 +56,7 @@ public class DesktopController {
     // 강아지 캐릭터 관련 변수들
     private ImageView dogCharacterView;
     private Label notificationBubble;
-    
-    private User currentUser;
+    private static User currentUser;
     private Timeline timeline;
     private Timeline dogAnimationTimeline;
     private Timeline randomNotificationTimeline;
@@ -49,8 +69,14 @@ public class DesktopController {
     private String currentNotification = "안녕하세요!";
     private boolean isAnimating = false;
     
+    // 알림
+    private boolean isNotificationExpanded = false;
+    private VBox expandedNotificationContent;
+    private Timeline expandAnimation;
     private AttendanceService attendanceService;
-
+    private NotificationDao notificationDao = NotificationDao.getInstance();
+    
+    
     public void setAttendanceService(AttendanceService attendanceService) {
         this.attendanceService = attendanceService;
     }
@@ -76,11 +102,11 @@ public class DesktopController {
         try {
             // 기본 이미지로 강아지 생성
             dogCharacterView = new ImageView(dogIdleImage);
-            dogCharacterView.setFitWidth(250); //가나디 가로
+            dogCharacterView.setFitWidth(250);
             dogCharacterView.setFitHeight(200);
-            dogCharacterView.setLayoutX(600);  // 가나디 좌표
-            dogCharacterView.setLayoutY(420);  
-            
+            dogCharacterView.setLayoutX(600);
+            dogCharacterView.setLayoutY(420);
+           
             // 클릭 이벤트 추가
             dogCharacterView.setOnMouseClicked(e -> onDogCharacterClick());
             
@@ -99,8 +125,21 @@ public class DesktopController {
             notificationBubble.setLayoutX(dogCharacterView.getLayoutX() + 90);
             notificationBubble.setLayoutY(dogCharacterView.getLayoutY() - 20);
             
-            // 데스크톱에 추가
-            desktopPane.getChildren().addAll(dogCharacterView, notificationBubble);
+            // 알림 버블 클릭 이벤트 추가
+            notificationBubble.setOnMouseClicked(e -> toggleNotificationExpansion());
+            
+            // 확장된 알림 내용 초기화
+            initializeExpandedNotification();
+            
+            // ✅ 중요: 데스크톱에 추가할 때 순서 변경
+            // 1. 먼저 강아지 추가 (뒤쪽 레이어)
+            desktopPane.getChildren().add(dogCharacterView);
+            
+            // 2. 그 다음 알림 버블 추가 (앞쪽 레이어)
+            desktopPane.getChildren().add(notificationBubble);
+            
+            // 3. 마지막에 확장된 알림 내용 추가 (가장 앞쪽 레이어)
+            desktopPane.getChildren().add(expandedNotificationContent);
 
         } catch (Exception e) {
             System.err.println("강아지 이미지 로드 실패: " + e.getMessage());
@@ -124,6 +163,245 @@ public class DesktopController {
             System.err.println("강아지 캐릭터 이미지를 로드할 수 없습니다: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+
+    // 확장된 알림 내용 초기화
+    private void initializeExpandedNotification() {
+    	expandedNotificationContent = new VBox(5);
+        expandedNotificationContent.setStyle(
+            "-fx-background-color: #ffffcc;" +
+            "-fx-border-color: #000000;" +
+            "-fx-border-width: 1;" +
+            "-fx-padding: 10;" +
+            "-fx-background-radius: 5;" +
+            "-fx-border-radius: 5;"
+        );
+        expandedNotificationContent.setLayoutX(dogCharacterView.getLayoutX() + 90);
+        expandedNotificationContent.setLayoutY(dogCharacterView.getLayoutY() - 200);
+        expandedNotificationContent.setPrefWidth(300);
+        expandedNotificationContent.setPrefHeight(400);
+        expandedNotificationContent.setVisible(false);
+        
+        // 헤더 (제목 + 닫기 버튼)
+        HBox header = new HBox(10);
+        header.setAlignment(Pos.CENTER_RIGHT);
+        header.setStyle("-fx-background-color: #c0c0c0; -fx-padding: 5;");
+        
+        Label titleLabel = new Label("알림");
+        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
+        
+        Button closeButton = new Button("X");
+        closeButton.setStyle(
+            "-fx-background-color: #ff0000;" +
+            "-fx-text-fill: white;" +
+            "-fx-font-weight: bold;" +
+            "-fx-min-width: 20;" +
+            "-fx-min-height: 20;"
+        );
+        closeButton.setOnAction(e -> toggleNotificationExpansion());
+        
+        header.getChildren().addAll(titleLabel, closeButton);
+        
+        // 알림 목록을 담을 스크롤 영역
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPrefHeight(350);
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+        
+        VBox notificationList = new VBox(5);
+        notificationList.setStyle("-fx-padding: 5;");
+        scrollPane.setContent(notificationList);
+        
+        // 샘플 알림 데이터 (실제로는 DB에서 가져옴)
+        addSampleNotifications(notificationList);
+        
+        expandedNotificationContent.getChildren().addAll(header, scrollPane);
+        
+
+    }
+    
+    
+ // 샘플 알림 추가 (테스트용)
+    private void addSampleNotifications(VBox notificationList) {
+        if (currentUser == null) {
+            System.out.println("❌ 현재 사용자 정보가 없습니다.");
+            return;
+        }
+        
+        System.out.println("🔍 사용자 ID: " + currentUser.getId());
+        
+        try {
+            // DB 연결 테스트
+            boolean connectionTest = notificationDao.testConnection();
+            System.out.println("🔗 DB 연결 테스트: " + (connectionTest ? "성공" : "실패"));
+            
+            // DB에서 실제 알림 데이터 가져오기
+            List<Notification> notifications = notificationDao.getAllNotifications(currentUser.getId());
+            
+            System.out.println("📊 조회된 알림 개수: " + notifications.size());
+            
+            if (notifications.isEmpty()) {
+                System.out.println("📭 알림이 없습니다.");
+                // 알림이 없을 경우 안내 메시지
+                Label noNotificationLabel = new Label("새로운 알림이 없습니다.");
+                noNotificationLabel.setStyle("-fx-font-size: 12; -fx-text-fill: #666666;");
+                notificationList.getChildren().add(noNotificationLabel);
+            } else {
+                System.out.println("✅ 알림 데이터를 화면에 표시합니다.");
+                // 실제 알림 데이터 표시
+                for (Notification notification : notifications) {
+                    System.out.println("📝 알림: " + notification.getTitle() + " - " + notification.getContent());
+                    HBox notificationItem = createNotificationItemFromDB(notification);
+                    notificationList.getChildren().add(notificationItem);
+                }
+            }
+            
+        } catch (Exception e) {
+            System.err.println("❌ 알림 데이터 로드 중 오류: " + e.getMessage());
+            e.printStackTrace();
+            
+            // 에러 시 샘플 데이터 표시
+            String[] sampleNotifications = {
+                "새로운 알림이 있습니다",
+                "데이터베이스 연결을 확인해주세요"
+            };
+            
+            for (String notification : sampleNotifications) {
+                HBox notificationItem = createNotificationItem(notification);
+                notificationList.getChildren().add(notificationItem);
+            }
+        }
+    }
+    
+    
+ // DB 데이터를 사용하는 알림 아이템 생성 메서드 추가
+    private HBox createNotificationItemFromDB(Notification notification) {
+        HBox item = new HBox(10);
+        item.setStyle(
+            "-fx-background-color: " + (notification.isRead() ? "#f0f0f0" : "#ffffff") + ";" +
+            "-fx-border-color: #cccccc;" +
+            "-fx-border-width: 1;" +
+            "-fx-padding: 8;" +
+            "-fx-background-radius: 3;" +
+            "-fx-border-radius: 3;"
+        );
+        item.setAlignment(Pos.CENTER_LEFT);
+        
+        VBox contentBox = new VBox(3);
+        
+        // 제목
+        Label titleLabel = new Label(notification.getTitle());
+        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 12;");
+        
+        // 내용
+        Label contentLabel = new Label(notification.getContent());
+        contentLabel.setStyle("-fx-font-size: 11; -fx-text-fill: #666666;");
+        contentLabel.setWrapText(true);
+        contentLabel.setPrefWidth(200);
+        
+        // 시간
+        Label timeLabel = new Label(notification.getCreatedAt().toString());
+        timeLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #999999;");
+        
+        contentBox.getChildren().addAll(titleLabel, contentLabel, timeLabel);
+        
+        Button readButton = new Button("읽음");
+        readButton.setStyle(
+            "-fx-background-color: #4CAF50;" +
+            "-fx-text-fill: white;" +
+            "-fx-font-size: 10;" +
+            "-fx-min-width: 50;"
+        );
+        readButton.setOnAction(e -> {
+            // 읽음 처리 및 삭제
+            notificationDao.markAsRead(notification.getId());
+            notificationDao.deleteNotification(notification.getId());
+            item.setVisible(false);
+        });
+    
+        item.getChildren().addAll(contentBox, readButton);
+        return item;
+    }
+    
+    
+ // 알림 아이템 생성
+    private HBox createNotificationItem(String message) {
+        HBox item = new HBox(10);
+        item.setStyle(
+            "-fx-background-color: #ffffff;" +
+            "-fx-border-color: #cccccc;" +
+            "-fx-border-width: 1;" +
+            "-fx-padding: 8;" +
+            "-fx-background-radius: 3;" +
+            "-fx-border-radius: 3;"
+        );
+        item.setAlignment(Pos.CENTER_LEFT);
+        
+        Label messageLabel = new Label(message);
+        messageLabel.setStyle("-fx-font-size: 11;");
+        messageLabel.setWrapText(true);
+        messageLabel.setPrefWidth(200);
+        
+        Button readButton = new Button("읽음");
+        readButton.setStyle(
+            "-fx-background-color: #4CAF50;" +
+            "-fx-text-fill: white;" +
+            "-fx-font-size: 10;" +
+            "-fx-min-width: 50;"
+        );
+        readButton.setOnAction(e -> {
+            // 읽음 처리 로직
+            item.setVisible(false);
+        });
+        
+        item.getChildren().addAll(messageLabel, readButton);
+        return item;
+    }
+    
+ // 알림 확장/축소 토글
+    private void toggleNotificationExpansion() {
+        if (isNotificationExpanded) {
+            // 축소
+            collapseNotification();
+        } else {
+            // 확장
+            expandNotification();
+        }
+    }
+    
+    
+ // 알림 확장 애니메이션
+    private void expandNotification() {
+        isNotificationExpanded = true;
+        
+        // 기존 알림 버블 숨기기
+        notificationBubble.setVisible(false);
+        
+        // 확장된 알림 내용 표시
+        expandedNotificationContent.setVisible(true);
+        
+        // 애니메이션 효과 (선택사항)
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(300), expandedNotificationContent);
+        fadeIn.setFromValue(0.0);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+    }
+    
+    
+ // 알림 축소 애니메이션
+    private void collapseNotification() {
+        isNotificationExpanded = false;
+        
+        // 확장된 알림 내용 숨기기
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(300), expandedNotificationContent);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.0);
+        fadeOut.setOnFinished(e -> {
+            expandedNotificationContent.setVisible(false);
+            notificationBubble.setVisible(true);
+        });
+        fadeOut.play();
     }
     
     // 강아지 클릭 시 랜덤 애니메이션 재생
@@ -228,11 +506,19 @@ public class DesktopController {
         currentNotification = message;
         updateNotificationBubble(message);
         
-        // 알림 버블을 4초간 표시하고 기본 메시지로 돌아감
-        Timeline hideNotificationTimeline = new Timeline(new KeyFrame(Duration.seconds(4), e -> {
-            updateNotificationBubble("안녕하세요!");
-        }));
-        hideNotificationTimeline.play();
+        if (!isNotificationExpanded) {
+            // 축소 상태일 때만 작은 버블 업데이트
+            updateNotificationBubble(message);
+            
+            // 알림 버블을 4초간 표시하고 기본 메시지로 돌아감
+            Timeline hideNotificationTimeline = new Timeline(new KeyFrame(Duration.seconds(4), e -> {
+                if (!isNotificationExpanded) {
+                    updateNotificationBubble("안녕하세요!");
+                }
+            }));
+            hideNotificationTimeline.play();
+        }
+       
     }
     
     // 알림 버블 업데이트
@@ -247,6 +533,17 @@ public class DesktopController {
     public void setCurrentUser(User user) {
         this.currentUser = user;
         updateWelcomeMessage();
+        
+        // 사용자 정보 설정 후 알림 데이터 로드
+        if (expandedNotificationContent != null) {
+            // 기존 알림 목록 제거
+            ScrollPane scrollPane = (ScrollPane) expandedNotificationContent.getChildren().get(1);
+            VBox notificationList = (VBox) scrollPane.getContent();
+            notificationList.getChildren().clear();
+            
+            // 새로운 알림 데이터 로드
+            addSampleNotifications(notificationList);
+        }
     }
     
     private void updateWelcomeMessage() {
@@ -451,41 +748,126 @@ public class DesktopController {
     private void openMyComputer() {
         showNotification("내 컴퓨터를 열었습니다!");
     }
-    
+    //마이페이지 출결관리
     @FXML
-    private void openFileManager() {
-        showNotification("폴더를 열었습니다!");
+    private void openmyCheck() {
+        try {
+            // currentUser null 체크 추가
+            if (currentUser == null) {
+                showAlert("오류", "사용자 정보가 없습니다. 다시 로그인해주세요.");
+                return;
+            }
+            
+            showNotification("출결리스트를 열었습니다!");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/attendance/attendance_list.fxml"));
+            Parent root = loader.load();
+
+            com.mypage.controller.AttendanceController controller = loader.getController();
+            
+            // controller null 체크 추가
+            if (controller == null) {
+                showAlert("오류", "출결 컨트롤러를 불러올 수 없습니다.");
+                return;
+            }
+            
+            // currentUser를 다시 확인하고 전달
+            System.out.println("[DEBUG] currentUser 전달 전 체크: " + 
+                              (currentUser != null ? currentUser.getName() : "null"));
+            
+            controller.setCurrentUser(currentUser);
+
+            Scene scene = new Scene(root, 1000, 750);
+            Stage stage = (Stage) startButton.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle("출결 관리");
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] openmyCheck() 실행 중 오류 발생:");
+            e.printStackTrace();
+            showAlert("오류", "출결 페이지를 열 수 없습니다: " + e.getMessage());
+        }
     }
-    
+    //마이페이지 과제 
     @FXML
-    private void openTrash() {
-        showNotification("휴지통을 열었습니다!");
+    private void openAssignment() {
+        try {
+            showNotification("과제 페이지를 열었습니다!");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/assignment/my_assignment_list.fxml"));
+            Parent root = loader.load();
+
+
+            AssignmentController controller = loader.getController();
+            controller.setCurrentUser(currentUser);
+
+            Stage stage = (Stage) startButton.getScene().getWindow();
+            stage.setScene(new Scene(root, 1000, 750));
+            stage.setTitle("과제 관리");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("오류", "과제 페이지를 열 수 없습니다.");
+        }
     }
+
     
     @FXML
     private void openBoard() {
         try {
-            showNotification("알림판으로 이동합니다!");
-            // 게시판 화면으로 이동
+            showNotification("게시판으로 이동합니다!");
+
             Stage currentStage = (Stage) startButton.getScene().getWindow();
-            Parent board = FXMLLoader.load(getClass().getResource("/view/board/boardList.fxml"));
-            currentStage.setScene(new Scene(board, 1000, 750));
-            currentStage.setTitle("HighForm - 알림판");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/BoardMain.fxml"));
+            Parent boardRoot = loader.load();
+
+            //  BoardController 인스턴스를 얻고 로그인한 사용자 정보 전달
+            BoardController controller = loader.getController();
+            controller.setCurrentUser(currentUser);
+
+            Scene boardScene = new Scene(boardRoot, 1000, 750);
+            currentStage.setScene(boardScene);
+            currentStage.setTitle("HighForm - 게시판");
+
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert("오류", "알림판을 열 수 없습니다.");
+            showAlert("오류", "게시판을 열 수 없습니다.");
         }
     }
-    
+
     @FXML
     private void openNotice() {
-        showNotification("공지사항을 확인해주세요!");
+        showNotification("알림을 확인해주세요!");
     }
-    
+ 
     @FXML
-    private void openVacationRequest() {
-        showNotification("휴가신청서를 작성해보세요!");
+    private void openManager() {
+        try {
+            showNotification("관리자 페이지에 접근합니다!");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/manager/MenuSelect.fxml"));
+            Parent root = loader.load();
+
+            // 컨트롤러에 현재 사용자 정보 주입
+            MenuSelectController controller = loader.getController();
+            controller.setCurrentUser(currentUser);
+
+            // 새 Stage 생성 (팝업창)
+            Stage popupStage = new Stage();
+            popupStage.setTitle("HighForm - 관리자 페이지");
+            popupStage.setScene(new Scene(root, 850, 600)); // 원하는 팝업 크기 지정
+            popupStage.initOwner(startButton.getScene().getWindow()); // 부모 창 설정
+            popupStage.setResizable(false);
+            popupStage.show(); // 또는 showAndWait() → 모달 형태
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("오류", "관리자 페이지를 열 수 없습니다.");
+        }
     }
+
+
     /**
      * 오늘의 출석 코드가 있는지 확인만 함 (생성하지 않음)
      * 스케줄러가 별도로 실행되어야 코드가 존재함
@@ -578,11 +960,11 @@ public class DesktopController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-        alert.getDialogPane().setStyle(
-            "-fx-background-color: #c0c0c0;" +
-            "-fx-font-family: 'Malgun Gothic';" +
-            "-fx-font-size: 11px;"
+
+        alert.getDialogPane().getStylesheets().add(
+            getClass().getResource("/fonts/alert.css").toExternalForm()
         );
+
         alert.showAndWait();
     }
 
@@ -630,17 +1012,30 @@ public class DesktopController {
         }
     }
         
-
-    
     @FXML
-    private void openCalculator() {
-        showNotification("계산기를 실행했습니다!");
+    private void openSchedule() {
+        try {
+            showNotification("달력을 열었습니다!");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/Calendar.fxml"));
+            Parent root = loader.load();
+
+            CalendarController controller = loader.getController();
+            controller.setCurrentUser(currentUser);
+
+            Stage stage = (Stage) startButton.getScene().getWindow();
+            stage.setScene(new Scene(root, 1000, 750));
+            stage.setTitle("달력 일정");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("오류", "달력 페이지를 열 수 없습니다.");
+        }
     }
-    
     private void handleLogout() {
         // 확인 대화상자 표시
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Log Off HighForm");
+        confirmAlert.setTitle("사용자 전환");
         confirmAlert.setHeaderText(null);
         confirmAlert.setContentText("정말 로그오프 하시겠습니까?");
         
@@ -674,6 +1069,10 @@ public class DesktopController {
             "-fx-font-size: 11px;"
         );
         
+        RedisLoginService redisService = new RedisLoginService();
+        redisService.deleteLoginUserFromRedis();
+       
+        
         shutdownAlert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 // 모든 타임라인 정지
@@ -699,8 +1098,12 @@ public class DesktopController {
             
             // 로그인 화면으로 전환
             Scene loginScene = new Scene(loginPage, 1000, 750);
+            loginScene.getStylesheets().add(getClass().getResource("/fonts/global.css").toExternalForm());
             currentStage.setScene(loginScene);
             currentStage.setTitle("HighForm Login");
+            
+            RedisLoginService redisService = new RedisLoginService();
+            redisService.deleteLoginUserFromRedis();
             
             // 현재 사용자 정보 초기화
             currentUser = null;
@@ -731,14 +1134,11 @@ public class DesktopController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-        
-        // 윈도우 98 스타일로 알럿 창 스타일링
-        alert.getDialogPane().setStyle(
-            "-fx-background-color: #c0c0c0;" +
-            "-fx-font-family: 'Malgun Gothic';" +
-            "-fx-font-size: 11px;"
+
+        alert.getDialogPane().getStylesheets().add(
+            getClass().getResource("/fonts/alert.css").toExternalForm()
         );
-        
+
         alert.showAndWait();
     }
     

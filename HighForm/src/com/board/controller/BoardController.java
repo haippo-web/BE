@@ -1,13 +1,18 @@
 package com.board.controller;
 
+
 import java.io.IOException;
-import java.sql.Date;
 import java.text.ParseException;
+import java.util.Map;
 
 import com.board.dao.BoardDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.dto.BoardDto;
+import com.login.controller.DesktopController;
+import com.login.model.User;
+import com.util.RedisLoginService;
+
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -46,13 +51,60 @@ public class BoardController {
     private static final double HEADER_HEIGHT = 32.0;
 
     private final BoardDao boardDao;
+    private RedisLoginService redisService = new RedisLoginService();
 
+    
     public BoardController() {
 		this.boardDao = new BoardDao().getInstance();
         // 반드시 public, 파라미터 없음
     }
     
+    private User currentUser;
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        System.out.println("[BoardController] 로그인된 사용자: " + user.getName());
+    }
     @FXML
+    private Button closeButton;
+    
+    @FXML
+    private void handleCloseButton() {
+        try {
+            // 현재 스테이지 가져오기
+            Stage stage = (Stage) closeButton.getScene().getWindow();
+
+            // FXML 로드
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login/Desktop.fxml"));
+            Parent root = loader.load();
+
+            // 컨트롤러 가져와 사용자 정보 전달
+            DesktopController desktopController = loader.getController();
+            if (desktopController != null && currentUser != null) {
+                desktopController.setCurrentUser(currentUser);
+                System.out.println("[DEBUG] 데스크탑으로 사용자 정보 전달: " + currentUser.getName());
+            } else {
+                System.err.println("[ERROR] DesktopController 또는 currentUser가 null입니다.");
+            }
+
+            // 씬 전환
+            Scene scene = new Scene(root, 1000, 750);
+            stage.setScene(scene);
+            stage.setTitle("HighForm - 데스크탑");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("페이지 이동 오류", "데스크탑으로 이동할 수 없습니다.");
+        }
+    }
+
+
+    private void showError(String string, String string2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@FXML
     public void initialize() throws ParseException {
         // 테이블 높이 고정 설정
         boardTable.setFixedCellSize(ROW_HEIGHT);
@@ -167,9 +219,12 @@ public class BoardController {
 
     @FXML
     private void handleUploadBtn(ActionEvent event) {
-    	// TODO :: 유저 연동 시 권한 체크  
-    	String userRole = "MANAGER";
-//    	String userRole = "STUDENT";
+    	// TODO :: 유저 연동 시 권한 체크
+        Map<String, String> userInfo = redisService.getLoginUserFromRedis();
+
+     // STUDENT, PROFESSOR, MANAGER
+        
+    	String userRole = userInfo.get("role");
         try {
         	// 권한이 매니저나 교수일 경우
         	if(userRole.equals("MANAGER") || userRole.equals( "PROFESSOR")) {
@@ -265,11 +320,14 @@ public class BoardController {
     // 게시글 작성 후 리스트에 추가
     // TODO :: User 연동되면 USerId 추가
     public void addNewPost(Board board) {
+        Map<String, String> userInfo = redisService.getLoginUserFromRedis();
+
         int no = allItems.size() + 1;
-        Long userId = 2L;
-        BoardDto dto =  new BoardDto(no, board.getTitle(), "test", board.getCreatedAt() , board.getType() ,board.getContent(), board.getBoardId(),userId);
+        Long userId = Long.valueOf(userInfo.get("id"));
+        BoardDto dto =  new BoardDto(no, board.getTitle(), userInfo.get("name"), board.getCreatedAt() , board.getType() ,board.getContent(), board.getBoardId(),userId);
         allItems.add(dto);
         filterByType(currentBoardType);
         updatePagination();
+
     }
 }

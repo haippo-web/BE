@@ -1,5 +1,6 @@
 package com.mypage.controller;
 
+
 import com.login.controller.DesktopController;
 import com.login.model.User;
 import com.mypage.Model.assignment.AssignmentSubmit;
@@ -62,6 +63,13 @@ public class AssignmentController {
     /* ================================================================
      *  (A) 초기화  (뷰 로드 직후 자동 호출)
      * ============================================================ */
+    private User currentUser;
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        System.out.println("[XXXController] 로그인 유저: " + user.getName());
+    }
+    
     @FXML
     public void initialize() {
         /* 제출 모달 */

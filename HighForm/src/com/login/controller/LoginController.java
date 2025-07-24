@@ -8,7 +8,6 @@ import com.login.model.User;
 import com.login.service.UserService;
 import com.util.DBConnection;
 import com.util.RedisLoginService;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -77,16 +76,14 @@ public class LoginController {
             DesktopController desktopController = loader.getController();
             desktopController.setCurrentUser(user); //로그인한 사용자 정보 주입
 
+
             RedisLoginService redisService = new RedisLoginService();
             redisService.saveLoginUserToRedis(user.getId(), user.getName(), user.getRole());
-            
-            
+
             Connection conn = DBConnection.getConnection();    
             AttendanceService attendanceService = AttendanceService.createInstance(conn, AttendanceCodeService.getInstance());
             desktopController.setAttendanceService(attendanceService);
 
-            
-            
      
             currentStage.setScene(new Scene(desktop, 1000, 750));
             currentStage.setTitle("HighForm Desktop - " + user.getName() + " (" + user.getRole() + ")");

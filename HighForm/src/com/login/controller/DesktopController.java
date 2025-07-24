@@ -50,7 +50,6 @@ public class DesktopController {
     // 강아지 캐릭터 관련 변수들
     private ImageView dogCharacterView;
     private Label notificationBubble;
-    
     private static User currentUser;
     private Timeline timeline;
     private Timeline dogAnimationTimeline;
@@ -63,7 +62,6 @@ public class DesktopController {
     private int currentAnimationFrame = 0;
     private String currentNotification = "안녕하세요!";
     private boolean isAnimating = false;
-    
     
     // 알림
     private boolean isNotificationExpanded = false;
@@ -102,7 +100,7 @@ public class DesktopController {
             dogCharacterView.setFitHeight(200);
             dogCharacterView.setLayoutX(600);
             dogCharacterView.setLayoutY(420);
-            
+           
             // 클릭 이벤트 추가
             dogCharacterView.setOnMouseClicked(e -> onDogCharacterClick());
             
@@ -143,7 +141,6 @@ public class DesktopController {
         }
     }
 
-
     // 강아지 캐릭터 초기화
     private void initializeDogCharacter() {
         try {
@@ -162,6 +159,7 @@ public class DesktopController {
         }
     }
     
+
     // 확장된 알림 내용 초기화
     private void initializeExpandedNotification() {
     	expandedNotificationContent = new VBox(5);
@@ -496,9 +494,6 @@ public class DesktopController {
         randomNotificationTimeline.setCycleCount(Timeline.INDEFINITE);
         randomNotificationTimeline.play();
     }
-    
-    
-    
     
     // 알림 표시
     public void showNotification(String message) {
@@ -972,7 +967,7 @@ public class DesktopController {
         
         RedisLoginService redisService = new RedisLoginService();
         redisService.deleteLoginUserFromRedis();
-        
+       
         
         shutdownAlert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
@@ -1007,8 +1002,6 @@ public class DesktopController {
             
             // 현재 사용자 정보 초기화
             currentUser = null;
-            
-
             
             System.out.println("로그아웃 완료");
             

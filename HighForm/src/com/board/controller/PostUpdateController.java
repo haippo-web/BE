@@ -5,14 +5,12 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
-
 import com.board.dao.BoardDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.dto.BoardDto;
 import com.board.model.dto.BoardWriteRequestDto;
 import com.util.RedisLoginService;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -37,7 +35,7 @@ public class PostUpdateController {
     private String UserName = ""; // 현재 로그인한 사용자 (실제로는 세션에서 가져와야 함)
     private String UserRole = "";
     private Long UserId = null;
-    
+
     
     public void setBoardId(Long boardId) {
         this.boardId = boardId;

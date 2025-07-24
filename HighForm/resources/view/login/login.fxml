@@ -3,7 +3,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
-
 <StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.login.controller.LoginController"
            style="-fx-background-color: #188492;" prefWidth="1000" prefHeight="750">
 
@@ -27,7 +26,6 @@
                 <!-- 안내 문구 -->
                 <Label text="Type a user name and password to log on"
                        style="-fx-font-family: 'Consolas'; -fx-font-size: 12; -fx-text-fill: #222; -fx-padding: 8 0 0 12; -fx-alignment: CENTER_LEFT;"/>
-
                 <!-- 입력 폼 -->
                 <GridPane hgap="8" vgap="8" alignment="CENTER_LEFT" style="-fx-padding: 8 0 0 24;">
 

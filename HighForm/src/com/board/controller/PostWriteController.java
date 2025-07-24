@@ -25,6 +25,7 @@ public class PostWriteController {
     @FXML private Button browseBtn, submitBtn;
 
     private BoardController boardController;
+
     private PostDetailController postDetailController;
 
     private BoardCategory selectedType = BoardCategory.DATA_ROOM;

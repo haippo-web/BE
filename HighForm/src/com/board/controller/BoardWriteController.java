@@ -31,7 +31,9 @@ public class BoardWriteController {
     @FXML private Button browseBtn, submitBtn, closeBtn;
     
     private BoardController boardController;
+
     private PostDetailController postDetailController;
+
     private File selectedFile;
     private final BoardDao boardDao;
     private final FileLocationDao fileLocationDao;

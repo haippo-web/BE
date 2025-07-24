@@ -23,6 +23,7 @@ import com.board.model.Comment;
 import com.board.model.FileLocation;
 import com.util.RedisLoginService;
 
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -78,7 +79,8 @@ public class PostDetailController implements Initializable {
     public PostDetailController() {
 		this.boardDao = new BoardDao().getInstance();
 		this.commentDao = new CommentDao().getInstance();
-        this.fileLocationDao = FileLocationDao.getInstance();
+    this.fileLocationDao = FileLocationDao.getInstance();
+
         // 반드시 public, 파라미터 없음
     }
     
@@ -297,6 +299,7 @@ public class PostDetailController implements Initializable {
             commentTextArea.clear();
             // 댓글 목록 새로고침
             comments = commentDao.getCommentsByBoardId(boardId, UserName);
+
             displayComments();
             showAlert("성공", "댓글이 작성되었습니다.");
         } else {

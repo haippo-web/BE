@@ -1,0 +1,9 @@
+.root {
+    -fx-font-family: 'DungGeunMo', 'Arial', sans-serif;
+}
+
+
+.table-view .column-header {
+         -fx-font-family: "DungGeunMo";
+         -fx-font-size: 14px;
+}

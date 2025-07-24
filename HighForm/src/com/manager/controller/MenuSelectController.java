@@ -1,5 +1,7 @@
 package com.manager.controller;
 
+import com.login.model.User;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -31,6 +33,13 @@ public class MenuSelectController {
         // 초기화 로직이 필요한 경우 여기에 작성
         System.out.println("MenuSelectController 초기화 완료");
     }
+    private User currentUser;
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        System.out.println("[MenuSelectController] 로그인 사용자: " + user.getName());
+    }
+
     
     // 강의 관리
     @FXML

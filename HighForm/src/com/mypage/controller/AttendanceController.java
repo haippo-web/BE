@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.login.model.User;
 import com.mypage.Model.attendance.Attendance;
 import com.mypage.dao.attendance.AttendanceDAO;
 import java.time.format.DateTimeFormatter; 
@@ -49,7 +50,12 @@ public class AttendanceController {
         loadAttendanceList();   // 출결 리스트 로드
         loadAttendanceRate();   // 출결률 로드
     }
+    private User currentUser;
 
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        System.out.println("[AttendanceController] 로그인 사용자: " + user.getName());
+    }
     /* -----------------------------------------------------------
      * 출결 리스트 로드
      * ----------------------------------------------------------- */

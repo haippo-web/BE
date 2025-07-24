@@ -18,6 +18,7 @@ import java.time.*;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import com.login.model.User;
 import com.mypage.Model.Schedule;
 import com.mypage.dao.ScheduleDAO;
 import com.mypage.dao.ScheduleDaoImpl;         
@@ -47,7 +48,12 @@ public class CalendarController implements Initializable {
         this(SessionContext.getLoginUserId());      // 직접 관리하는 세션 헬퍼
     }
     */
+    private User currentUser;
 
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        System.out.println("[XXXController] 로그인 유저: " + user.getName());
+    }
     /* ========== 초기화 ========== */
     @Override
     public void initialize(URL url, ResourceBundle rb) {

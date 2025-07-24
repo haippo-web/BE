@@ -9,12 +9,14 @@ import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.dto.BoardDto;
 import com.board.model.dto.BoardWriteRequestDto;
+import com.login.model.User;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
 
 public class PostWriteController {
     @FXML private ComboBox<String> typeComboBox;
@@ -31,6 +33,12 @@ public class PostWriteController {
     private String attachmentPath = "";
     private final BoardDao boardDao;
     
+    private User currentUser;
+    
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        System.out.println("[BoardController] 로그인한 사용자: " + user.getName());
+    }
     
     public PostWriteController() {
 		this.boardDao = new BoardDao().getInstance();
@@ -75,7 +83,8 @@ public class PostWriteController {
     private void handleSubmitBtn(ActionEvent event) throws ParseException {
         String title = titleField.getText().trim();
         String content = contentArea.getText().trim();
-        String author = "교수님"; // 실제로는 로그인한 사용자 정보를 가져와야 함
+//        String author = "교수님"; // 실제로는 로그인한 사용자 정보를 가져와야 함
+        String author = currentUser.getName(); 
         if (title.isEmpty() || content.isEmpty()) {
             showAlert("제목과 내용을 입력하세요.");
             return;
@@ -86,7 +95,8 @@ public class PostWriteController {
 //        newItem.setAttachmentPath(attachmentPath);
     
         Long fileId = 1L;
-        Long userId = 1L;
+//        Long userId = 1L;
+        Long userId = currentUser.getId();
         BoardWriteRequestDto newPost = new BoardWriteRequestDto(1, title, author,  selectedType,content,fileId );
         
        

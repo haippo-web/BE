@@ -11,15 +11,40 @@ import javafx.stage.Stage;
 public class Main extends Application {
     private Stage primaryStage;
 
+//    @Override
+//    public void start(Stage primaryStage) throws Exception {
+//     try {
+//            // 1. 폰트 로드
+//            Font.loadFont(getClass().getResourceAsStream("/fonts/DungGeunMo.ttf"), 14);
+//
+//            // 2. FXML 로드 및 Scene 생성
+//            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/manager/menuSelect.fxml"));
+//            Scene scene = new Scene(loader.load(), 1000, 750);
+//
+//            // 3. CSS 적용 (폰트 패밀리 지정 포함)
+//            scene.getStylesheets().add(getClass().getResource("/fonts/global.css").toExternalForm());
+//
+//            primaryStage.setTitle("Management Menu");
+//            primaryStage.setScene(scene);
+//            primaryStage.show();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
+        
+        javafx.scene.text.Font.loadFont(//폰트로드 
+                getClass().getResourceAsStream("/fonts/DungGeunMo.ttf"), 14);
         showSplash();
     }
 
     private void showSplash() throws Exception {
-        Parent splash = FXMLLoader.load(getClass().getResource("/view/login/splash.fxml"));
-        primaryStage.setScene(new Scene(splash, 1000, 750));
+    	Parent splash = FXMLLoader.load(getClass().getResource("/view/login/splash.fxml"));
+        Scene scene = new Scene(splash, 1000, 750); // Scene 객체 생성과 동시에 변수에 저장
+        scene.getStylesheets().add(getClass().getResource("/fonts/global.css").toExternalForm());
+        primaryStage.setScene(scene);
         primaryStage.show();
 
         // 3초 후 로딩 화면으로 전환
@@ -45,15 +70,12 @@ public class Main extends Application {
     }
 
     private void showLogin() throws Exception {
-        Parent login = FXMLLoader.load(getClass().getResource("/view/login/login.fxml"));
-        primaryStage.setScene(new Scene(login, 1000, 750));
+    	Parent login = FXMLLoader.load(getClass().getResource("/view/login/login.fxml"));
+        Scene scene = new Scene(login, 1000, 750); 
+        scene.getStylesheets().add(getClass().getResource("/fonts/global.css").toExternalForm());
+        primaryStage.setScene(scene);
     }
 
-
-//    	scene.getStylesheets().add(getClass().getResource("/fonts/global.css").toExternalForm());
-//    	primaryStage.setScene(scene);
-//    }
-    
 
     public static void main(String[] args) {
         launch(args);

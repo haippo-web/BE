@@ -10,6 +10,7 @@ import com.board.dao.BoardDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.dto.BoardDto;
+import com.login.model.User;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -54,6 +55,11 @@ public class BoardController {
         // 반드시 public, 파라미터 없음
     }
     
+    private User currentUser;
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        System.out.println("[BoardController] 로그인된 사용자: " + user.getName());
+    }
     @FXML
     public void initialize() throws ParseException {
         // 테이블 높이 고정 설정

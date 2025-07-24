@@ -1,5 +1,7 @@
 package com.manager.controller;
 
+import com.login.model.User;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -10,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 public class MenuSelectController {
+
 	@FXML
 	private Button courseManagementButton;
 
@@ -22,6 +25,12 @@ public class MenuSelectController {
 	@FXML
 	private Button memberManagementButton;
 
+    private User currentUser;
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        System.out.println("[BoardController] 로그인된 사용자: " + user.getName());
+    }
+    
 	@FXML
 	private void initialize() {
 		// 초기화 로직이 필요한 경우 여기에 작성

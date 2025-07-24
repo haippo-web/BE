@@ -30,9 +30,11 @@ public class DBConnection {
                 url = props.getProperty("db.url");
                 user = props.getProperty("db.user");
                 password = props.getProperty("db.password");
+
                 geminiKey = props.getProperty("API_KEY");
                 
                 System.out.println(url);
+
 
             }
         } catch (Exception e) {
@@ -47,10 +49,12 @@ public class DBConnection {
         System.out.println("[DB] User: " + conn.getMetaData().getUserName());
         return conn;
     }
+
     
     public static String getKey() {
         return geminiKey;
     }
 
 }
+
 

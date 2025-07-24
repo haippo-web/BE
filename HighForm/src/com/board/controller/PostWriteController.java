@@ -9,6 +9,7 @@ import com.board.dao.FileLocationDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.dto.BoardWriteRequestDto;
+import com.login.model.User;
 import com.util.RedisLoginService;
 
 import javafx.event.ActionEvent;
@@ -16,6 +17,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
 
 public class PostWriteController {
     @FXML private ComboBox<String> typeComboBox;
@@ -38,6 +40,12 @@ public class PostWriteController {
     private String UserRole = "";
     private Long UserId = null;
     
+    private User currentUser;
+    
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        System.out.println("[BoardController] 로그인한 사용자: " + user.getName());
+    }
     
     public PostWriteController() {
 		this.boardDao = new BoardDao().getInstance();

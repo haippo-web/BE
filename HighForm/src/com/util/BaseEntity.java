@@ -13,7 +13,6 @@ public abstract class BaseEntity {
 
     protected char del_yn;
 
-
     public void markAsDeleted() { this.del_yn = 'Y'; }
 }
 

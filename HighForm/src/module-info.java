@@ -8,7 +8,8 @@ module HighForm {
 	requires java.sql;
 	requires jakarta.mail;
 	requires redis.clients.jedis;
-
+	requires java.net.http;
+	requires com.google.gson;
 
     /* ───── 런처에서 접근해야 하는 패키지 ───── */
     exports com.mypage;                        

@@ -1,0 +1,21 @@
+.dialog-pane {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #444;
+    -fx-border-width: 2px;
+    -fx-font-family: 'DungGeunMo';
+    -fx-font-size: 14px;
+    -fx-text-fill: black;
+}
+
+.dialog-pane .content.label {
+    -fx-text-fill: black;
+}
+
+.dialog-pane > *.button-bar > *.button {
+    -fx-font-family: 'DungGeunMo';
+    -fx-font-size: 13px;
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #dcdcdc);
+    -fx-border-color: #666;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.3), 2, 0.1, 1, 1);
+}

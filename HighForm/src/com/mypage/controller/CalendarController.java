@@ -18,6 +18,7 @@ import java.time.*;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import com.login.model.User;
 import com.mypage.Model.Schedule;
 import com.mypage.dao.ScheduleDAO;
 import com.mypage.dao.ScheduleDaoImpl;         
@@ -41,13 +42,24 @@ public class CalendarController implements Initializable {
         this.scheduleDAO = new ScheduleDaoImpl();   // ⬅️ ④ DBConnection 사용 DAO
         this.currentYm   = YearMonth.now();
     }
-
+ 
+    public CalendarController() {
+        this.scheduleDAO = new ScheduleDaoImpl();
+        this.currentYm = YearMonth.now();
+    }
     /* FXML 로더가 no‑arg 생성자를 요구한다면 ↓ 하나 더 추가해두면 됩니다.
     public CalendarController() {
         this(SessionContext.getLoginUserId());      // 직접 관리하는 세션 헬퍼
     }
     */
+    private User currentUser;
 
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        this.loginUserId = user.getId();
+        System.out.println("[XXXController] 로그인 유저: " + user.getName());
+        drawCalendar();
+    }
     /* ========== 초기화 ========== */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -55,7 +67,7 @@ public class CalendarController implements Initializable {
         nextBtn.setOnAction(e -> moveMonth(+1));
         addBtn .setOnAction(e -> openAddDialog());
         editBtn.setOnAction(e -> openDailyView(LocalDate.now()));
-        drawCalendar();
+        
     }
 
     /* ========== 달 이동 ========== */

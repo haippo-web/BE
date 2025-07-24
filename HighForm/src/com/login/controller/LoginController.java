@@ -54,11 +54,11 @@ public class LoginController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-        alert.getDialogPane().setStyle(
-            "-fx-background-color: #c0c0c0;" +
-            "-fx-font-family: 'MS Sans Serif';" +
-            "-fx-font-size: 11px;"
-        );
+
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(getClass().getResource("/fonts/alert.css").toExternalForm());
+        dialogPane.getStyleClass().add("retro-alert");
+
         alert.showAndWait();
     }
 
@@ -77,15 +77,9 @@ public class LoginController {
             AttendanceService attendanceService = AttendanceService.createInstance(conn, AttendanceCodeService.getInstance());
             desktopController.setAttendanceService(attendanceService);
 
-            
-            
-     
+      
             currentStage.setScene(new Scene(desktop, 1000, 750));
             currentStage.setTitle("HighForm Desktop - " + user.getName() + " (" + user.getRole() + ")");
-
-//            Scene desktopScene = new Scene(desktop, 1000, 750);
-//            currentStage.setScene(desktopScene);
-//            currentStage.setTitle("HighForm Desktop - " + user.getName() + " (" + user.getRole() + ")");
 
         } catch (Exception e) {
             e.printStackTrace();

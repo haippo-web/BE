@@ -640,7 +640,7 @@ public class DesktopController {
     private void handleLogout() {
         // 확인 대화상자 표시
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Log Off HighForm");
+        confirmAlert.setTitle("사용자 전환");
         confirmAlert.setHeaderText(null);
         confirmAlert.setContentText("정말 로그오프 하시겠습니까?");
         

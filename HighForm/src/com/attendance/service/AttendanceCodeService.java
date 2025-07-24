@@ -7,8 +7,13 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import jakarta.mail.*;
+import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import redis.clients.jedis.Jedis;

@@ -4,16 +4,20 @@
 
 <VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.board.controller.BoardController" spacing="0" style="-fx-background-color: #C0C0C0;">
+
     <!-- 상단 타이틀 바 -->
+
     <HBox style="-fx-background-color: #000080; -fx-padding: 5;" alignment="CENTER_LEFT">
         <Label text="📁" style="-fx-text-fill: yellow; -fx-font-size: 16px;" />
         <Label text="Boadr" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
     </HBox>
+
     <!-- 경로 바 -->
     <HBox style="-fx-background-color: #C0C0C0; -fx-padding: 5; -fx-border-color: #808080; -fx-border-width: 1;">
         <Label text="C:\Board\DataRoom" style="-fx-font-size: 12px;" />
     </HBox>
     <!-- 게시글 테이블 -->
+
     <TableView fx:id="postTableView" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-border-color: #808080; -fx-border-width: 1;">
         <columns>
             <TableColumn fx:id="noColumn" text="No" prefWidth="50" />

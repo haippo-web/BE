@@ -4,6 +4,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 
+
 <StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.login.controller.LoginController"
            style="-fx-background-color: #188492;" prefWidth="1000" prefHeight="750">
     
@@ -11,7 +12,7 @@
         <StackPane alignment="CENTER">
             <VBox style="-fx-background-color: #eaeaea; -fx-border-color: #222; -fx-border-width: 2; -fx-background-radius: 4; -fx-border-radius: 4; -fx-effect: dropshadow(gaussian, #222, 8, 0.2, 0, 2);" 
                   maxWidth="350" minWidth="350" maxHeight="230" minHeight="230" alignment="TOP_CENTER">
-                
+
                 <!-- 상단 바 -->
                 <HBox style="-fx-background-color: linear-gradient(to bottom, #1a4fa3 90%, #eaeaea 100%); -fx-border-width: 0 0 2 0; -fx-border-color: #222;">
                     <ImageView fitWidth="20" fitHeight="20" style="-fx-padding: 2 4 2 6;">
@@ -30,7 +31,7 @@
 
                 <!-- 입력 폼 -->
                 <GridPane hgap="8" vgap="8" alignment="CENTER_LEFT" style="-fx-padding: 8 0 0 24;">
-                    
+
                     <!-- 아이디 -->
                     <ImageView fitWidth="24" fitHeight="24" GridPane.rowIndex="0" GridPane.columnIndex="0">
                         <image>
@@ -61,4 +62,6 @@
             </VBox>
         </StackPane>
     </VBox>
+
 </StackPane>
+

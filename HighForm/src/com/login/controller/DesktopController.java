@@ -253,6 +253,7 @@ public class DesktopController {
     public void setCurrentUser(User user) {
         this.currentUser = user;
         updateWelcomeMessage();
+        System.out.println("[DEBUG] DesktopController currentUser 복원: " + user.getName());
     }
     
     private void updateWelcomeMessage() {
@@ -461,26 +462,42 @@ public class DesktopController {
     @FXML
     private void openmyCheck() {
         try {
+            // currentUser null 체크 추가
+            if (currentUser == null) {
+                showAlert("오류", "사용자 정보가 없습니다. 다시 로그인해주세요.");
+                return;
+            }
+            
             showNotification("출결리스트를 열었습니다!");
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/attendance/attendance_list.fxml"));
-
             Parent root = loader.load();
 
             com.mypage.controller.AttendanceController controller = loader.getController();
+            
+            // controller null 체크 추가
+            if (controller == null) {
+                showAlert("오류", "출결 컨트롤러를 불러올 수 없습니다.");
+                return;
+            }
+            
+            // currentUser를 다시 확인하고 전달
+            System.out.println("[DEBUG] currentUser 전달 전 체크: " + 
+                              (currentUser != null ? currentUser.getName() : "null"));
+            
             controller.setCurrentUser(currentUser);
 
-
+            Scene scene = new Scene(root, 1000, 750);
             Stage stage = (Stage) startButton.getScene().getWindow();
-            stage.setScene(new Scene(root, 1000, 750));
+            stage.setScene(scene);
             stage.setTitle("출결 관리");
 
         } catch (Exception e) {
+            System.err.println("[ERROR] openmyCheck() 실행 중 오류 발생:");
             e.printStackTrace();
-            showAlert("오류", "출결 페이지를 열 수 없습니다.");
+            showAlert("오류", "출결 페이지를 열 수 없습니다: " + e.getMessage());
         }
     }
-    
     //마이페이지 과제 
     @FXML
     private void openAssignment() {

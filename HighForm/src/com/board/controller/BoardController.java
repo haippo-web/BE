@@ -2,13 +2,14 @@ package com.board.controller;
 
 
 import java.io.IOException;
-import java.sql.Date;
 import java.text.ParseException;
+import java.util.Map;
 
 import com.board.dao.BoardDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.dto.BoardDto;
+import com.util.RedisLoginService;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -47,7 +48,9 @@ public class BoardController {
     private static final double HEADER_HEIGHT = 32.0;
 
     private final BoardDao boardDao;
+    private RedisLoginService redisService = new RedisLoginService();
 
+    
     public BoardController() {
 		this.boardDao = new BoardDao().getInstance();
         // 반드시 public, 파라미터 없음
@@ -63,11 +66,7 @@ public class BoardController {
         boardTable.setMaxHeight(tableHeight);
 
         
-        // DB 게시물 데이터 호출 후 저장
-        allItems.addAll (boardDao.getBoardList(BoardCategory.BOARD));
-        allItems.addAll (boardDao.getBoardList(BoardCategory.DATA_ROOM));
-        allItems.addAll (boardDao.getBoardList(BoardCategory.NOTICE));
-        
+
 
         // 컬럼 바인딩
         noColumn.setCellValueFactory(cellData -> cellData.getValue().noProperty().asObject());
@@ -114,6 +113,8 @@ public class BoardController {
 
         
         // 초기화 - PageFactory는 한 번만 설정
+        allItems.clear();
+        allItems.addAll (boardDao.getBoardList(BoardCategory.NOTICE));
         filterByType(BoardCategory.NOTICE);
         pagination.setPageFactory(this::createPage);
         updatePagination();
@@ -124,7 +125,11 @@ public class BoardController {
     private void handleNoticeBtn(ActionEvent event) {
         currentBoardType = BoardCategory.NOTICE;
         pathLabel.setText("C:\\Board\\Notice");
+        
+        allItems.clear();
+        allItems.addAll (boardDao.getBoardList(BoardCategory.NOTICE));
         filterByType(BoardCategory.NOTICE);
+        
         updatePagination();
     }
 
@@ -133,7 +138,14 @@ public class BoardController {
     private void handleResourceBtn(ActionEvent event) {
         currentBoardType = BoardCategory.DATA_ROOM;
         pathLabel.setText("C:\\Board\\DataRoom");
+
+        allItems.clear();
+        allItems.addAll (boardDao.getBoardList(BoardCategory.DATA_ROOM));
+
         filterByType(BoardCategory.DATA_ROOM);
+        
+
+        
         updatePagination();
     }
 
@@ -142,6 +154,10 @@ public class BoardController {
     private void handleBoardBtn(ActionEvent event) {
         currentBoardType = BoardCategory.BOARD;
         pathLabel.setText("C:\\Board\\Board");
+        // DB 게시물 데이터 호출 후 저장
+        allItems.clear();
+        allItems.addAll (boardDao.getBoardList(BoardCategory.BOARD));
+
         filterByType(BoardCategory.BOARD);
         updatePagination();
     }
@@ -155,9 +171,12 @@ public class BoardController {
 
     @FXML
     private void handleUploadBtn(ActionEvent event) {
-    	// TODO :: 유저 연동 시 권한 체크  
-    	String userRole = "MANAGER";
-//    	String userRole = "STUDENT";
+    	// TODO :: 유저 연동 시 권한 체크
+        Map<String, String> userInfo = redisService.getLoginUserFromRedis();
+
+     // STUDENT, PROFESSOR, MANAGER
+        
+    	String userRole = userInfo.get("role");
         try {
         	// 권한이 매니저나 교수일 경우
         	if(userRole.equals("MANAGER") || userRole.equals( "PROFESSOR")) {
@@ -253,9 +272,11 @@ public class BoardController {
     // 게시글 작성 후 리스트에 추가
     // TODO :: User 연동되면 USerId 추가
     public void addNewPost(Board board) {
+        Map<String, String> userInfo = redisService.getLoginUserFromRedis();
+
         int no = allItems.size() + 1;
-        Long userId = 2L;
-        BoardDto dto =  new BoardDto(no, board.getTitle(), "test", board.getCreatedAt() , board.getType() ,board.getContent(), board.getBoardId(),userId);
+        Long userId = Long.valueOf(userInfo.get("id"));
+        BoardDto dto =  new BoardDto(no, board.getTitle(), userInfo.get("name"), board.getCreatedAt() , board.getType() ,board.getContent(), board.getBoardId(),userId);
         allItems.add(dto);
         filterByType(currentBoardType);
         updatePagination();

@@ -29,11 +29,11 @@ public class ApprovalListDAO {
 	    String sql ="SELECT A.ID, '휴가' AS REQUEST_TYPE, A.REASON, "
 	    		+ "M.NAME AS USER_NAME, "
 	    		+ "A.PROOF_FILE, A.START_DATE, A.END_DATE, A.REQUESTED_AT, A.STATUS, "
-	    		+ "C.COURSE_NAME "
+	    		+ "C.NAME AS CURRICULUM_NAME "
 	    		+ "FROM attendance_approval_request A "
-	    		+ "INNER JOIN Members M ON A.USER_ID = M.ID "
-	    		+ "LEFT JOIN enrollment E ON A.USER_ID = E.MEMBER_ID "
-	    		+ "LEFT JOIN course C ON E.COURSE_ID = C.COURSE_ID "
+	    		+ "INNER JOIN user_info M ON A.USER_ID = M.ID "
+	    		+ "LEFT JOIN enrollment E ON A.USER_ID = E.ID "
+	    		+ "LEFT JOIN CURRICULUM C ON E.CURRICULUM_ID = C.ID "
 	    		+ "ORDER BY CASE WHEN A.STATUS = 'progressing' THEN 0 ELSE 1 END, A.REQUESTED_AT DESC";
 
 	    try (Connection conn = getConnection();
@@ -52,7 +52,7 @@ public class ApprovalListDAO {
 	            approval.setStart_date(rs.getString("START_DATE"));
 	            approval.setEnd_date(rs.getString("END_DATE"));
 	            approval.setUserName(rs.getString("USER_NAME"));
-	            approval.setUserAffiliation(rs.getString("COURSE_NAME"));
+	            approval.setUserAffiliation(rs.getString("CURRICULUM_NAME"));
 
 	            approvals.add(approval);
 	        }

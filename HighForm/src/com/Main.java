@@ -1,6 +1,6 @@
 package com;
-import java.sql.SQLException;
-import com.board.dao.BoardDao;
+
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -51,7 +51,9 @@ public class Main extends Application {
     	primaryStage.setScene(scene);
     }
 
+
     public static void main(String[] args) {
         launch(args);
     }
+
 }

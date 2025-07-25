@@ -45,7 +45,9 @@ public class RedisLoginService {
 
     public void deleteLoginUserFromRedis() {
         try (Jedis jedis = new Jedis(REDIS_HOST, REDIS_PORT)) {
-            jedis.flushAll(); // 모든 DB의 모든 키 삭제
+            String key = "login:user:";
+            jedis.del(key); 
+//            jedis.flushAll(); // 모든 DB의 모든 키 삭제
         }
     }
     

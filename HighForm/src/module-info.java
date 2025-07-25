@@ -1,5 +1,4 @@
 module HighForm {
-
 	requires javafx.controls;
 	requires javafx.fxml;
 	requires javafx.base;
@@ -12,7 +11,7 @@ module HighForm {
 
     /* ───── 런처에서 접근해야 하는 패키지 ───── */
     exports com.mypage;                        
-
+	exports com.manager;
     /* JavaFX 런처가 리플렉션으로 new 할 때 접근 허용 */
     opens com.mypage to javafx.graphics;      
     
@@ -29,3 +28,4 @@ module HighForm {
     opens com.notification.model to javafx.fxml;
     
 }
+

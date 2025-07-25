@@ -14,6 +14,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -57,11 +58,11 @@ public class LoginController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-        alert.getDialogPane().setStyle(
-            "-fx-background-color: #c0c0c0;" +
-            "-fx-font-family: 'MS Sans Serif';" +
-            "-fx-font-size: 11px;"
-        );
+
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(getClass().getResource("/fonts/alert.css").toExternalForm());
+        dialogPane.getStyleClass().add("retro-alert");
+
         alert.showAndWait();
     }
 
@@ -69,6 +70,9 @@ public class LoginController {
         try {
             System.out.println("showDesktop() 호출됨");  // 디버깅용
 
+            RedisLoginService redisService = new RedisLoginService();
+            redisService.saveLoginUserToRedis(user.getId(), user.getName(), user.getRole());
+            
             Stage currentStage = (Stage) okButton.getScene().getWindow();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login/desktop.fxml"));
             Parent desktop = loader.load();
@@ -77,8 +81,7 @@ public class LoginController {
             desktopController.setCurrentUser(user); //로그인한 사용자 정보 주입
 
 
-            RedisLoginService redisService = new RedisLoginService();
-            redisService.saveLoginUserToRedis(user.getId(), user.getName(), user.getRole());
+
 
             Connection conn = DBConnection.getConnection();    
             AttendanceService attendanceService = AttendanceService.createInstance(conn, AttendanceCodeService.getInstance());

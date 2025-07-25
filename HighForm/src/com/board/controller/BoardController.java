@@ -1,5 +1,6 @@
 package com.board.controller;
 
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Map;
@@ -8,6 +9,9 @@ import com.board.dao.BoardDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.dto.BoardDto;
+import com.board.service.BoardService;
+import com.login.controller.DesktopController;
+import com.login.model.User;
 import com.util.RedisLoginService;
 
 import javafx.collections.FXCollections;
@@ -46,16 +50,62 @@ public class BoardController {
     private static final double ROW_HEIGHT = 32.0;
     private static final double HEADER_HEIGHT = 32.0;
 
-    private final BoardDao boardDao;
+
+    private final BoardService boardService;
     private RedisLoginService redisService = new RedisLoginService();
 
     
     public BoardController() {
-		this.boardDao = new BoardDao().getInstance();
+        this.boardService = BoardService.getInstance();
         // 반드시 public, 파라미터 없음
     }
     
+    private User currentUser;
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        System.out.println("[BoardController] 로그인된 사용자: " + user.getName());
+    }
     @FXML
+    private Button closeButton;
+    
+    @FXML
+    private void handleCloseButton() {
+        try {
+            // 현재 스테이지 가져오기
+            Stage stage = (Stage) closeButton.getScene().getWindow();
+
+            // FXML 로드
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login/Desktop.fxml"));
+            Parent root = loader.load();
+
+            // 컨트롤러 가져와 사용자 정보 전달
+            DesktopController desktopController = loader.getController();
+            if (desktopController != null && currentUser != null) {
+                desktopController.setCurrentUser(currentUser);
+                System.out.println("[DEBUG] 데스크탑으로 사용자 정보 전달: " + currentUser.getName());
+            } else {
+                System.err.println("[ERROR] DesktopController 또는 currentUser가 null입니다.");
+            }
+
+            // 씬 전환
+            Scene scene = new Scene(root, 1000, 750);
+            stage.setScene(scene);
+            stage.setTitle("HighForm - 데스크탑");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("페이지 이동 오류", "데스크탑으로 이동할 수 없습니다.");
+        }
+    }
+
+
+    private void showError(String string, String string2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@FXML
     public void initialize() throws ParseException {
         // 테이블 높이 고정 설정
         boardTable.setFixedCellSize(ROW_HEIGHT);
@@ -113,7 +163,7 @@ public class BoardController {
         
         // 초기화 - PageFactory는 한 번만 설정
         allItems.clear();
-        allItems.addAll (boardDao.getBoardList(BoardCategory.NOTICE));
+        allItems.addAll (boardService.getBoardList(BoardCategory.NOTICE));
         filterByType(BoardCategory.NOTICE);
         pagination.setPageFactory(this::createPage);
         updatePagination();
@@ -126,7 +176,7 @@ public class BoardController {
         pathLabel.setText("C:\\Board\\Notice");
         
         allItems.clear();
-        allItems.addAll (boardDao.getBoardList(BoardCategory.NOTICE));
+        allItems.addAll (boardService.getBoardList(BoardCategory.NOTICE));
         filterByType(BoardCategory.NOTICE);
         
         updatePagination();
@@ -139,7 +189,7 @@ public class BoardController {
         pathLabel.setText("C:\\Board\\DataRoom");
 
         allItems.clear();
-        allItems.addAll (boardDao.getBoardList(BoardCategory.DATA_ROOM));
+        allItems.addAll (boardService.getBoardList(BoardCategory.DATA_ROOM));
 
         filterByType(BoardCategory.DATA_ROOM);
         
@@ -155,7 +205,7 @@ public class BoardController {
         pathLabel.setText("C:\\Board\\Board");
         // DB 게시물 데이터 호출 후 저장
         allItems.clear();
-        allItems.addAll (boardDao.getBoardList(BoardCategory.BOARD));
+        allItems.addAll (boardService.getBoardList(BoardCategory.BOARD));
 
         filterByType(BoardCategory.BOARD);
         updatePagination();
@@ -214,11 +264,6 @@ public class BoardController {
             allItems.stream().filter(item -> BoardCategory.BOARD.equals(item.getType()))
             .forEach(currentItems::add);
         } else if (type.equals(BoardCategory.NOTICE)) {
-        	System.out.println(allItems.getFirst().getType().toString());
-        	System.out.println(BoardCategory.NOTICE == allItems.getFirst().getType());
-        	System.out.println(BoardCategory.NOTICE.equals(allItems.getFirst().getType()));
-        	
-        	
             allItems.stream().filter(item -> BoardCategory.NOTICE == item.getType())
                     .forEach(currentItems::add);
         } else if (type.equals(BoardCategory.DATA_ROOM)) {
@@ -279,5 +324,6 @@ public class BoardController {
         allItems.add(dto);
         filterByType(currentBoardType);
         updatePagination();
+
     }
 }

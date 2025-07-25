@@ -3,6 +3,7 @@ package com.login.controller;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import com.attendance.model.Attendance;
@@ -10,7 +11,13 @@ import com.attendance.service.AttendanceCheckResult;
 import com.attendance.service.AttendanceCodeService;
 import com.attendance.service.AttendanceService;
 import com.attendance.service.exception.AttendanceServiceException;
+import com.board.controller.BoardController;
 import com.login.model.User;
+import com.manager.controller.MenuSelectController;
+import com.mypage.controller.AssignmentController;
+import com.mypage.controller.CalendarController;
+
+import javafx.animation.Timeline;
 import com.notification.dao.NotificationDao;
 import com.notification.model.Notification;
 import com.util.RedisLoginService;
@@ -67,16 +74,24 @@ public class DesktopController {
     private boolean isNotificationExpanded = false;
     private VBox expandedNotificationContent;
     private Timeline expandAnimation;
-    private AttendanceService attendanceService;
+    private static AttendanceService attendanceService;
     private NotificationDao notificationDao = NotificationDao.getInstance();
-    
+    private RedisLoginService redisService = new RedisLoginService();
+    private String UserName = ""; // 현재 로그인한 사용자 (실제로는 세션에서 가져와야 함)
+    private String UserRole = "";
+    private Long UserId = null;
     
     public void setAttendanceService(AttendanceService attendanceService) {
         this.attendanceService = attendanceService;
     }
+   
     
     @FXML
     public void initialize() {
+        Map<String, String> userInfo = redisService.getLoginUserFromRedis();
+        UserName = userInfo.get("name");
+        UserRole = userInfo.get("role");
+        UserId = Long.valueOf(userInfo.get("id"));
         // 시간 업데이트 타이머 시작
         startClock();
         // 시작 메뉴 초기화
@@ -742,41 +757,126 @@ public class DesktopController {
     private void openMyComputer() {
         showNotification("내 컴퓨터를 열었습니다!");
     }
-    
+    //마이페이지 출결관리
     @FXML
-    private void openFileManager() {
-        showNotification("폴더를 열었습니다!");
+    private void openmyCheck() {
+        try {
+            // currentUser null 체크 추가
+            if (currentUser == null) {
+                showAlert("오류", "사용자 정보가 없습니다. 다시 로그인해주세요.");
+                return;
+            }
+            
+            showNotification("출결리스트를 열었습니다!");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/attendance/attendance_list.fxml"));
+            Parent root = loader.load();
+
+            com.mypage.controller.AttendanceController controller = loader.getController();
+            
+            // controller null 체크 추가
+            if (controller == null) {
+                showAlert("오류", "출결 컨트롤러를 불러올 수 없습니다.");
+                return;
+            }
+            
+            // currentUser를 다시 확인하고 전달
+            System.out.println("[DEBUG] currentUser 전달 전 체크: " + 
+                              (currentUser != null ? currentUser.getName() : "null"));
+            
+            controller.setCurrentUser(currentUser);
+
+            Scene scene = new Scene(root, 1000, 750);
+            Stage stage = (Stage) startButton.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle("출결 관리");
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] openmyCheck() 실행 중 오류 발생:");
+            e.printStackTrace();
+            showAlert("오류", "출결 페이지를 열 수 없습니다: " + e.getMessage());
+        }
     }
-    
+    //마이페이지 과제 
     @FXML
-    private void openTrash() {
-        showNotification("휴지통을 열었습니다!");
+    private void openAssignment() {
+        try {
+            showNotification("과제 페이지를 열었습니다!");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/assignment/my_assignment_list.fxml"));
+            Parent root = loader.load();
+
+
+            AssignmentController controller = loader.getController();
+            controller.setCurrentUser(currentUser);
+
+            Stage stage = (Stage) startButton.getScene().getWindow();
+            stage.setScene(new Scene(root, 1000, 750));
+            stage.setTitle("과제 관리");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("오류", "과제 페이지를 열 수 없습니다.");
+        }
     }
+
     
     @FXML
     private void openBoard() {
         try {
-            showNotification("알림판으로 이동합니다!");
-            // 게시판 화면으로 이동
+            showNotification("게시판으로 이동합니다!");
+
             Stage currentStage = (Stage) startButton.getScene().getWindow();
-            Parent board = FXMLLoader.load(getClass().getResource("/view/board/boardList.fxml"));
-            currentStage.setScene(new Scene(board, 1000, 750));
-            currentStage.setTitle("HighForm - 알림판");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/BoardMain.fxml"));
+            Parent boardRoot = loader.load();
+
+            //  BoardController 인스턴스를 얻고 로그인한 사용자 정보 전달
+            BoardController controller = loader.getController();
+            controller.setCurrentUser(currentUser);
+
+            Scene boardScene = new Scene(boardRoot, 1000, 750);
+            currentStage.setScene(boardScene);
+            currentStage.setTitle("HighForm - 게시판");
+
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert("오류", "알림판을 열 수 없습니다.");
+            showAlert("오류", "게시판을 열 수 없습니다.");
         }
     }
-    
+
     @FXML
     private void openNotice() {
-        showNotification("공지사항을 확인해주세요!");
+        showNotification("알림을 확인해주세요!");
     }
-    
+ 
     @FXML
-    private void openVacationRequest() {
-        showNotification("휴가신청서를 작성해보세요!");
+    private void openManager() {
+        try {
+            showNotification("관리자 페이지에 접근합니다!");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/manager/MenuSelect.fxml"));
+            Parent root = loader.load();
+
+            // 컨트롤러에 현재 사용자 정보 주입
+            MenuSelectController controller = loader.getController();
+            controller.setCurrentUser(currentUser);
+
+            // 새 Stage 생성 (팝업창)
+            Stage popupStage = new Stage();
+            popupStage.setTitle("HighForm - 관리자 페이지");
+            popupStage.setScene(new Scene(root, 850, 600)); // 원하는 팝업 크기 지정
+            popupStage.initOwner(startButton.getScene().getWindow()); // 부모 창 설정
+            popupStage.setResizable(false);
+            popupStage.show(); // 또는 showAndWait() → 모달 형태
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("오류", "관리자 페이지를 열 수 없습니다.");
+        }
     }
+
+
     /**
      * 오늘의 출석 코드가 있는지 확인만 함 (생성하지 않음)
      * 스케줄러가 별도로 실행되어야 코드가 존재함
@@ -831,7 +931,7 @@ public class DesktopController {
             }
             
             // 출석 가능 여부 확인
-            AttendanceCheckResult result = attendanceService.canCheckIn(currentUser.getId());
+            AttendanceCheckResult result = attendanceService.canCheckIn(UserId);			//TODO
             if (!result.isPossible()) {
                 showAlert("출석 체크", result.getMessage());
                 return;
@@ -851,7 +951,7 @@ public class DesktopController {
 
             codeDialog.showAndWait().ifPresent(code -> {
                 try {
-                    Attendance attendance = attendanceService.checkIn(currentUser.getId(), code);
+                    Attendance attendance = attendanceService.checkIn(UserId, code);	//TODO
                     showNotification("출석 완료! 상태: " + attendance.getStatus().getDescription());
                     showAlert("출석 완료", "출석이 완료되었습니다!\n상태: " + attendance.getStatus().getDescription());
                 } catch (AttendanceServiceException e) {
@@ -869,11 +969,11 @@ public class DesktopController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-        alert.getDialogPane().setStyle(
-            "-fx-background-color: #c0c0c0;" +
-            "-fx-font-family: 'Malgun Gothic';" +
-            "-fx-font-size: 11px;"
+
+        alert.getDialogPane().getStylesheets().add(
+            getClass().getResource("/fonts/alert.css").toExternalForm()
         );
+
         alert.showAndWait();
     }
 
@@ -899,7 +999,7 @@ public class DesktopController {
     @FXML
     private void openClockOut() {
         try {
-            AttendanceCheckResult result = attendanceService.canCheckOut(currentUser.getId());
+            AttendanceCheckResult result = attendanceService.canCheckOut(UserId);		//TODO
             if (!result.isPossible()) {
                 showRetroInfoDialog("퇴근 체크", result.getMessage());
                 return;
@@ -908,11 +1008,13 @@ public class DesktopController {
             boolean confirmed = showRetroConfirmationDialog("퇴근하기", "진짜 퇴실 처리하시겠습니까?");
             if (confirmed) {
                 try {
-                    Attendance attendance = attendanceService.checkOut(currentUser.getId());
+                    Attendance attendance = attendanceService.checkOut(UserId);		//TODO
                     showNotification("퇴근 완료! 근무시간: " + String.format("%.2f", attendance.getWorkingHours()) + "시간");
                     showRetroInfoDialog("퇴근 완료", "수고하셨습니다!\n퇴근 시간: " + attendance.getCheckOut().toLocalTime());
                 } catch (AttendanceServiceException e) {
+                    e.printStackTrace();
                     showRetroInfoDialog("퇴근 오류", e.getMessage());
+
                 }
             }
         } catch (Exception e) {
@@ -921,17 +1023,30 @@ public class DesktopController {
         }
     }
         
-
-    
     @FXML
-    private void openCalculator() {
-        showNotification("계산기를 실행했습니다!");
+    private void openSchedule() {
+        try {
+            showNotification("달력을 열었습니다!");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/Calendar.fxml"));
+            Parent root = loader.load();
+
+            CalendarController controller = loader.getController();
+            controller.setCurrentUser(currentUser);
+
+            Stage stage = (Stage) startButton.getScene().getWindow();
+            stage.setScene(new Scene(root, 1000, 750));
+            stage.setTitle("달력 일정");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("오류", "달력 페이지를 열 수 없습니다.");
+        }
     }
-    
     private void handleLogout() {
         // 확인 대화상자 표시
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Log Off HighForm");
+        confirmAlert.setTitle("사용자 전환");
         confirmAlert.setHeaderText(null);
         confirmAlert.setContentText("정말 로그오프 하시겠습니까?");
         
@@ -994,6 +1109,7 @@ public class DesktopController {
             
             // 로그인 화면으로 전환
             Scene loginScene = new Scene(loginPage, 1000, 750);
+            loginScene.getStylesheets().add(getClass().getResource("/fonts/global.css").toExternalForm());
             currentStage.setScene(loginScene);
             currentStage.setTitle("HighForm Login");
             
@@ -1029,14 +1145,11 @@ public class DesktopController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-        
-        // 윈도우 98 스타일로 알럿 창 스타일링
-        alert.getDialogPane().setStyle(
-            "-fx-background-color: #c0c0c0;" +
-            "-fx-font-family: 'Malgun Gothic';" +
-            "-fx-font-size: 11px;"
+
+        alert.getDialogPane().getStylesheets().add(
+            getClass().getResource("/fonts/alert.css").toExternalForm()
         );
-        
+
         alert.showAndWait();
     }
     

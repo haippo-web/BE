@@ -24,10 +24,10 @@ public class CourseDAO {
 		}
 	}
 
-	// 모든 강의 조회
+	// 모든 유효 강의 조회
 	public List<Course> getAllCourses() {
 		List<Course> courses = new ArrayList<>();
-		String sql = "SELECT COURSE_ID, COURSE_NAME, START_DATE, END_DATE, INSTRUCTOR, MANAGER, NOTE FROM COURSE ORDER BY COURSE_ID";
+		String sql = "SELECT COURSE_ID, COURSE_NAME, START_DATE, END_DATE, INSTRUCTOR, MANAGER, NOTE FROM COURSE WHERE DEL_YN='N' ORDER BY COURSE_ID";
 
 		try (Connection conn = getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -81,7 +81,7 @@ public class CourseDAO {
 
 	// 강의 수정
 	public boolean updateCourse(Course course) {
-		String sql = "UPDATE COURSE SET COURSE_NAME=?, START_DATE=?, END_DATE=?, INSTRUCTOR=?, MANAGER=?, NOTE=? WHERE COURSE_ID=?";
+		String sql = "UPDATE COURSE SET COURSE_NAME=?, START_DATE=?, END_DATE=?, INSTRUCTOR=?, MANAGER=?, NOTE=?, UPDATED_AT=SYSDATE WHERE COURSE_ID=?";
 
 		try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -106,11 +106,12 @@ public class CourseDAO {
 
 	// 강의 삭제
 	public boolean deleteCourse(int courseId) {
-		String sql = "DELETE FROM COURSE WHERE COURSE_ID = ?";
+		String sql = "UPDATE COURSE SET DEL_YN ='Y', UPDATED_AT=SYSDATE WHERE COURSE_ID=?";
 
 		try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
 			pstmt.setInt(1, courseId);
+
 			int result = pstmt.executeUpdate();
 			System.out.println("강의 삭제 결과: " + result + "건 삭제");
 			return result > 0;
@@ -119,7 +120,8 @@ public class CourseDAO {
 			System.err.println("강의 삭제 중 오류 발생: " + e.getMessage());
 			e.printStackTrace();
 			return false;
-		}
+		}		
+		
 	}
 
 	// 특정 강의 조회 (필요시 사용)

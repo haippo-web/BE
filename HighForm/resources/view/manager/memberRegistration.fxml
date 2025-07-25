@@ -31,7 +31,7 @@
 		</HBox>
 	</top>
 	<center>
-		<VBox prefHeight="435.0" prefWidth="500.0" spacing="15.0">
+		<VBox prefHeight="255.0" prefWidth="500.0" spacing="15.0">
 			<children>
 				<GridPane hgap="10.0" vgap="15.0">
 					<columnConstraints>
@@ -45,7 +45,6 @@
 						<RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
 						<RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
 						<RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
-						<RowConstraints minHeight="80.0" prefHeight="80.0" vgrow="SOMETIMES" />
 					</rowConstraints>
 
 					<children>
@@ -107,8 +106,8 @@
 						<!-- 소속 -->
 						<HBox alignment="CENTER" prefHeight="100.0" prefWidth="180.0" GridPane.rowIndex="4">
 							<children>
-								<Label alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="소" />
-								<Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="속" />
+								<Label alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="수" />
+								<Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="업" />
 							</children>
 							<padding>
 								<Insets right="5.0" />
@@ -154,16 +153,7 @@
 						</ComboBox>
 
 						<!-- 비고 -->
-						<HBox alignment="CENTER" prefHeight="100.0" prefWidth="180.0" style="-fx-alignment: top-center;" GridPane.rowIndex="6">
-							<children>
-								<Label alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="비" />
-								<Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="고" />
-							</children>
-							<padding>
-								<Insets right="5.0" />
-							</padding>
-						</HBox>
-						<TextArea fx:id="noteArea" prefHeight="80.0" text="" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+						
 					</children>
 				</GridPane>
 			</children>

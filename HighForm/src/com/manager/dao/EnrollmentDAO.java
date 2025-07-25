@@ -26,7 +26,7 @@ public class EnrollmentDAO {
 
 	// 회원-강의 등록 (enrollment 테이블 insert)
 	public boolean insertEnrollment(int memberId, int courseId) {
-		String sql = "INSERT INTO enrollment (member_id, course_id) VALUES (?, ?)";
+		String sql = "INSERT INTO enrollment (member_id, CURRICULUM_ID) VALUES (?, ?)";
 
 		try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 

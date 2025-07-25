@@ -3,11 +3,13 @@ package com.board.controller;
 import java.io.File;
 import java.util.Map;
 
-import com.board.dao.BoardDao;
+import com.board.dao.CommentDao;
 import com.board.dao.FileLocationDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
+import com.board.model.Comment;
 import com.board.model.dto.BoardWriteRequestDto;
+import com.board.service.BoardService;
 import com.util.RedisLoginService;
 
 import javafx.event.ActionEvent;
@@ -19,9 +21,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
 public class BoardWriteController {
     
     @FXML private TextField titleField;
@@ -35,7 +35,7 @@ public class BoardWriteController {
     private PostDetailController postDetailController;
 
     private File selectedFile;
-    private final BoardDao boardDao;
+    private final BoardService boardService;
     private final FileLocationDao fileLocationDao;
     private RedisLoginService redisService = new RedisLoginService();
     private String UserName = ""; // 현재 로그인한 사용자 (실제로는 세션에서 가져와야 함)
@@ -44,7 +44,7 @@ public class BoardWriteController {
     
     
     public BoardWriteController() {
-		this.boardDao = new BoardDao().getInstance();
+		this.boardService = BoardService.getInstance();
         this.fileLocationDao = FileLocationDao.getInstance();
         // 반드시 public, 파라미터 없음
     }
@@ -120,7 +120,7 @@ public class BoardWriteController {
             // 1. 게시글 먼저 저장
             BoardWriteRequestDto newPost = new BoardWriteRequestDto(1, title, author, type, content, null);
             Board board = newPost.toEntity(newPost, null, UserId);
-            Long boardId = boardDao.createBoard(board);
+            Long boardId = boardService.createBoard(board);
             
             // 2. 첨부파일이 있다면 파일 저장
             Long fileId = null;
@@ -139,7 +139,7 @@ public class BoardWriteController {
             }
             
             // 4. DB에서 최신 게시글 정보 가져오기
-            Board boardEntity = boardDao.getBoard(boardId);
+            Board boardEntity = boardService.getBoard(boardId);
             
             // 5. 게시글 목록 새로고침
             if (boardController != null) {
@@ -148,6 +148,22 @@ public class BoardWriteController {
             
             showAlert("성공", "게시글이 성공적으로 작성되었습니다.");
             ((Stage) submitBtn.getScene().getWindow()).close();
+            
+
+//            // AI 체크박스가 체크되어 있으면
+//            if (aiQuestionCheck.isSelected()) {
+//                // 비동기로 AI 답변 요청
+//                new Thread(() -> {
+//                    String aiComment = GeminiApiClient.generateComment(title, content);
+//                    if (aiComment != null && !aiComment.isBlank()) {
+//                        // 댓글 저장 (UI 스레드에서)
+//                        javafx.application.Platform.runLater(() -> {
+//                            saveAiComment(boardId, aiComment, UserId);
+//                        });
+//                    }
+//                }).start();
+//            }
+
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -182,5 +198,15 @@ public class BoardWriteController {
         filePathField.clear();
         aiQuestionCheck.setSelected(false);
         selectedFile = null;
+    }
+    
+    private void saveAiComment(Long boardId, String comment, Long userId) {
+        Comment commentObj = Comment.builder()
+            .boardId(boardId)
+            .content(comment)
+            .userId(userId)
+            .author("AI")
+            .build();
+        CommentDao.getInstance().createComment(commentObj);
     }
 }

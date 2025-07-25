@@ -5,8 +5,6 @@
 //import java.net.http.HttpClient;
 //import java.net.http.HttpRequest;
 //import java.net.http.HttpResponse;
-
-//import java.sql.Connection;
 //import java.sql.SQLException;
 //import java.time.Duration;
 //
@@ -16,7 +14,7 @@
 //import com.util.DBConnection;
 //
 //public class GeminiApiClient {
-//    private static final String API_KEY; // 실제 API 키로 교체
+//    private static String API_KEY = "";
 //    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
 //    private static final HttpClient httpClient = HttpClient.newBuilder()
 //            .connectTimeout(Duration.ofSeconds(10))
@@ -25,14 +23,19 @@
 //    
 //    
 //    
-//    private String getKey() throws SQLException {
+//    private static String getKey() throws SQLException {
 //        return DBConnection.getKey();
 //    }
 //    
 //    
 //    public static String generateComment(String postContent, String postTitle) {
 //        try {
-//        	API_KEY = getKey();
+//        	try {
+//				API_KEY = getKey();
+//			} catch (SQLException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 //        	
 //            // 프롬프트 구성
 //            String prompt = String.format(

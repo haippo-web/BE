@@ -41,7 +41,7 @@
                                  <children>
                                     <ImageView fitHeight="130.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="@../../../../../../../../Users/KOSA/Desktop/1차플젝/img/stamp.png" />
+                                          <Image url="@../../img2/stamp.png" />
                                        </image></ImageView>
                                     <Label style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 20px;" text="결재관리">
                                        <font>
@@ -65,7 +65,7 @@
                                  <children>
                                     <ImageView fitHeight="120.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="@../../../../../../../../Users/KOSA/Desktop/1차플젝/img/attendance.png" />
+                                          <Image url="@../../img2/attendance.png" />
                                        </image>
                                     </ImageView>
                                     <Region prefHeight="10.0" prefWidth="200.0" />
@@ -91,7 +91,7 @@
                                  <children>
                                     <ImageView fitHeight="100.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="@../../../../../../../../Users/KOSA/Desktop/1차플젝/img/members.png" />
+                                          <Image url="@../../img2/members.png" />
                                        </image>
                                     </ImageView>
                                     <Region prefHeight="116.0" prefWidth="13.0" />
@@ -113,7 +113,7 @@
                                  <children>
                                     <ImageView fitHeight="150.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="@../../../../../../../../Users/KOSA/Desktop/1차플젝/img/course.png" />
+                                          <Image url="@../../img2/course.png" />
                                        </image>
                                     </ImageView>
                                     <Region prefHeight="116.0" prefWidth="13.0" />

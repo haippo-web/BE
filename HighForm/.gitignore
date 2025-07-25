@@ -9,4 +9,5 @@ target/
 .DS_Store
 HighForm/resources/db.properties
 /.apt_generated/
+/build/
 /bin/

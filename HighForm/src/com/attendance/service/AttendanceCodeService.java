@@ -7,7 +7,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-
+import jakarta.mail.*;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -119,7 +119,7 @@ public class AttendanceCodeService {
     /**
      * Redis에 코드 저장 (24시간 TTL) - 스케줄러 전용
      */
-    private void storeCodeInRedis(LocalDate date, String code) {
+    public void storeCodeInRedis(LocalDate date, String code) { //mail test 에서 접근하기 위해 public으로 변경
         jedis.set(date.toString(), code);
         jedis.expire(date.toString(), 86400); // 24시간 유지
     }
@@ -162,33 +162,62 @@ public class AttendanceCodeService {
      */
     public void startDailyScheduler() {
         Timer timer = new Timer();
+        Date now = new Date();
+
+        // 오늘 오전 7시 기준 시각
+        Calendar today7amCal = Calendar.getInstance();
+        today7amCal.set(Calendar.HOUR_OF_DAY, 7);
+        today7amCal.set(Calendar.MINUTE, 0);
+        today7amCal.set(Calendar.SECOND, 0);
+        today7amCal.set(Calendar.MILLISECOND, 0);
+        Date today7am = today7amCal.getTime();
+
+        LocalDate today = LocalDate.now();
+        String todayCode = getCodeFromRedis(today);
+
+        // 현재 시간이 7시 이후이고, Redis에 코드가 없다면 즉시 발급
+        if (now.after(today7am) && todayCode == null) {
+            String code = generateDailyCode(today);
+            storeCodeInRedis(today, code);
+            sendAttendanceCodeEmail("qowhxk@naver.com", code);
+            System.out.println("[스케줄러] " + today + " 출석 코드 즉시 발급 완료: " + code);
+        } else {
+            System.out.println("[스케줄러] 오늘 코드가 이미 존재하거나, 아직 7시 전이므로 발급 생략");
+        }
+
+        // 다음 실행 시간은 무조건 내일 오전 7시
+        today7amCal.add(Calendar.DATE, 1);
+        Date nextSchedule = today7amCal.getTime();
+
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 try {
-                    LocalDate today = LocalDate.now();
-                    String code = generateDailyCode(today);
-                    storeCodeInRedis(today, code);
+                    LocalDate scheduledDate = LocalDate.now();
+                    String code = generateDailyCode(scheduledDate);
+                    storeCodeInRedis(scheduledDate, code);
                     sendAttendanceCodeEmail("vsana2d2v@gmail.com", code);
-                    System.out.println("[스케줄러] " + today + " 출석 코드 생성 및 발송 완료: " + code);
+                    System.out.println("[스케줄러] " + scheduledDate + " 출석 코드 생성 및 발송 완료: " + code);
                 } catch (Exception e) {
                     System.err.println("[스케줄러] 오류 발생: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
-        }, getNext7amTime(), 1000 * 60 * 60 * 24); // 매일 24시간마다 반복
-        
-        System.out.println("[스케줄러] 매일 오전 7시 출석 코드 자동 발송 시작");
-        
-        // 프로그램 종료 방지를 위한 무한 대기
+        }, nextSchedule, 1000 * 60 * 60 * 24);
+
+        System.out.println("[스케줄러] 매일 오전 7시 출석 코드 자동 발송 예약 완료");
+
+        // 프로그램 종료 방지
         while (true) {
             try {
-                Thread.sleep(1000 * 60 * 60); // 1시간마다 체크
+                Thread.sleep(1000 * 60 * 60);
             } catch (InterruptedException e) {
                 System.out.println("[스케줄러] 종료됨");
                 break;
             }
         }
     }
+
+
 
     /**
      * 다음 오전 7시 시각을 반환

@@ -44,6 +44,7 @@ public class CourseDAO {
 				+ "c.DESCRIPTION "
 				+ "FROM CURRICULUM c";
 
+
 		try (Connection conn = getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql);
 				ResultSet rs = pstmt.executeQuery()) {

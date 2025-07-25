@@ -41,6 +41,7 @@
 	</top>
 
 	<center>
+
 		<VBox prefHeight="520.0" prefWidth="900.0" spacing="20.0">
 			<children>
 				<!-- 회원 목록 섹션 -->
@@ -70,6 +71,7 @@
 									style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px;"
 									text="ID" />
 								<TableColumn fx:id="nameColumn" prefWidth="80.0"
+
 									style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px;"
 									text="이름" />
 								<TableColumn fx:id="emailColumn" minWidth="200.0"
@@ -280,7 +282,6 @@
 									GridPane.rowIndex="2" />
 
 								<!-- 비고 -->
-								
 							</children>
 						</GridPane>
 					</children>

@@ -23,6 +23,7 @@
 
 	<center>
 		<VBox prefHeight="251.0" prefWidth="500.0" spacing="15.0">
+
 			<children>
 				<GridPane hgap="10.0" vgap="15.0">
 					<columnConstraints>
@@ -67,12 +68,11 @@
 							</children>
 						</HBox>
 
-						<!-- 교수 -->
-						
+						<!-- 교수 -->		
 		
-
 						<!-- 비고 -->
 						<HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" style="-fx-alignment: top-center;" GridPane.rowIndex="2">
+
 							<children>
 								<Label alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="비" />
 								<Label alignment="CENTER_RIGHT" prefHeight="20.0" prefWidth="80.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 16px ;" text="고" />

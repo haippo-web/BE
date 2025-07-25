@@ -71,6 +71,7 @@ public class MemberDAO {
 				+ "FROM USER_INFO M " + "LEFT JOIN ENROLLMENT E ON M.ID = E.ID "
 				+ "LEFT JOIN CURRICULUM C ON E.CURRICULUM_ID = C.ID " + "ORDER BY M.ID, C.COURSE_NAME";
 
+
 		try (Connection conn = getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql);
 				ResultSet rs = pstmt.executeQuery()) {
@@ -102,6 +103,7 @@ public class MemberDAO {
 	// 시퀀스 번호 받아오기(회원 등록에서 사용)
 	public long getNextMemberId() {
 		String sql = "SELECT SEQ_USER_INFO.NEXTVAL FROM dual";
+
 
 		try (Connection conn = getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql);

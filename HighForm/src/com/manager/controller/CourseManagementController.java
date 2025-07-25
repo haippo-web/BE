@@ -2,6 +2,7 @@ package com.manager.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.manager.model.Course;
@@ -84,6 +85,12 @@ public class CourseManagementController {
 		courseService = new CourseService();
 		courseList = FXCollections.observableArrayList();
 
+		instructorField.setEditable(false);  // 입력 불가
+		instructorField.setDisable(true);    // 비활성화 (선택도 못함)
+		
+		managerField.setEditable(false);  // 입력 불가
+		managerField.setDisable(true);    // 비활성화 (선택도 못함)
+		
 		// 테이블 컬럼 설정
 		// 강의ID
 		courseIdColumn.setCellValueFactory(cellData -> {
@@ -245,46 +252,57 @@ public class CourseManagementController {
 	private void handleEditCourse() {
 		Course selectedCourse = courseTable.getSelectionModel().getSelectedItem();
 
-	    if (selectedCourse == null) {
-	    	showAlert("선택 오류", "수정할 강의를 선택하세요.");
-	        return;
-	    }
+		if (selectedCourse == null) {
+			showAlert("선택 오류", "수정할 강의를 선택하세요.");
+			return;
+		}
 
-	    // 1. 수정 전 확인 다이얼로그
-	    Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-	    confirmAlert.setTitle("수정 확인");
-	    confirmAlert.setHeaderText("선택한 강의를 수정하시겠습니까?");
-	    confirmAlert.setContentText(selectedCourse.getCourseName());
+		// 수정 불가능한 필드 비교
+		String originalInstructor = selectedCourse.getInstructor();
+		String originalManager = selectedCourse.getManager();
+		String newInstructor = instructorField.getText();
+		String newManager = managerField.getText();
 
-	    // 2. 확인/취소 버튼 대기
-	    Optional<ButtonType> result = confirmAlert.showAndWait();
+		if (!Objects.equals(originalInstructor, newInstructor) || !Objects.equals(originalManager, newManager)) {
+			Alert warningAlert = new Alert(Alert.AlertType.WARNING);
+			warningAlert.setTitle("수정 불가");
+			warningAlert.setHeaderText("강사 및 매니저 정보는 수정할 수 없습니다.");
+			warningAlert.setContentText("변경하려는 시도를 감지했습니다.\n수정은 이름, 날짜, 비고만 가능합니다.");
+			warningAlert.show();
+			return;
+		}
 
-	    if (result.isPresent() && result.get() == ButtonType.OK) {
-	        // 3. 사용자가 '확인'을 누르면 수정 진행
-	        boolean success = courseService.updateCourse(selectedCourse);
-	        
-	        
-	        if (success) {
-	    		selectedCourse.setCourseName(courseNameField.getText());
-	    		selectedCourse.setStartDate(startDateField.getText());
-	    		selectedCourse.setEndDate(endDateField.getText());
-	    		selectedCourse.setInstructor(instructorField.getText());
-	    		selectedCourse.setManager(managerField.getText());
-	    		selectedCourse.setNote(notesArea.getText());
-	    
-	    		courseService.updateCourse(selectedCourse);
-	    		
-	            Alert successAlert = new Alert(Alert.AlertType.INFORMATION, "강의가 수정되었습니다.");
-	            successAlert.show();
-	        } else {
-	            Alert errorAlert = new Alert(Alert.AlertType.ERROR, "강의 수정 중 오류가 발생했습니다.");
-	            errorAlert.show();
-	        }
-	        loadCourseData();
-	        clearFields();
-	    } else {
-	        System.out.println("강의 수정이 취소되었습니다.");
-	    }
+		// 수정 확인 다이얼로그
+		Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+		confirmAlert.setTitle("수정 확인");
+		confirmAlert.setHeaderText("선택한 강의를 수정하시겠습니까?");
+		confirmAlert.setContentText(selectedCourse.getCourseName());
+
+		Optional<ButtonType> result = confirmAlert.showAndWait();
+
+		if (result.isPresent() && result.get() == ButtonType.OK) {
+			// 수정할 필드만 반영
+			selectedCourse.setCourseName(courseNameField.getText());
+			selectedCourse.setStartDate(startDateField.getText());
+			selectedCourse.setEndDate(endDateField.getText());
+			selectedCourse.setNote(notesArea.getText());
+			// instructor, manager는 반영 안 함
+
+			boolean success = courseService.updateCourse(selectedCourse);
+
+			if (success) {
+				Alert successAlert = new Alert(Alert.AlertType.INFORMATION, "강의가 수정되었습니다.");
+				successAlert.show();
+			} else {
+				Alert errorAlert = new Alert(Alert.AlertType.ERROR, "강의 수정 중 오류가 발생했습니다.");
+				errorAlert.show();
+			}
+
+			loadCourseData();
+			clearFields();
+		} else {
+			System.out.println("강의 수정이 취소되었습니다.");
+		}
 	}
 	
 

@@ -41,7 +41,6 @@
                                  <children>
                                     <ImageView fitHeight="130.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-  
                                           <Image url="@../../img2/stamp.png" />
                                        </image></ImageView>
                                     <Label style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 20px;" text="결재관리">

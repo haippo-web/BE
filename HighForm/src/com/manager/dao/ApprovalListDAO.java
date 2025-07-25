@@ -32,7 +32,7 @@ public class ApprovalListDAO {
 	    		+ "C.NAME AS CURRICULUM_NAME "
 	    		+ "FROM attendance_approval_request A "
 	    		+ "INNER JOIN user_info M ON A.USER_ID = M.ID "
-	    		+ "LEFT JOIN enrollment E ON A.USER_ID = E.ID "
+	    		+ "LEFT JOIN enrollment E ON A.USER_ID = E.MEMBER_ID "
 	    		+ "LEFT JOIN CURRICULUM C ON E.CURRICULUM_ID = C.ID "
 	    		+ "ORDER BY CASE WHEN A.STATUS = 'progressing' THEN 0 ELSE 1 END, A.REQUESTED_AT DESC";
 

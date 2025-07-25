@@ -28,9 +28,12 @@ public class MemberDAO {
 	// 유효한 회원만 조회
 	public List<Member> getAvailableMembers() {
 		List<Member> members = new ArrayList<>();
-		String sql = "SELECT M.ID, M.LOGIN_ID, M.PHONE, M.EMAIL, M.NAME, C.COURSE_NAME, M.ROLE " + "FROM USER_INFO M "
-				+ "LEFT JOIN ENROLLMENT E ON M.ID = E.ID " + "LEFT JOIN COURSE C ON E.CURRICULUM_ID = C.COURSE_ID "
-				+ "WHERE M.DEL_YN = 'N' " + "ORDER BY M.ID, C.COURSE_NAME";
+		String sql = "SELECT M.ID, M.LOGIN_ID, M.PHONE, M.EMAIL, M.NAME AS USER_NAME, C.NAME as CUR_NAME, M.ROLE "
+				+ "FROM USER_INFO M " 
+				+ "LEFT JOIN ENROLLMENT E ON M.ID = E.MEMBER_ID "
+				+ "LEFT JOIN CURRICULUM C ON E.CURRICULUM_ID = C.ID " 
+				+ "WHERE M.DEL_YN = 'N' "
+				+ "ORDER BY M.ID, C.NAME";
 
 		try (Connection conn = getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -43,8 +46,8 @@ public class MemberDAO {
 				member.setMemberLoginId(rs.getString("LOGIN_ID"));
 				member.setPhoneNumber(rs.getString("PHONE"));
 				member.setEmail(rs.getString("EMAIL"));
-				member.setMemberName(rs.getString("NAME"));
-				member.setAffiliation(rs.getString("COURSE_NAME")); // 추가
+				member.setMemberName(rs.getString("USER_NAME"));
+				member.setAffiliation(rs.getString("CUR_NAME")); // 추가
 				member.setPosition(rs.getString("ROLE"));
 
 				members.add(member);
@@ -64,10 +67,10 @@ public class MemberDAO {
 	public List<Member> getAllMembers() {
 		List<Member> members = new ArrayList<>();
 
+		String sql = "SELECT M.ID, M.LOGIN_ID, M.PHONE, M.EMAIL, M.NAME AS MEM_NAME, C.NAME AS CUR_NAME, M.ROLE "
+				+ "FROM USER_INFO M " + "LEFT JOIN ENROLLMENT E ON M.ID = E.ID "
+				+ "LEFT JOIN CURRICULUM C ON E.CURRICULUM_ID = C.ID " + "ORDER BY M.ID, C.COURSE_NAME";
 
-		String sql = "SELECT M.ID, M.LOGIN_ID, M.PHONE, M.EMAIL, M.NAME, C.COURSE_NAME, M.ROLE " + "FROM USER_INFO M "
-				+ "LEFT JOIN ENROLLMENT E ON M.ID = E.ID " + "LEFT JOIN COURSE C ON E.CURRICULUM_ID = C.COURSE_ID "
-				+ "ORDER BY M.ID, C.COURSE_NAME";
 
 		try (Connection conn = getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -80,8 +83,8 @@ public class MemberDAO {
 				member.setMemberLoginId(rs.getString("LOGIN_ID"));
 				member.setPhoneNumber(rs.getString("PHONE"));
 				member.setEmail(rs.getString("EMAIL"));
-				member.setMemberName(rs.getString("NAME"));
-				member.setAffiliation(rs.getString("COURSE_NAME")); // 추가
+				member.setMemberName(rs.getString("MEM_NAME"));
+				member.setAffiliation(rs.getString("CUR_NAME")); // 추가
 				member.setPosition(rs.getString("ROLE"));
 
 				members.add(member);
@@ -99,7 +102,8 @@ public class MemberDAO {
 
 	// 시퀀스 번호 받아오기(회원 등록에서 사용)
 	public long getNextMemberId() {
-		String sql = "SELECT SYS.USER_INFO_SEQ.NEXTVAL FROM dual";
+		String sql = "SELECT SEQ_USER_INFO.NEXTVAL FROM dual";
+
 
 		try (Connection conn = getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -155,7 +159,7 @@ public class MemberDAO {
 	public boolean updateMember(Member member) {
 		String sql = "UPDATE USER_INFO SET PHONE = ?, EMAIL = ?, NAME = ?, ROLE = ?, UPDATED_AT = SYSDATE "
 				+ "WHERE ID = ?";
-
+				
 		try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
 			pstmt.setString(1, member.getPhoneNumber());

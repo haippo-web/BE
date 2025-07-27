@@ -7,6 +7,11 @@ import com.util.RedisLoginService;
 import java.util.List;
 import java.util.Map;
 
+/*		[					]
+ * 		[	배지원    담당   	]
+ * 		[					]
+ */
+
 public class NotificationService {
     
     private static NotificationService instance;

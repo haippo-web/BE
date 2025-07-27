@@ -8,6 +8,11 @@ import com.manager.model.Course;
 
 import java.time.format.DateTimeFormatter;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class AddCourseController {
 
     @FXML private TextField courseNameField;

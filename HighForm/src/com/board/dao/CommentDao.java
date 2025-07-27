@@ -13,6 +13,11 @@ import com.util.DBConnection;
 
 import java.sql.CallableStatement;
 
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
+
 public class CommentDao {
     private static CommentDao instance;
     

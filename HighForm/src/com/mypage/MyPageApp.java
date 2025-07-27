@@ -7,6 +7,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
 public class MyPageApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {

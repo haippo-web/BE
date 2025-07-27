@@ -17,6 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
 /**
  * AssignmentSubmitDAO
  *  - 과제 제출/조회 DAO

@@ -10,6 +10,11 @@ import java.util.List;
 import com.manager.model.Course;
 import com.util.DBConnection;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class CourseDAO {
 
 	private Connection getConnection() throws SQLException {

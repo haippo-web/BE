@@ -20,6 +20,11 @@ import javafx.stage.Stage;
 import javafx.stage.Modality;
 import javafx.beans.property.SimpleStringProperty;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class CourseManagementController {
 
 	@FXML

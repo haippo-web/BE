@@ -19,6 +19,11 @@ import com.mypage.Model.attendance.Attendance;
 import com.mypage.dao.attendance.AttendanceDAO;
 import java.time.format.DateTimeFormatter; 
 
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
 public class AttendanceController {
 	@FXML
 	private Button closeButton;  // 버튼 

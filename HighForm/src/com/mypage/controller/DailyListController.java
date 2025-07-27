@@ -17,6 +17,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
 public class DailyListController {
 
     @FXML private Label      dateLabel;

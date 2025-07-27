@@ -33,6 +33,11 @@ import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
+
 public class BoardController {
     @FXML private Label pathLabel;
     @FXML private Button noticeBtn, resourceBtn, boardBtn, backBtn, uploadBtn;

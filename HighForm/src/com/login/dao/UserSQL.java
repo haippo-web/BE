@@ -1,5 +1,10 @@
 package com.login.dao;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 public class UserSQL {
 
 	// 로그인 쿼리 - login_id와 password로 사용자 조회

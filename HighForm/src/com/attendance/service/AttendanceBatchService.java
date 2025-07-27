@@ -11,6 +11,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 /**
  * 배치 처리용 서비스
  * 매일 23:00에 실행되어 퇴실하지 않은 출석자를 자동으로 결석 처리

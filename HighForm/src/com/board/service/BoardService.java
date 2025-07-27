@@ -13,6 +13,11 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
+
 public class BoardService {
     
     private static BoardService instance;

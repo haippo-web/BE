@@ -22,6 +22,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
 /**
  * AssignmentController
  *  ─ 메인 화면  : 내 제출 목록 + (과제 제출 버튼)

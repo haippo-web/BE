@@ -21,6 +21,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class ApprovalListController {
 	// 네비게이션 컨트롤들
 	@FXML

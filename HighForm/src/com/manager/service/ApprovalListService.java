@@ -4,6 +4,11 @@ import com.manager.dao.ApprovalListDAO;
 import com.manager.model.Approval;
 import java.util.List;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class ApprovalListService {
 	private ApprovalListDAO approvalListDAO;
 

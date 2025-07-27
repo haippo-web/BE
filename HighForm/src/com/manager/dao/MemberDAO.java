@@ -12,6 +12,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class MemberDAO {
 	private Connection getConnection() throws SQLException {
 		return DBConnection.getConnection();

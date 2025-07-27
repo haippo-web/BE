@@ -22,6 +22,11 @@ import javafx.stage.Window;
 
 import java.io.IOException;
 
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
 public class ApprovalRequestController {
     @FXML private TextArea reasonArea;
     @FXML private TextField fileField;

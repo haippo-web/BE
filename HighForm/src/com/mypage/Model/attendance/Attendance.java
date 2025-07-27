@@ -7,6 +7,11 @@ import lombok.Builder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
 /**
  * 출석 정보를 담는 VO 클래스
  * attendance 테이블과 매핑

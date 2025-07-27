@@ -16,6 +16,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
 public class BoardDto {
 
 	private IntegerProperty no;

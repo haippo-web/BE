@@ -7,6 +7,11 @@ import java.sql.SQLException;
 import com.mypage.Model.attendance.AttendanceApprovalRequest;
 import com.util.DBConnection;
 
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
 public class AttendanceApprovalRequestDAO {
     public void insert(AttendanceApprovalRequest req) throws SQLException {
         // 1) id 컬럼에 시퀀스를 직접 호출하도록 SQL 수정

@@ -1,5 +1,10 @@
 package com.attendance.service;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 /**
  * 출석/퇴실 가능 여부 확인 결과
  */

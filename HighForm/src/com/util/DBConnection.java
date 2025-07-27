@@ -28,7 +28,7 @@ public class DBConnection {
             // db.properties 읽기 (src/main/resources 등 classpath 기준)
             Properties props = new Properties();
 
-            try (InputStream in = DBConnection.class.getResourceAsStream("db.properties");
+            try (InputStream in = DBConnection.class.getResourceAsStream("/db.properties");
 
                  InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
                 props.load(reader);
@@ -37,7 +37,7 @@ public class DBConnection {
                 password = props.getProperty("db.password");
 
                 geminiKey = props.getProperty("API_KEY");
-                
+                System.out.println("db.properties found? " + (in != null));
                 System.out.println(url);
 
 

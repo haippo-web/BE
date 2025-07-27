@@ -5,6 +5,11 @@ import javafx.fxml.FXML;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 public class SplashController {
     @FXML
     private Rectangle cursor;

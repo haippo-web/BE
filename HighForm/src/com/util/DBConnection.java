@@ -8,6 +8,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
+/*		[					]
+ * 		[	배지원    담당   	]
+ * 		[					]
+ */
+
 public class DBConnection {
     private static String url;
     private static String user;
@@ -30,9 +35,11 @@ public class DBConnection {
                 url = props.getProperty("db.url");
                 user = props.getProperty("db.user");
                 password = props.getProperty("db.password");
+
                 geminiKey = props.getProperty("API_KEY");
                 System.out.println("db.properties found? " + (in != null));
                 System.out.println(url);
+
 
             }
         } catch (Exception e) {
@@ -47,10 +54,12 @@ public class DBConnection {
         System.out.println("[DB] User: " + conn.getMetaData().getUserName());
         return conn;
     }
+
     
     public static String getKey() {
         return geminiKey;
     }
 
 }
+
 

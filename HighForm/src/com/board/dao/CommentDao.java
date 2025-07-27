@@ -11,6 +11,13 @@ import java.util.List;
 import com.board.model.Comment;
 import com.util.DBConnection;
 
+import java.sql.CallableStatement;
+
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
+
 public class CommentDao {
     private static CommentDao instance;
     
@@ -23,6 +30,32 @@ public class CommentDao {
     
     private Connection getConnection() throws SQLException {
         return DBConnection.getConnection();
+    }
+    
+    // 계층형 댓글 View 생성
+    public void createHierarchicalCommentsView() throws SQLException {
+        String createViewSQL = CommentSQL.CREATE_HIERARCHICAL_COMMENTS_VIEW;
+        try(Connection conn = getConnection();
+            CallableStatement psmt = conn.prepareCall(createViewSQL)){
+            psmt.executeUpdate();
+            System.out.println("계층형 댓글 View 생성 완료");
+        }catch(Exception e) {
+            System.err.println("계층형 댓글 View 생성 중 오류: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    // 댓글 삭제 프로시저 생성
+    public void createDeleteCommentProcedure() throws SQLException {
+        String createProcedureSQL = CommentSQL.CREATE_DELETE_COMMENT_PROCEDURE;
+        try(Connection conn = getConnection();
+            CallableStatement psmt = conn.prepareCall(createProcedureSQL)){
+            psmt.executeUpdate();
+            System.out.println("댓글 삭제 프로시저 생성 완료");
+        }catch(Exception e) {
+            System.err.println("댓글 삭제 프로시저 생성 중 오류: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     // 댓글 작성
@@ -49,7 +82,7 @@ public class CommentDao {
         return null;
     }
     
-    // 게시글의 댓글 목록 조회
+    // 게시글의 댓글 목록 조회 (계층형 View 사용)
     public List<Comment> getCommentsByBoardId(Long boardId, String currentUser) {
         String sql = CommentSQL.GET_COMMENTS_BY_BOARD_ID;
         List<Comment> comments = new ArrayList<>();
@@ -72,12 +105,19 @@ public class CommentDao {
                 comment.setUpdatedAt(rs.getDate("updated_at"));
                 comment.setDel_yn(rs.getString("del_yn").charAt(0));
                 
+                // 계층 구조 관련 필드들
+                comment.setCommentLevel(rs.getInt("comment_level"));
+                comment.setRootCommentId(rs.getLong("root_comment_id"));
+                comment.setCommentPath(rs.getString("comment_path"));
+                comment.setCommentType(rs.getString("comment_type"));
+                
                 // 현재 사용자가 작성자인지 확인
                 comment.setOwner(comment.getAuthor().equals(currentUser));
                 
                 comments.add(comment);
             }
         } catch (Exception e) {
+            System.err.println("댓글 목록 조회 중 오류: " + e.getMessage());
             e.printStackTrace();
         }
         return comments;
@@ -114,7 +154,7 @@ public class CommentDao {
         }
     }
     
-    // 대댓글도 함께 삭제
+    // 대댓글도 함께 삭제 
     public boolean deleteCommentWithReplies(Long commentId) {
         String sql = CommentSQL.DELETE_COMMENT_WITH_REPLIES;
         try (Connection conn = getConnection();

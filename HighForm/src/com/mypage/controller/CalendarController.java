@@ -32,6 +32,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
 public class CalendarController implements Initializable {
 
     /* ========== FXML 필드 ========== */
@@ -52,7 +58,9 @@ public class CalendarController implements Initializable {
         this.scheduleDAO = new ScheduleDaoImpl();
         this.currentYm   = YearMonth.now();
     }
+
     /** FX용 no‑arg 생성자 (초기 사용자 ID를 1L로 설정) */
+
     public CalendarController() {
         this(1L);
     }

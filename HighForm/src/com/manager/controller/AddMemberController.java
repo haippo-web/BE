@@ -17,6 +17,11 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class AddMemberController {
 
 	@FXML
@@ -101,7 +106,6 @@ public class AddMemberController {
 			return;
 		}
 
-		String note = noteArea.getText();
 
 		// Member 객체 생성
 		Member member = new Member(idx, loginId, password, name, email, phone, courseName, position);

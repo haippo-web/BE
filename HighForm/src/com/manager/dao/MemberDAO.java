@@ -12,6 +12,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class MemberDAO {
 	private Connection getConnection() throws SQLException {
 		return DBConnection.getConnection();
@@ -28,9 +33,12 @@ public class MemberDAO {
 	// 유효한 회원만 조회
 	public List<Member> getAvailableMembers() {
 		List<Member> members = new ArrayList<>();
-		String sql = "SELECT M.ID, M.LOGIN_ID, M.PHONE, M.EMAIL, M.NAME, C.COURSE_NAME, M.ROLE " + "FROM MEMBERS M "
-				+ "LEFT JOIN ENROLLMENT E ON M.ID = E.MEMBER_ID " + "LEFT JOIN COURSE C ON E.COURSE_ID = C.COURSE_ID "
-				+ "WHERE M.DEL_YN = 'N' " + "ORDER BY M.ID, C.COURSE_NAME";
+		String sql = "SELECT M.ID, M.LOGIN_ID, M.PHONE, M.EMAIL, M.NAME AS USER_NAME, C.NAME as CUR_NAME, M.ROLE "
+				+ "FROM USER_INFO M " 
+				+ "LEFT JOIN ENROLLMENT E ON M.ID = E.MEMBER_ID "
+				+ "LEFT JOIN CURRICULUM C ON E.CURRICULUM_ID = C.ID " 
+				+ "WHERE M.DEL_YN = 'N' "
+				+ "ORDER BY M.ID, C.NAME";
 
 		try (Connection conn = getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -43,8 +51,8 @@ public class MemberDAO {
 				member.setMemberLoginId(rs.getString("LOGIN_ID"));
 				member.setPhoneNumber(rs.getString("PHONE"));
 				member.setEmail(rs.getString("EMAIL"));
-				member.setMemberName(rs.getString("NAME"));
-				member.setAffiliation(rs.getString("COURSE_NAME")); // 추가
+				member.setMemberName(rs.getString("USER_NAME"));
+				member.setAffiliation(rs.getString("CUR_NAME")); // 추가
 				member.setPosition(rs.getString("ROLE"));
 
 				members.add(member);
@@ -63,10 +71,11 @@ public class MemberDAO {
 	// 모든 회원 조회
 	public List<Member> getAllMembers() {
 		List<Member> members = new ArrayList<>();
-		
-		String sql = "SELECT M.ID, M.LOGIN_ID, M.PHONE, M.EMAIL, M.NAME, C.COURSE_NAME, M.ROLE " + "FROM MEMBERS M "
-				+ "LEFT JOIN ENROLLMENT E ON M.ID = E.MEMBER_ID " + "LEFT JOIN COURSE C ON E.COURSE_ID = C.COURSE_ID "
-				+ "ORDER BY M.ID, C.COURSE_NAME";
+
+		String sql = "SELECT M.ID, M.LOGIN_ID, M.PHONE, M.EMAIL, M.NAME AS MEM_NAME, C.NAME AS CUR_NAME, M.ROLE "
+				+ "FROM USER_INFO M " + "LEFT JOIN ENROLLMENT E ON M.ID = E.ID "
+				+ "LEFT JOIN CURRICULUM C ON E.CURRICULUM_ID = C.ID " + "ORDER BY M.ID, C.COURSE_NAME";
+
 
 		try (Connection conn = getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -79,8 +88,8 @@ public class MemberDAO {
 				member.setMemberLoginId(rs.getString("LOGIN_ID"));
 				member.setPhoneNumber(rs.getString("PHONE"));
 				member.setEmail(rs.getString("EMAIL"));
-				member.setMemberName(rs.getString("NAME"));
-				member.setAffiliation(rs.getString("COURSE_NAME")); // 추가
+				member.setMemberName(rs.getString("MEM_NAME"));
+				member.setAffiliation(rs.getString("CUR_NAME")); // 추가
 				member.setPosition(rs.getString("ROLE"));
 
 				members.add(member);
@@ -98,7 +107,8 @@ public class MemberDAO {
 
 	// 시퀀스 번호 받아오기(회원 등록에서 사용)
 	public long getNextMemberId() {
-		String sql = "SELECT SYS.MEMBERS_SEQ.NEXTVAL FROM dual";
+		String sql = "SELECT SEQ_USER_INFO.NEXTVAL FROM dual";
+
 
 		try (Connection conn = getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -120,7 +130,7 @@ public class MemberDAO {
 
 		String password = "1234"; // 초기 비밀번호
 
-		String sql = "INSERT INTO MEMBERS (ID, LOGIN_ID, PASSWORD, PHONE, EMAIL, NAME, ROLE, CREATED_AT, UPDATED_AT)"
+		String sql = "INSERT INTO USER_INFO (ID, LOGIN_ID, PASSWORD, PHONE, EMAIL, NAME, ROLE, CREATED_AT, UPDATED_AT)"
 				+ " VALUES (?, ?, ?, ?, ?, ?, ?, SYSDATE, SYSDATE)";
 		String[] generatedColumns = { "ID" };
 
@@ -152,9 +162,9 @@ public class MemberDAO {
 
 	// 회원 수정
 	public boolean updateMember(Member member) {
-		String sql = "UPDATE MEMBERS SET PHONE = ?, EMAIL = ?, NAME = ?, ROLE = ?, UPDATED_AT = SYSDATE "
+		String sql = "UPDATE USER_INFO SET PHONE = ?, EMAIL = ?, NAME = ?, ROLE = ?, UPDATED_AT = SYSDATE "
 				+ "WHERE ID = ?";
-
+				
 		try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
 			pstmt.setString(1, member.getPhoneNumber());
@@ -176,7 +186,7 @@ public class MemberDAO {
 
 	// 회원 삭제(실제 삭제가 아니라 del_yn='Y'로 처리)
 	public boolean deleteMember(long memberId) {
-		String sql = "UPDATE MEMBERS SET DEL_YN = 'Y' WHERE ID = ?";
+		String sql = "UPDATE USER_INFO SET DEL_YN = 'Y', UPDATED_AT = SYSDATE WHERE ID = ?";
 
 		try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -197,7 +207,7 @@ public class MemberDAO {
 		List<Member> members = new ArrayList<>();
 
 		String sql = "SELECT ID, LOGIN_ID, PASSWORD, PHONE, EMAIL, NAME, ROLE, CREATED_AT, DEL_YN "
-				+ "FROM MEMBERS WHERE DEL_YN = 'N' AND (NAME LIKE ? OR REPLACE(PHONE, '-', '') LIKE ?)";
+				+ "FROM USER_INFO WHERE DEL_YN = 'N' AND (NAME LIKE ? OR REPLACE(PHONE, '-', '') LIKE ?)";
 
 		try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 

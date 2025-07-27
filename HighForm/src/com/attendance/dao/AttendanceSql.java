@@ -1,5 +1,10 @@
 package com.attendance.dao;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 public class AttendanceSql {
    // ============ 출석 관련 SQL ============
     

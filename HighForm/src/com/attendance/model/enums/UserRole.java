@@ -1,5 +1,11 @@
 package com.attendance.model.enums;
 
+
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 public enum UserRole {
     STUDENT("학생"),
     PROFESSOR("교수"),

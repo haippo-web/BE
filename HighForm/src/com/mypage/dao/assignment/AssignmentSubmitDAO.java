@@ -16,6 +16,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
+/**
+ * AssignmentSubmitDAO
+ *  - 과제 제출/조회 DAO
+ *  - 싱글턴 패턴
+ */
+
 public class AssignmentSubmitDAO {
 
     /* ============ 1) 과제 콤보 옵션용 DTO ============ */

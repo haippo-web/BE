@@ -8,6 +8,11 @@ import com.manager.model.Course;
 
 import java.time.format.DateTimeFormatter;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class AddCourseController {
 
     @FXML private TextField courseNameField;
@@ -28,13 +33,11 @@ public class AddCourseController {
 
     private void handleSubmit() {
         String courseName = courseNameField.getText();
-        String instructor = instructorField.getText();
 
-        if (courseName == null || courseName.isEmpty() ||
-            instructor == null || instructor.isEmpty()) {
-            showAlert("입력 오류", "강의명과 교수는 필수 입력입니다.");
-            return;
-        }
+        if (courseName == null || courseName.isEmpty()) {
+                showAlert("입력 오류", "강의명은 필수 입력입니다.");
+                return;
+            }
 
         String startDate = (startDatePicker.getValue() != null)
                 ? startDatePicker.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
@@ -43,11 +46,12 @@ public class AddCourseController {
         String endDate = (endDatePicker.getValue() != null)
                 ? endDatePicker.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                 : null;
-        String manager = managerField.getText();
+        //String manager = managerField.getText();
         String note = noteArea.getText();
 
         // Course 객체 생성 (id는 시퀀스로 처리한다고 가정해서 0)
-        Course course = new Course(0, courseName, startDate, endDate, instructor, manager, note);
+        Course course = new Course(0, courseName, startDate, endDate, "", "", note);
+        
 
         boolean success = courseDAO.addCourse(course);
         if (success) {

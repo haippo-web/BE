@@ -1,5 +1,10 @@
 package com.manager.model;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 import lombok.Getter;
 
 public class Member {
@@ -27,7 +32,7 @@ public class Member {
 		this.memberName = memberName;
 		this.email = email;
 		this.phoneNumber = phoneNumber;
-		this.affiliation = affiliation;
+		//this.affiliation = affiliation;
 		this.position = position;
 	}
 

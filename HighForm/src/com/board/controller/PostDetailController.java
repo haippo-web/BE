@@ -4,17 +4,24 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import com.board.dao.BoardDao;
-import com.board.dao.CommentDao;
 import com.board.model.Board;
 import com.board.model.Comment;
+import com.board.model.FileLocation;
+import com.board.service.BoardService;
+import com.board.service.CommentService;
+import com.board.service.FileService;
+
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -36,6 +43,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
+
 public class PostDetailController implements Initializable {
     
     @FXML private Label titleLabel;
@@ -55,16 +67,23 @@ public class PostDetailController implements Initializable {
     // 데이터 모델
     private static Board boardData;
     private List<Comment> comments;
-    private String currentUser = "교수님"; // 현재 로그인한 사용자 (실제로는 세션에서 가져와야 함)
+    private String UserName = ""; // 현재 로그인한 사용자 (실제로는 세션에서 가져와야 함)
+    private String UserRole = "";
+    private Long UserId = null;
+    
     private static Long boardId;
     
-    private final BoardDao boardDao;
-    private final CommentDao commentDao;
+    private final BoardService boardService;
+    private final CommentService commentService;
+    private final FileService fileService;
+    
     
     // 의존성 주입 
     public PostDetailController() {
-		this.boardDao = new BoardDao().getInstance();
-		this.commentDao = new CommentDao().getInstance();
+		this.boardService = BoardService.getInstance();
+		this.commentService = CommentService.getInstance();
+        this.fileService = FileService.getInstance();
+
         // 반드시 public, 파라미터 없음
     }
     
@@ -84,6 +103,12 @@ public class PostDetailController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         comments = new ArrayList<>();
         
+        Map<String, String> userInfo = boardService.getCurrentUserInfo();
+        UserName = userInfo.get("name");
+        UserRole = userInfo.get("role");
+        UserId = Long.valueOf(userInfo.get("id"));
+        
+        
         // 데이터 로드 
         try {
 			loadData(boardId);
@@ -102,13 +127,14 @@ public class PostDetailController implements Initializable {
     	
     	// TODO :: DB에서 데이터 호출
         System.out.println("게시물 ID : " + boardId);
-        Board board = boardDao.getBoard(boardId);
+        Board board = boardService.getBoard(boardId);
         
         boardData = board;
         
         // 샘플 댓글 데이터
-        comments = commentDao.getCommentsByBoardId(boardId, currentUser);
+        comments = commentService.getCommentsByBoardId(boardId);
     }
+    
     
     private void displayPost() {
         titleLabel.setText(boardData.getTitle());
@@ -116,23 +142,20 @@ public class PostDetailController implements Initializable {
         dateLabel.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(boardData.getCreatedAt()));
         contentLabel.setText(boardData.getContent());
         
-        // 첨부파일 표시	
-        if (!(boardData.getFileId() == null)) {
+        // 첨부파일 표시
+        List<FileLocation> files = fileService.getFilesByBoardId(boardId);
+        if (!files.isEmpty()) {
             attachmentBox.setVisible(true);
             attachmentList.getChildren().clear();
             
-          Hyperlink fileLink = new Hyperlink("file test");
-          fileLink.setOnAction(e -> downloadFile("file test"));
-          fileLink.setStyle("-fx-text-fill: #007bff;");
-          attachmentList.getChildren().add(fileLink);
-            
-            // TODO :: 첨부파일 테이블 연동시  첨부파일 이름 출력 
-//            for (Long attachment : boardData.getFileId()) {
-//                Hyperlink fileLink = new Hyperlink(attachment);
-//                fileLink.setOnAction(e -> downloadFile(attachment));
-//                fileLink.setStyle("-fx-text-fill: #007bff;");
-//                attachmentList.getChildren().add(fileLink);
-//            }
+            for (FileLocation file : files) {
+                Hyperlink fileLink = new Hyperlink(file.getFilePath().substring(file.getFilePath().lastIndexOf("_") + 1));
+                fileLink.setOnAction(e -> downloadFile(file));
+                fileLink.setStyle("-fx-text-fill: #007bff;");
+                attachmentList.getChildren().add(fileLink);
+            }
+        } else {
+            attachmentBox.setVisible(false);
         }
     }
     
@@ -206,7 +229,7 @@ public class PostDetailController implements Initializable {
     
     // 본인이 작성한 게시물에서만 수정/삭제 버튼 출력 
     private void checkAuthorPermissions() {
-        if (boardData.getAuthor().equals(currentUser)) {
+        if (boardData.getAuthor().equals(UserName)) {
             actionButtonsBox.setVisible(true);
         }
     }
@@ -216,8 +239,6 @@ public class PostDetailController implements Initializable {
     private void handleEditPost(ActionEvent event) {
         // 게시글 수정 페이지로 이동 (미구현)
     	// TODO :: 유저 연동 시 권한 체크  
-    	String userRole = "MANAGER";
-//    	String userRole = "STUDENT";
         try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/board/PostUpdate.fxml"));
                 Stage stage = new Stage();
@@ -251,7 +272,7 @@ public class PostDetailController implements Initializable {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             // 게시글 삭제 로직 (미구현)
-        	boardDao.deleteBoard(boardId);
+        	boardService.deleteBoardWithFiles(boardId);
             showAlert("삭제", "게시글이 삭제되었습니다.");
             handleBack(event);
         }
@@ -267,20 +288,12 @@ public class PostDetailController implements Initializable {
         }
         
         // 새 댓글 생성
-        Comment newComment = Comment.builder()
-                .boardId(boardId)
-                .parentId(0L)  // 최상위 댓글
-                .author(currentUser)
-                .content(commentText)
-                .userId(1L)  // TODO: 실제 사용자 ID로 변경
-                .build();
-        
-        // DB에 저장
-        Long commentId = commentDao.createComment(newComment);
+        Long commentId = commentService.createNewComment(boardId, commentText, null);
         if (commentId != null) {
             commentTextArea.clear();
             // 댓글 목록 새로고침
-            comments = commentDao.getCommentsByBoardId(boardId, currentUser);
+            comments = commentService.getCommentsByBoardId(boardId);
+
             displayComments();
             showAlert("성공", "댓글이 작성되었습니다.");
         } else {
@@ -301,10 +314,10 @@ public class PostDetailController implements Initializable {
             String newContent = result.get().trim();
             
             // DB 업데이트
-            boolean success = commentDao.updateComment(comment.getId(), newContent);
+            boolean success = commentService.updateComment(comment.getId(), newContent);
             if (success) {
                 // 댓글 목록 새로고침
-                comments = commentDao.getCommentsByBoardId(boardId, currentUser);
+                comments = commentService.getCommentsByBoardId(boardId);
                 displayComments();
                 showAlert("성공", "댓글이 수정되었습니다.");
             } else {
@@ -321,10 +334,10 @@ public class PostDetailController implements Initializable {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             // 댓글과 대댓글 모두 삭제
-            boolean success = commentDao.deleteCommentWithReplies(comment.getId());
+            boolean success = commentService.deleteCommentWithReplies(comment.getId());
             if (success) {
                 // 댓글 목록 새로고침
-                comments = commentDao.getCommentsByBoardId(boardId, currentUser);
+                comments = commentService.getCommentsByBoardId(boardId);
                 displayComments();
                 showAlert("성공", "댓글이 삭제되었습니다.");
             } else {
@@ -342,20 +355,11 @@ public class PostDetailController implements Initializable {
         }
         
         // 대댓글 생성
-        Comment reply = Comment.builder()
-                .boardId(boardId)
-                .parentId(parentComment.getId())  // 부모 댓글 ID
-                .author(currentUser)
-                .content(replyText)
-                .userId(1L)  // TODO: 실제 사용자 ID로 변경
-                .build();
-        
-        // DB에 저장
-        Long replyId = commentDao.createComment(reply);
+        Long replyId = commentService.createNewComment(boardId, replyText, parentComment.getId());
         if (replyId != null) {
             commentTextArea.clear();
             // 댓글 목록 새로고침
-            comments = commentDao.getCommentsByBoardId(boardId, currentUser);
+            comments = commentService.getCommentsByBoardId(boardId);
             displayComments();
             showAlert("성공", "답글이 작성되었습니다.");
         } else {
@@ -363,23 +367,30 @@ public class PostDetailController implements Initializable {
         }
     }
     
-    private void downloadFile(String fileName) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("파일 저장");
-        fileChooser.setInitialFileName(fileName);
-        
-        File saveFile = fileChooser.showSaveDialog(null);
-        if (saveFile != null) {
-            try {
-                // 실제로는 서버에서 파일을 다운로드해야 함
-                // 여기서는 샘플 파일 생성
-                Files.write(saveFile.toPath(), "샘플 파일 내용입니다.".getBytes());
+    private void downloadFile(FileLocation fileLocation) {
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("파일 저장");
+            
+            // 원본 파일명 추출
+            String originalFileName = fileLocation.getFilePath().substring(fileLocation.getFilePath().lastIndexOf("_") + 1);
+            fileChooser.setInitialFileName(originalFileName);
+            
+            File saveFile = fileChooser.showSaveDialog(null);
+            if (saveFile != null) {
+                // 서버에서 파일 복사
+                Path sourcePath = Paths.get(fileLocation.getFilePath());
+                Path targetPath = saveFile.toPath();
+                Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                
                 showAlert("다운로드", "파일이 성공적으로 다운로드되었습니다.");
-            } catch (IOException e) {
-                showAlert("오류", "파일 다운로드 중 오류가 발생했습니다.");
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("오류", "파일 다운로드 중 오류가 발생했습니다.");
         }
     }
+
     
     @FXML
     private void handleBack(ActionEvent event) {

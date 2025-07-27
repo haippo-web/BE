@@ -22,6 +22,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
+/**
+ * AssignmentController
+ *  ─ 메인 화면  : 내 제출 목록 + (과제 제출 버튼)
+ *  ─ 팝업 창    : 등록된 과제(수강 중 전체) + 제출 여부 목록
+ */
+
 public class AssignmentController {
 
     @FXML private Button submitBtn;  // 메인: 과제 제출 모달
@@ -55,6 +67,7 @@ public class AssignmentController {
             isCourseListMode = false;
             loadMySubmitList(currentPage);
         }
+
         if (closeButton != null) {
             closeButton.setOnAction(e -> {
                 Stage stage = (Stage) closeButton.getScene().getWindow();

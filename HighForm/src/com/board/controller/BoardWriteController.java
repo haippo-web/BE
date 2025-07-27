@@ -1,13 +1,15 @@
 package com.board.controller;
 
 import java.io.File;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
-import com.board.dao.BoardDao;
+import com.board.dao.CommentDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
+import com.board.model.Comment;
 import com.board.model.dto.BoardWriteRequestDto;
+import com.board.service.BoardService;
+import com.board.service.FileService;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,9 +20,12 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
+
 public class BoardWriteController {
     
     @FXML private TextField titleField;
@@ -34,11 +39,16 @@ public class BoardWriteController {
     private PostDetailController postDetailController;
 
     private File selectedFile;
+    private final BoardService boardService;
+    private final FileService fileService;
+    private String UserName = ""; // 현재 로그인한 사용자 (실제로는 세션에서 가져와야 함)
+    private String UserRole = "";
+    private Long UserId = null;
     
-    private final BoardDao boardDao;
-
+    
     public BoardWriteController() {
-		this.boardDao = new BoardDao().getInstance();
+		this.boardService = BoardService.getInstance();
+        this.fileService = FileService.getInstance();
         // 반드시 public, 파라미터 없음
     }
     
@@ -56,7 +66,12 @@ public class BoardWriteController {
     
     @FXML
     public void initialize() {
-        // 초기화 코드 (필요시)
+        
+        Map<String, String> userInfo = boardService.getCurrentUserInfo();
+        UserName = userInfo.get("name");
+        UserRole = userInfo.get("role");
+        UserId = Long.valueOf(userInfo.get("id"));
+        
     }
     
 
@@ -83,6 +98,7 @@ public class BoardWriteController {
         }
     }
     
+    
     @FXML
     private void handleSubmitBtn(ActionEvent event) {
         // 입력 검증
@@ -100,55 +116,45 @@ public class BoardWriteController {
             // 새 게시글 생성
             String title = titleField.getText().trim();
             String content = contentArea.getText().trim();
-            String author = "현재사용자"; // 실제로는 로그인한 사용자 정보를 가져와야 함
+            String author =UserName; // 실제로는 로그인한 사용자 정보를 가져와야 함
             BoardCategory type = BoardCategory.BOARD;
             
-            // 첨부파일 정보가 있다면 처리
+            
+            // 1. 게시글 먼저 저장
+            BoardWriteRequestDto newPost = new BoardWriteRequestDto(1, title, author, type, content, null);
+            Board board = newPost.toEntity(newPost, null, UserId);
+            Long boardId = boardService.createBoard(board);
+            
+            // 2. 첨부파일이 있다면 파일 저장
+            Long fileId = null;
             if (selectedFile != null) {
-                // 파일 처리 로직 (파일 복사, 경로 저장 등)
-                System.out.println("첨부파일: " + selectedFile.getAbsolutePath());
+                try {
+                    fileId = fileService.saveFile(selectedFile, UserId, boardId);
+                    System.out.println("파일 저장 완료: " + fileId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    showAlert("경고", "파일 업로드 중 오류가 발생했습니다.");
+                }
+            }
+         // 3. 게시글에 파일 ID 업데이트 (필요시)
+            if (fileId != null) {
+                // board 테이블의 file_id 컬럼을 업데이트하는 로직 추가 가능
             }
             
+            // 4. DB에서 최신 게시글 정보 가져오기
+            Board boardEntity = boardService.getBoard(boardId);
             
-            // BoardDto 객체 생성 (생성자에 맞게 수정 필요)
-            // TODO :: File Table 생성 후 ID 가져와야함, User Id값 가져와야함 
-
-            Long fileId = 1L;
-            Long userId = 1L;
-            BoardWriteRequestDto newPost = new BoardWriteRequestDto(1, title, author,  type,content,fileId );
-            
- 
-            Board board = newPost.toEntity(newPost, fileId, userId);
-            
-            // DB 데이터 저장 Entity 값을 반환받을 수가 없기에 boardId값을 반환받아 사용 
-            Long boardId = boardDao.createBoard(board);
-            
-            
-            // DB 데이터 호출 - DB에 저장하는 시점에 시간 저장이 되기 때문에 다시 게시물에 대한 값을 받아와야함 
-            Board boardEntity = boardDao.getBoard(boardId);
-            
-            
-            // AI 질문 여부 처리
-            if (aiQuestionCheck.isSelected()) {
-                // AI 질문 관련 처리
-                System.out.println("AI 질문 게시글로 설정됨");
-            }
-            
-            
-            // DB에서 방금 저장된 Entity 호출
-            
-            
-            // BoardController에 새 게시글 추가
+            // 5. 게시글 목록 새로고침
             if (boardController != null) {
                 boardController.addNewPost(boardEntity);
             }
             
             showAlert("성공", "게시글이 성공적으로 작성되었습니다.");
-            closeWindow();
+            ((Stage) submitBtn.getScene().getWindow()).close();
             
         } catch (Exception e) {
-            showAlert("오류", "게시글 작성 중 오류가 발생했습니다: " + e.getMessage());
             e.printStackTrace();
+            showAlert("오류", "게시글 작성 중 오류가 발생했습니다.");
         }
     }
     
@@ -179,5 +185,15 @@ public class BoardWriteController {
         filePathField.clear();
         aiQuestionCheck.setSelected(false);
         selectedFile = null;
+    }
+    
+    private void saveAiComment(Long boardId, String comment, Long userId) {
+        Comment commentObj = Comment.builder()
+            .boardId(boardId)
+            .content(comment)
+            .userId(userId)
+            .author("AI")
+            .build();
+        CommentDao.getInstance().createComment(commentObj);
     }
 }

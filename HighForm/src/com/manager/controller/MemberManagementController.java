@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import com.manager.model.Course;
 import com.manager.model.Member;
 import com.manager.service.MemberService;
 
@@ -20,6 +19,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
 
 public class MemberManagementController {
 	@FXML
@@ -64,8 +68,8 @@ public class MemberManagementController {
 	@FXML
 	private TextField affiliationField;
 
-	@FXML
-	private TextArea notesArea;
+	//@FXML
+	//private TextArea notesArea;
 
 	@FXML
 	private Button newMemberBtn;
@@ -88,6 +92,9 @@ public class MemberManagementController {
 		memberService = new MemberService();
 		memberList = FXCollections.observableArrayList();
 
+		affiliationField.setEditable(false);  // 입력 불가
+		affiliationField.setDisable(true);    // 비활성화 (선택도 못함)
+		
 		// 테이블 컬럼 설정
 		// 인덱스 ID
 		idColumn.setCellValueFactory(cellData -> {
@@ -190,7 +197,9 @@ public class MemberManagementController {
 
 			// 데이터 확인용 디버깅
 			for (Member member : members) {
-				System.out.println("로드된 유저: " + member.getMemberName() + " | " + member.getAffiliation());
+
+				System.out.println("로드된 유저: " + member.getMemberName() + " | " + member.getAffiliation() + "|"
+						+ member.getPosition());
 			}
 
 			memberList.addAll(members);
@@ -212,7 +221,7 @@ public class MemberManagementController {
 		phoneField.setText(member.getPhoneNumber());
 		emailField.setText(member.getEmail());
 		affiliationField.setText(member.getAffiliation());
-		notesArea.setText("");
+		//notesArea.setText("");
 	}
 
 	private void clearFields() {
@@ -222,7 +231,7 @@ public class MemberManagementController {
 		phoneField.clear();
 		emailField.clear();
 		affiliationField.clear();
-		notesArea.clear();
+		//notesArea.clear();
 		memberTable.getSelectionModel().clearSelection();
 	}
 
@@ -265,28 +274,34 @@ public class MemberManagementController {
 		confirmAlert.setHeaderText("선택한 회원을 수정하시겠습니까?");
 		confirmAlert.setContentText(selectedMember.getMemberName());
 
-		// 2. 확인/취소 버튼 대기
 		Optional<ButtonType> result = confirmAlert.showAndWait();
 
 		if (result.isPresent() && result.get() == ButtonType.OK) {
-			// 3. 사용자가 '확인'을 누르면 수정 진행
+			String originalAffiliation = selectedMember.getAffiliation();
+			String newAffiliation = affiliationField.getText();
+
+			if (originalAffiliation != null && !originalAffiliation.equals(newAffiliation)) {
+				// 수정 시도 막기
+				showAlert("수정 제한", "소속은 수정할 수 없습니다.");
+				return;
+			}
+
+			// 수정 처리
+			selectedMember.setMemberName(nameField.getText());
+			selectedMember.setPosition(positionField.getText());
+			selectedMember.setPhoneNumber(phoneField.getText());
+			selectedMember.setEmail(emailField.getText());
+
 			boolean success = memberService.updateMember(selectedMember);
 
 			if (success) {
-				selectedMember.setMemberName(nameField.getText());
-				selectedMember.setPosition(positionField.getText());
-				selectedMember.setPhoneNumber(phoneField.getText());
-				selectedMember.setEmail(emailField.getText());
-				selectedMember.setAffiliation(affiliationField.getText());
-
-				memberService.updateMember(selectedMember);
-
 				Alert successAlert = new Alert(Alert.AlertType.INFORMATION, "회원 정보가 수정되었습니다.");
 				successAlert.show();
 			} else {
 				Alert errorAlert = new Alert(Alert.AlertType.ERROR, "회원 정보 수정 중 오류가 발생했습니다.");
 				errorAlert.show();
 			}
+
 			loadMemberData();
 			clearFields();
 		} else {
@@ -339,8 +354,7 @@ public class MemberManagementController {
 		alert.setContentText(message);
 		alert.showAndWait();
 	}
-	
-	
+
 	// 이전 화면으로 돌아가기
 	@FXML
 	private void handleBackMenu(ActionEvent event) {

@@ -7,6 +7,11 @@ import java.sql.SQLException;
 import com.mypage.Model.attendance.AttendanceApprovalRequest;
 import com.util.DBConnection;
 
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
 public class AttendanceApprovalRequestDAO {
     public void insert(AttendanceApprovalRequest req) throws SQLException {
         // status 값은 필요시 상수로 관리

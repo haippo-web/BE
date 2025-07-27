@@ -1,5 +1,10 @@
 package com.manager.model;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class Course {
     private int courseId;
     private String courseName;

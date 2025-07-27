@@ -10,6 +10,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 public class UserDAO {
 
     // Singleton 패턴
@@ -46,8 +51,13 @@ public class UserDAO {
                 System.out.println("password 원본: [" + password + "]");
                 System.out.println("password 길이: " + (password != null ? password.length() : "null"));
 
+                System.out.println(loginId);
+                System.out.println(password);
+                
                 pstmt.setString(1, loginId);
                 pstmt.setString(2, password);
+                
+
 
                 System.out.println("=== SQL 실행 ===");
                 ResultSet rs = pstmt.executeQuery();

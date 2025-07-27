@@ -19,7 +19,10 @@ import com.mypage.Model.attendance.Attendance;
 import com.mypage.dao.attendance.AttendanceDAO;
 import java.time.format.DateTimeFormatter; 
 
-public class AttendanceController {
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
 
     @FXML private Button closeButton;
 
@@ -208,6 +211,7 @@ public class AttendanceController {
     }
 
     // ------------------ 휴가/공결 신청 팝업 ------------------
+
     @FXML
     private void handleApplyBtn() {
         try {
@@ -230,4 +234,6 @@ public class AttendanceController {
             new Alert(Alert.AlertType.ERROR, "신청 창 열기 실패: " + e.getMessage()).showAndWait();
         }
     }
+
 }
+

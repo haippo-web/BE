@@ -7,6 +7,11 @@ import javafx.stage.Stage;
 
 import java.time.LocalDate;
 
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
 public class ScheduleDialogController {
 
     @FXML private TextField  titleField;

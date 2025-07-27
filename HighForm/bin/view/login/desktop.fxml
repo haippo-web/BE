@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.login.controller.DesktopController" 
+            style="-fx-background-color: #008080;" prefWidth="1000" prefHeight="750">
+    
+    <center>
+        <AnchorPane fx:id="desktopPane">
+            <VBox layoutX="20" layoutY="20" spacing="15" alignment="TOP_LEFT">
+                
+                <!-- 공통 아이콘 VBox 템플릿 -->
+                <!-- 출석체크 -->
+                <VBox alignment="CENTER" spacing="8" onMouseClicked="#openAttendanceCheck"
+                      style="-fx-cursor: hand;" maxWidth="80" minWidth="80">
+                    <ImageView fitWidth="64" fitHeight="64">
+                        <image>
+                            <Image url="@../../img2/attendance_icon.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="출석체크" 
+                           style="-fx-text-fill: white; -fx-font-family: 'DungGeunMo'; -fx-font-size: 12px;"
+                           wrapText="true" textAlignment="CENTER"/>
+                </VBox>
+
+                <!-- 마이페이지 출결 -->
+                <VBox alignment="CENTER" spacing="8" onMouseClicked="#openmyCheck"
+                      style="-fx-cursor: hand;" maxWidth="80" minWidth="80">
+                    <ImageView fitWidth="64" fitHeight="64">
+                        <image>
+                            <Image url="@../../img2/myCheck_icon.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="나의 출결관리" 
+                           style="-fx-text-fill: white; -fx-font-family: 'DungGeunMo'; -fx-font-size: 12px;"
+                           wrapText="true" textAlignment="CENTER"/>
+                </VBox>
+
+                <!-- 마이페이지 과제 -->
+                <VBox alignment="CENTER" spacing="8" onMouseClicked="#openAssignment"
+                      style="-fx-cursor: hand;" maxWidth="80" minWidth="80">
+                    <ImageView fitWidth="64" fitHeight="64">
+                        <image>
+                            <Image url="@../../img2/assignment_icon.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="과제제출하기"
+                           style="-fx-text-fill: white; -fx-font-family: 'DungGeunMo'; -fx-font-size: 12px;"
+                           wrapText="true" textAlignment="CENTER"/>
+                </VBox>
+
+                <!--게시판 -->
+                <VBox alignment="CENTER" spacing="8" onMouseClicked="#openBoard"
+                      style="-fx-cursor: hand;" maxWidth="80" minWidth="80">
+                    <ImageView fitWidth="64" fitHeight="64">
+                        <image>
+                            <Image url="@../../img2/notice_icon.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="게시판" 
+                           style="-fx-text-fill: white; -fx-font-family: 'DungGeunMo'; -fx-font-size: 12px;"
+                           wrapText="true" textAlignment="CENTER"/>
+                </VBox>
+
+                <!-- ㅇ -->
+                <VBox alignment="CENTER" spacing="8" onMouseClicked="#openNotice"
+                      style="-fx-cursor: hand;" maxWidth="80" minWidth="80">
+                    <ImageView fitWidth="64" fitHeight="64">
+                        <image>
+                            <Image url="@../../img2/board_icon.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="여기머하징" 
+                           style="-fx-text-fill: white; -fx-font-family: 'DungGeunMo'; -fx-font-size: 12px;"
+                           wrapText="true" textAlignment="CENTER"/>
+                </VBox>
+
+                <!-- 관리자 페이지 -->
+                <VBox alignment="CENTER" spacing="8" onMouseClicked="#openManager"
+                      style="-fx-cursor: hand;" maxWidth="80" minWidth="80">
+                    <ImageView fitWidth="64" fitHeight="64">
+                        <image>
+                            <Image url="@../../img2/manager_icon.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="관리자페이지" 
+                           style="-fx-text-fill: white; -fx-font-family: 'DungGeunMo'; -fx-font-size: 12px;"
+                           wrapText="true" textAlignment="CENTER"/>
+                </VBox>
+            </VBox>
+            
+            <!-- 오른쪽 아이콘 그룹 -->
+            <VBox layoutX="120" layoutY="20" spacing="15" alignment="TOP_LEFT">
+                
+                <!-- 퇴근하기 -->
+                <VBox alignment="CENTER" spacing="8" onMouseClicked="#openClockOut"
+                      style="-fx-cursor: hand;" maxWidth="80" minWidth="80">
+                    <ImageView fitWidth="64" fitHeight="64">
+                        <image>
+                            <Image url="@../../img2/clockout_icon.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="퇴근하기" 
+                           style="-fx-text-fill: white; -fx-font-family: 'DungGeunMo'; -fx-font-size: 12px;"
+                           wrapText="true" textAlignment="CENTER"/>
+                </VBox>
+
+                <!-- 마이페이지 달력 일정-->
+                <VBox alignment="CENTER" spacing="8" onMouseClicked="#openSchedule"
+                      style="-fx-cursor: hand;" maxWidth="80" minWidth="80">
+                    <ImageView fitWidth="64" fitHeight="64">
+                        <image>
+                            <Image url="@../../img2/Calendar_icon.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="달력" 
+                           style="-fx-text-fill: white; -fx-font-family: 'DungGeunMo'; -fx-font-size: 12px;"
+                           wrapText="true" textAlignment="CENTER"/>
+                </VBox>
+            </VBox>
+
+            <!-- 사용자 정보 표시 -->
+            <HBox layoutX="650" layoutY="20" spacing="10" alignment="CENTER_RIGHT">
+                <Label fx:id="welcomeLabel" text="환영합니다, 사용자님!" 
+                       style="-fx-text-fill: white; -fx-font-family: 'DungGeunMo'; -fx-font-size: 14px;"/>
+            </HBox>
+        </AnchorPane>
+    </center>
+    
+    <bottom>
+        <HBox style="-fx-background-color: linear-gradient(to bottom, #c0c0c0 0%, #a0a0a0 100%); -fx-border-color: #808080; -fx-border-width: 2 0 0 0; -fx-padding: 6;"
+              prefHeight="45" alignment="CENTER_LEFT" spacing="8">
+            <Button text="시작" fx:id="startButton" onAction="#showStartMenu"
+                    style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 14px; -fx-background-color: linear-gradient(to bottom, #d0d0d0 0%, #b0b0b0 100%); -fx-border-color: #808080; -fx-border-width: 2; -fx-padding: 6 20 6 20;"
+                    prefHeight="35" minWidth="80"/>
+            <Separator orientation="VERTICAL" prefHeight="30"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Label fx:id="timeLabel" text="3:43 pm" 
+                   style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 14px; -fx-text-fill: black;"/>
+        </HBox>
+    </bottom>
+</BorderPane>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.image.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.geometry.Insets?>
@@ -7,22 +8,15 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.manager.controller.MenuSelectController">
+<VBox prefHeight="500.0" prefWidth="860.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.manager.controller.MenuSelectController">
    <children>
       <!-- Header -->
-      <HBox alignment="CENTER_LEFT" prefHeight="60.0" style="-fx-background-color: #2E3A87;" VBox.vgrow="NEVER">
+      <HBox alignment="CENTER_LEFT" prefHeight="50.0" style="-fx-background-color: #000080;" VBox.vgrow="NEVER">
          <padding>
             <Insets left="20.0" right="20.0" />
          </padding>
          <children>
-            <Label prefHeight="21.0" prefWidth="191.0" text="Manager's Menu" textFill="WHITE">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-            </Label>
-            <Region prefHeight="60.0" prefWidth="349.0" HBox.hgrow="ALWAYS" />
-            <!-- Settings Button -->
-            <Button fx:id="settingsButton" mnemonicParsing="false" onAction="#handleSettings" prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-width: 1; -fx-text-fill: white;" text="x" />
+            <Label text="Manager's Menu"  prefHeight="21.0" prefWidth="191.0" style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 20px;" textFill="WHITE"/>
          </children>
       </HBox>
    
@@ -41,12 +35,15 @@
                   <VBox alignment="CENTER" spacing="30.0">
                      <children>
                         <!-- 결제승인 Button -->
-                        <Button fx:id="paymentApprovalButton" onAction="#handlePaymentApproval" prefHeight="251.0" prefWidth="150.0" style="-fx-background-color: #D0D0D0; -fx-border-color: #999999; -fx-border-width: 1;">
+                        <Button fx:id="paymentApprovalButton" onAction="#handlePaymentApproval" prefHeight="280.0" prefWidth="200.0" style="-fx-background-color: #D0D0D0; -fx-border-color: #999999; -fx-border-width: 1;">
                            <graphic>
                               <VBox alignment="CENTER" spacing="10.0">
                                  <children>
-                                    <Region prefHeight="80.0" prefWidth="80.0" style="-fx-background-color: transparent;" />
-                                    <Label text="결재승인">
+                                    <ImageView fitHeight="130.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../img2/stamp.png" />
+                                       </image></ImageView>
+                                    <Label style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 20px;" text="결재관리">
                                        <font>
                                           <Font name="Malgun Gothic" size="14.0" />
                                        </font>
@@ -62,12 +59,17 @@
                   <VBox alignment="CENTER" spacing="30.0">
                      <children>
                         <!-- 출결리스트 Button -->
-                        <Button fx:id="attendanceListButton" onAction="#handleAttendanceList" prefHeight="247.0" prefWidth="150.0" style="-fx-background-color: #D0D0D0; -fx-border-color: #999999; -fx-border-width: 1;">
+                        <Button fx:id="attendanceListButton" onAction="#handleAttendanceList" prefHeight="280.0" prefWidth="200.0" style="-fx-background-color: #D0D0D0; -fx-border-color: #999999; -fx-border-width: 1;">
                            <graphic>
                               <VBox alignment="CENTER" prefHeight="227.0" prefWidth="124.0" spacing="10.0">
                                  <children>
-                                    <Region prefHeight="80.0" prefWidth="80.0" style="-fx-background-color: transparent;" />
-                                    <Label text="출결리스트">
+                                    <ImageView fitHeight="120.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../img2/attendance.png" />
+                                       </image>
+                                    </ImageView>
+                                    <Region prefHeight="10.0" prefWidth="200.0" />
+                                    <Label style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 20px;" text="출결리스트">
                                        <font>
                                           <Font name="Malgun Gothic" size="14.0" />
                                        </font>
@@ -80,37 +82,49 @@
                   </VBox>
                   
                   <!-- Third Column -->
-                  <VBox alignment="CENTER" spacing="30.0">
+                  <VBox alignment="CENTER" spacing="20.0">
                      <children>
                         <!-- 회원관리 Button -->
-                        <Button fx:id="memberManagementButton" onAction="#handleMemberManagement" prefHeight="106.0" prefWidth="150.0" style="-fx-background-color: #D0D0D0; -fx-border-color: #999999; -fx-border-width: 1;">
+                        <Button fx:id="memberManagementButton" onAction="#handleMemberManagement" prefHeight="130.0" prefWidth="210.0" style="-fx-background-color: #D0D0D0; -fx-border-color: #999999; -fx-border-width: 1;">
                            <graphic>
-                              <VBox alignment="CENTER" spacing="10.0">
+                              <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                                  <children>
-                                    <Region prefHeight="80.0" prefWidth="80.0" style="-fx-background-color: transparent;" />
-                                    <Label text="회원관리">
+                                    <ImageView fitHeight="100.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../img2/members.png" />
+                                       </image>
+                                    </ImageView>
+                                    <Region prefHeight="116.0" prefWidth="13.0" />
+                                    <Label style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 18px;" text="회원관리">
                                        <font>
                                           <Font name="Malgun Gothic" size="14.0" />
                                        </font>
                                     </Label>
+                                    <Region prefHeight="116.0" prefWidth="13.0" />
                                  </children>
-                              </VBox>
+                              </HBox>
                            </graphic>
                         </Button>
                         
                         <!-- 강의관리 Button -->
-                        <Button fx:id="courseManagementButton" onAction="#handleCourseManagement" prefHeight="107.0" prefWidth="150.0" style="-fx-background-color: #D0D0D0; -fx-border-color: #999999; -fx-border-width: 1;">
+                        <Button fx:id="courseManagementButton" onAction="#handleCourseManagement" prefHeight="130.0" prefWidth="210.0" style="-fx-background-color: #D0D0D0; -fx-border-color: #999999; -fx-border-width: 1;">
                            <graphic>
-                              <VBox alignment="CENTER" spacing="10.0">
+                              <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                                  <children>
-                                    <Region prefHeight="80.0" prefWidth="80.0" style="-fx-background-color: transparent;" />
-                                    <Label text="강의관리">
+                                    <ImageView fitHeight="150.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../img2/course.png" />
+                                       </image>
+                                    </ImageView>
+                                    <Region prefHeight="116.0" prefWidth="13.0" />
+                                    <Label style="-fx-font-family: 'DungGeunMo'; -fx-font-size: 18px;" text="강의관리">
                                        <font>
                                           <Font name="Malgun Gothic" size="14.0" />
                                        </font>
                                     </Label>
+                                    <Region prefHeight="116.0" prefWidth="13.0" />
                                  </children>
-                              </VBox>
+                              </HBox>
                            </graphic>
                         </Button>
                      </children>

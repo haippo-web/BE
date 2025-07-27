@@ -1,4 +1,3 @@
-/bin/
 # Eclipse 설정 및 빌드 결과
 .project
 .classpath
@@ -10,3 +9,5 @@ target/
 .DS_Store
 HighForm/resources/db.properties
 /.apt_generated/
+/build/
+/bin/

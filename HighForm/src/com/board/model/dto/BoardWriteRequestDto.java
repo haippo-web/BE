@@ -10,6 +10,11 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @Setter
+
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
 public class BoardWriteRequestDto {
 	private int no;
     private String title;

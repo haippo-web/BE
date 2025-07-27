@@ -11,6 +11,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class MenuSelectController {
 	@FXML
 	private Button courseManagementButton;

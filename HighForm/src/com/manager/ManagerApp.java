@@ -8,6 +8,11 @@ import javafx.scene.Scene;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class ManagerApp extends Application {
 	
 	 @Override

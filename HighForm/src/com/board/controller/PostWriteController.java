@@ -17,6 +17,10 @@ import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
 
 public class PostWriteController {
     @FXML private ComboBox<String> typeComboBox;

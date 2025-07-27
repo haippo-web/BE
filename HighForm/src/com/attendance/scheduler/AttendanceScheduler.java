@@ -2,6 +2,11 @@ package com.attendance.scheduler;
 
 import com.attendance.service.AttendanceCodeService;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 /**
  * 출석 코드 스케줄러 - 앱과 별도로 실행되는 독립 프로세스
  * 

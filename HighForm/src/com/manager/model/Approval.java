@@ -1,5 +1,10 @@
 package com.manager.model;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class Approval {
 	private int approvalId;
 	private String category;

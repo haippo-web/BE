@@ -4,6 +4,11 @@ import java.util.Map;
 
 import redis.clients.jedis.Jedis;
 
+/*		[					]
+ * 		[	배지원    담당   	]
+ * 		[					]
+ */
+
 public class RedisLoginService {
     private static final String REDIS_HOST = "localhost";
     private static final int REDIS_PORT = 6379;

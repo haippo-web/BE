@@ -1,5 +1,11 @@
 package com.notification.dao;
 
+
+/*		[					]
+ * 		[	배지원    담당   	]
+ * 		[					]
+ */
+
 public class NotificationSQL {
     
 	// 시퀀스 생성

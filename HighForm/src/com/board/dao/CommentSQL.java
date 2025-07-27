@@ -1,5 +1,10 @@
 package com.board.dao;
 
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
+
 public class CommentSQL {
 	
 	public static final String CREATE_COMMENT_TABLE =

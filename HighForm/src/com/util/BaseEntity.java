@@ -5,6 +5,12 @@ import java.sql.Date;
 import lombok.Getter;
 import lombok.Setter;
 
+/*		[					]
+ * 		[	배지원    담당   	]
+ * 		[					]
+ */
+
+
 @Getter
 @Setter
 public abstract class BaseEntity {

@@ -18,6 +18,11 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import redis.clients.jedis.Jedis;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 /**
  * 출석 코드 관리 서비스 - 앱에서는 조회만, 스케줄러는 별도 실행
  */

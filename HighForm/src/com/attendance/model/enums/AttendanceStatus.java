@@ -1,5 +1,10 @@
 package com.attendance.model.enums;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 public enum AttendanceStatus {
     PRESENT("정상출석"),      // 09:00 이전 출석
     LATE("지각"),           // 09:00~14:00 출석

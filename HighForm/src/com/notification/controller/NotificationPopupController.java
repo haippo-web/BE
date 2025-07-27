@@ -11,6 +11,11 @@ import com.notification.service.NotificationService;
 import java.util.List;
 import java.util.Map;
 
+/*		[					]
+ * 		[	배지원    담당   	]
+ * 		[					]
+ */
+
 public class NotificationPopupController {
     @FXML private VBox notificationList;
     @FXML private Button closeButton;

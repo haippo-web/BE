@@ -7,6 +7,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
 public class AttendanceDAO {
     // 싱글톤 패턴
     private static AttendanceDAO instance;

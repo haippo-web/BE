@@ -1,5 +1,10 @@
 package com.manager.model;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 import lombok.Getter;
 
 public class Member {

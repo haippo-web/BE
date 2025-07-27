@@ -1,5 +1,10 @@
 package com.attendance.model;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 import com.attendance.model.enums.ApprovalStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

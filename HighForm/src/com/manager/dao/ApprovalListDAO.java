@@ -10,6 +10,11 @@ import java.util.List;
 import com.manager.model.Approval;
 import com.util.DBConnection;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class ApprovalListDAO {
 	private Connection getConnection() throws SQLException {
 		return DBConnection.getConnection();

@@ -6,6 +6,11 @@ import jakarta.mail.internet.*;
 import java.time.LocalDate;
 import java.util.Properties;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 public class MailTest {
     public static void sendTestMail() {
         String username = "sana2d2v@gmail.com";

@@ -8,6 +8,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/*		[					]
+ * 		[	배지원    담당   	]
+ * 		[					]
+ */
+
 public class Main extends Application {
     private Stage primaryStage;
 

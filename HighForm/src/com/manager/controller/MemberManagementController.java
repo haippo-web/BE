@@ -20,6 +20,11 @@ import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class MemberManagementController {
 	@FXML
 	private TableView<Member> memberTable;

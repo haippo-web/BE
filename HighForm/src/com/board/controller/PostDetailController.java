@@ -43,6 +43,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
+
 public class PostDetailController implements Initializable {
     
     @FXML private Label titleLabel;

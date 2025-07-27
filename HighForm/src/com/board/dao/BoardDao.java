@@ -13,6 +13,11 @@ import com.board.model.BoardCategory;
 import com.board.model.dto.BoardDto;
 import com.util.DBConnection;
 
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
+
 public class BoardDao {
 
    // 1. Singleton & DB connection

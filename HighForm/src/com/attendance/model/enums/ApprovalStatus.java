@@ -1,5 +1,10 @@
 package com.attendance.model.enums;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 public enum ApprovalStatus {
     PROGRESSING("진행중"),
     APPROVE("승인"),

@@ -17,6 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
 public class FileLocationDao {
     
     private static FileLocationDao instance;

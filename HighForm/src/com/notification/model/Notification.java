@@ -3,6 +3,11 @@ package com.notification.model;
 import java.sql.Date;
 import com.util.BaseEntity;
 
+/*		[					]
+ * 		[	배지원    담당   	]
+ * 		[					]
+ */
+
 public class Notification extends BaseEntity {
     private Long id;
     private String title;

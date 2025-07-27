@@ -21,6 +21,11 @@ import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
+
 public class BoardWriteController {
     
     @FXML private TextField titleField;

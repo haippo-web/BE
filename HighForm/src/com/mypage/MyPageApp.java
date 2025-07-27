@@ -7,14 +7,21 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/*		[					]
+ * 		[	황요한   담당   	]
+ * 		[					]
+ */
+
 public class MyPageApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
 
-//      FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/assignment/my_assignment_list.fxml"));
+
+      FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/assignment/my_assignment_list.fxml"));
 //      FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/attendance/attendance_list.fxml"));
-    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/calendar.fxml"));
+//    	FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mypage/calendar.fxml"));
+
         loader.setControllerFactory(type -> {
             if (type == CalendarController.class) {
                 return new CalendarController(3L);

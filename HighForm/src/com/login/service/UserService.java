@@ -4,6 +4,11 @@ import com.login.dao.UserDAO;
 import com.login.model.User;
 import java.util.List;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 public class UserService {
     private static final UserDAO userDAO = UserDAO.getInstance();
     private static UserService instance;

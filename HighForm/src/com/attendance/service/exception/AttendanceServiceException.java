@@ -1,5 +1,10 @@
 package com.attendance.service.exception;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 /**
  * 출석 서비스 관련 예외
  */

@@ -7,6 +7,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/*		[					]
+ * 		[	배지원    담당   	]
+ * 		[					]
+ */
+
 public class NotificationDao {
     
     // 싱글톤 패턴

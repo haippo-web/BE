@@ -5,6 +5,12 @@ import java.sql.SQLException;
 /**
  * Notification 데이터베이스 프로시저를 생성하는 초기화 클래스
  */
+
+/*		[					]
+ * 		[	배지원    담당   	]
+ * 		[					]
+ */
+
 public class NotificationDatabaseInitializer {
     
     private final NotificationDao notificationDao;

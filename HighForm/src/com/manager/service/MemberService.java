@@ -5,6 +5,11 @@ import java.util.List;
 import com.manager.dao.MemberDAO;
 import com.manager.model.Member;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class MemberService {
 
 	private MemberDAO memberDAO;

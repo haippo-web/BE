@@ -4,6 +4,11 @@ import com.manager.dao.CourseDAO;
 import com.manager.model.Course;
 import java.util.List;
 
+/*		[					]
+ * 		[	이지민    담당   	]
+ * 		[					]
+ */
+
 public class CourseService {
     private CourseDAO courseDAO;
     

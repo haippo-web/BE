@@ -47,6 +47,11 @@ import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+/*		[					]
+ * 		[	최산하   담당   	]
+ * 		[					]
+ */
+
 public class DesktopController {
     
     @FXML private Label welcomeLabel;

@@ -1,5 +1,9 @@
 package com.board.dao;
 
+/*		[					]
+ * 		[	배지원   담당   	]
+ * 		[					]
+ */
 public class BoardSQL {
 	// 시퀀스 생성
 	public static final String CREATE_BOARD_SEQUENCE =

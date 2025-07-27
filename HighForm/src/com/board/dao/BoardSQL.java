@@ -28,6 +28,36 @@ public class BoardSQL {
 				)
 			""";
 
+	// 게시글 목록 조회용 View 생성
+	public static final String CREATE_BOARD_LIST_VIEW =
+			"""
+				CREATE OR REPLACE VIEW V_BOARD_LIST AS
+				SELECT 
+				    ROW_NUMBER() OVER (ORDER BY b.created_at DESC) AS no,
+				    b.id,
+				    b.title,
+				    b.author,
+				    b.content,
+				    b.type,
+				    b.created_at,
+				    b.user_id,
+				    NVL(comment_count, 0) as comment_count,
+				    NVL(file_count, 0) as file_count
+				FROM board b
+				LEFT JOIN (
+				    SELECT board_id, COUNT(*) as comment_count
+				    FROM comments 
+				    WHERE del_yn = 'N'
+				    GROUP BY board_id
+				) c ON b.id = c.board_id
+				LEFT JOIN (
+				    SELECT submit_id, COUNT(*) as file_count
+				    FROM file_location 
+				    GROUP BY submit_id
+				) f ON b.id = f.submit_id
+				WHERE b.del_yn = 'N'
+			""";
+
 	
 	public static final String CREATE_BOARD = 
 			"""
@@ -45,13 +75,8 @@ public class BoardSQL {
 	
 	public static final String GET_BOARD_FROM_TYPE =
 			"""
-				SELECT 
-				    ROW_NUMBER() OVER (ORDER BY created_at DESC) AS no,
-				    b.*
-				FROM 
-			    	BOARD b
-				WHERE 
-			    	type = ? AND del_yn = 'N'
+				SELECT * FROM V_BOARD_LIST 
+				WHERE type = ?
 			""";
 			
 	// 게시글 수정을 위한 SQL 쿼리들

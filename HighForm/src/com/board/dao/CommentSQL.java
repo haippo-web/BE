@@ -18,6 +18,33 @@ public class CommentSQL {
 				    CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES user_info(id)
 				)
 			""";
+
+	// 계층형 댓글 조회용 View 생성
+	public static final String CREATE_HIERARCHICAL_COMMENTS_VIEW =
+			"""
+				CREATE OR REPLACE VIEW V_HIERARCHICAL_COMMENTS AS
+				SELECT 
+				    c.id,
+				    c.board_id,
+				    c.parent_id,
+				    c.author,
+				    c.content,
+				    c.user_id,
+				    c.created_at,
+				    c.updated_at,
+				    c.del_yn,
+				    LEVEL as comment_level,
+				    CONNECT_BY_ROOT c.id as root_comment_id,
+				    SYS_CONNECT_BY_PATH(c.id, '/') as comment_path,
+				    CASE 
+				        WHEN LEVEL = 1 THEN 'PARENT'
+				        ELSE 'REPLY'
+				    END as comment_type
+				FROM comments c
+				WHERE c.del_yn = 'N'
+				START WITH c.parent_id = 0
+				CONNECT BY PRIOR c.id = c.parent_id
+			""";
 	
 //	parent_id NUMBER DEFAULT 0,  -- 0이면 최상위 댓글, 아니면 대댓글
 	
@@ -40,9 +67,9 @@ public class CommentSQL {
     
     public static final String GET_COMMENTS_BY_BOARD_ID =
             """
-            SELECT * FROM comments 
-            WHERE board_id = ? AND del_yn = 'N'
-            ORDER BY parent_id ASC, created_at ASC
+            SELECT * FROM V_HIERARCHICAL_COMMENTS 
+            WHERE board_id = ?
+            ORDER BY root_comment_id, comment_level, created_at
             """;
     
     public static final String UPDATE_COMMENT =
@@ -64,6 +91,62 @@ public class CommentSQL {
             UPDATE comments
             SET del_yn = 'Y', updated_at = SYSDATE 
             WHERE id = ? OR parent_id = ?
+            """;
+    
+    // 댓글 및 대댓글 삭제 프로시저 생성
+    public static final String CREATE_DELETE_COMMENT_PROCEDURE =
+            """
+            CREATE OR REPLACE PROCEDURE DELETE_COMMENT_CASCADE(
+                p_comment_id IN NUMBER,
+                p_result OUT NUMBER
+            ) AS
+                v_affected_rows NUMBER := 0;
+                v_comment_exists NUMBER := 0;
+            BEGIN
+                -- 댓글 존재 여부 확인
+                SELECT COUNT(*) INTO v_comment_exists
+                FROM comments 
+                WHERE id = p_comment_id AND del_yn = 'N';
+                
+                IF v_comment_exists = 0 THEN
+                    p_result := 0;
+                    RETURN;
+                END IF;
+                
+                -- 대댓글 먼저 삭제 (논리 삭제)
+                UPDATE comments 
+                SET del_yn = 'Y', updated_at = SYSDATE 
+                WHERE parent_id = p_comment_id AND del_yn = 'N';
+                
+                v_affected_rows := v_affected_rows + SQL%ROWCOUNT;
+                
+                -- 원본 댓글 삭제 (논리 삭제)
+                UPDATE comments 
+                SET del_yn = 'Y', updated_at = SYSDATE 
+                WHERE id = p_comment_id AND del_yn = 'N';
+                
+                v_affected_rows := v_affected_rows + SQL%ROWCOUNT;
+                
+                p_result := v_affected_rows;
+                
+                -- 삭제 로그 기록 (선택사항)
+                IF v_affected_rows > 0 THEN
+                    INSERT INTO comment_delete_log (comment_id, deleted_at, affected_rows)
+                    VALUES (p_comment_id, SYSDATE, v_affected_rows);
+                END IF;
+                
+            EXCEPTION
+                WHEN OTHERS THEN
+                    p_result := 0;
+                    DBMS_OUTPUT.PUT_LINE('댓글 삭제 중 오류: ' || SQLERRM);
+                    RAISE;
+            END DELETE_COMMENT_CASCADE;
+            """;
+    
+    // 댓글 삭제 프로시저 호출용 SQL
+    public static final String DELETE_COMMENT_WITH_REPLIES_PROCEDURE =
+            """
+            {call DELETE_COMMENT_CASCADE(?, ?)}
             """;
     
     

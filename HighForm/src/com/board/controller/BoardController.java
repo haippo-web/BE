@@ -52,7 +52,6 @@ public class BoardController {
 
 
     private final BoardService boardService;
-    private RedisLoginService redisService = new RedisLoginService();
 
     
     public BoardController() {
@@ -221,7 +220,7 @@ public class BoardController {
     @FXML
     private void handleUploadBtn(ActionEvent event) {
     	// TODO :: 유저 연동 시 권한 체크
-        Map<String, String> userInfo = redisService.getLoginUserFromRedis();
+        Map<String, String> userInfo = boardService.getCurrentUserInfo();
 
      // STUDENT, PROFESSOR, MANAGER
         
@@ -316,14 +315,10 @@ public class BoardController {
     // 게시글 작성 후 리스트에 추가
     // TODO :: User 연동되면 USerId 추가
     public void addNewPost(Board board) {
-        Map<String, String> userInfo = redisService.getLoginUserFromRedis();
-
-        int no = allItems.size() + 1;
-        Long userId = Long.valueOf(userInfo.get("id"));
-        BoardDto dto =  new BoardDto(no, board.getTitle(), userInfo.get("name"), board.getCreatedAt() , board.getType() ,board.getContent(), board.getBoardId(),userId);
+        BoardDto dto = boardService.createBoardDto(board);
+        dto.setNo(allItems.size() + 1);
         allItems.add(dto);
         filterByType(currentBoardType);
         updatePagination();
-
     }
 }

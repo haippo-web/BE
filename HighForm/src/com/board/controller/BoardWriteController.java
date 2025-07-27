@@ -4,13 +4,12 @@ import java.io.File;
 import java.util.Map;
 
 import com.board.dao.CommentDao;
-import com.board.dao.FileLocationDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.Comment;
 import com.board.model.dto.BoardWriteRequestDto;
 import com.board.service.BoardService;
-import com.util.RedisLoginService;
+import com.board.service.FileService;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -36,8 +35,7 @@ public class BoardWriteController {
 
     private File selectedFile;
     private final BoardService boardService;
-    private final FileLocationDao fileLocationDao;
-    private RedisLoginService redisService = new RedisLoginService();
+    private final FileService fileService;
     private String UserName = ""; // 현재 로그인한 사용자 (실제로는 세션에서 가져와야 함)
     private String UserRole = "";
     private Long UserId = null;
@@ -45,7 +43,7 @@ public class BoardWriteController {
     
     public BoardWriteController() {
 		this.boardService = BoardService.getInstance();
-        this.fileLocationDao = FileLocationDao.getInstance();
+        this.fileService = FileService.getInstance();
         // 반드시 public, 파라미터 없음
     }
     
@@ -64,7 +62,7 @@ public class BoardWriteController {
     @FXML
     public void initialize() {
         
-        Map<String, String> userInfo = redisService.getLoginUserFromRedis();
+        Map<String, String> userInfo = boardService.getCurrentUserInfo();
         UserName = userInfo.get("name");
         UserRole = userInfo.get("role");
         UserId = Long.valueOf(userInfo.get("id"));
@@ -126,7 +124,7 @@ public class BoardWriteController {
             Long fileId = null;
             if (selectedFile != null) {
                 try {
-                    fileId = fileLocationDao.saveFile(selectedFile, UserId, boardId);
+                    fileId = fileService.saveFile(selectedFile, UserId, boardId);
                     System.out.println("파일 저장 완료: " + fileId);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -148,22 +146,6 @@ public class BoardWriteController {
             
             showAlert("성공", "게시글이 성공적으로 작성되었습니다.");
             ((Stage) submitBtn.getScene().getWindow()).close();
-            
-
-//            // AI 체크박스가 체크되어 있으면
-//            if (aiQuestionCheck.isSelected()) {
-//                // 비동기로 AI 답변 요청
-//                new Thread(() -> {
-//                    String aiComment = GeminiApiClient.generateComment(title, content);
-//                    if (aiComment != null && !aiComment.isBlank()) {
-//                        // 댓글 저장 (UI 스레드에서)
-//                        javafx.application.Platform.runLater(() -> {
-//                            saveAiComment(boardId, aiComment, UserId);
-//                        });
-//                    }
-//                }).start();
-//            }
-
             
         } catch (Exception e) {
             e.printStackTrace();

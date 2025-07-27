@@ -38,6 +38,41 @@ public class NotificationDao {
         }
     }
     
+    // 오래된 알림 정리 프로시저 생성
+    public void createCleanupProcedure() throws SQLException {
+        String createProcedureSQL = NotificationSQL.CREATE_CLEANUP_PROCEDURE;
+        try (Connection conn = getConnection();
+             CallableStatement psmt = conn.prepareCall(createProcedureSQL)) {
+            psmt.executeUpdate();
+            System.out.println("오래된 알림 정리 프로시저 생성 완료");
+        } catch (Exception e) {
+            System.err.println("오래된 알림 정리 프로시저 생성 중 오류: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    // 오래된 알림 자동 삭제
+    public int cleanupOldNotifications(int daysOld) {
+        String sql = NotificationSQL.CLEANUP_OLD_NOTIFICATIONS;
+        try (Connection conn = getConnection();
+             CallableStatement cstmt = conn.prepareCall(sql)) {
+            
+            cstmt.setInt(1, daysOld);
+            cstmt.registerOutParameter(2, java.sql.Types.INTEGER);
+            
+            cstmt.execute();
+            
+            int deletedCount = cstmt.getInt(2);
+            System.out.println("오래된 알림 정리 결과: " + deletedCount + "건 삭제");
+            
+            return deletedCount;
+        } catch (Exception e) {
+            System.err.println("알림 정리 중 오류: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
+    }
+    
     // 알림 생성
     public Long createNotification(Notification notification) {
         String sql = NotificationSQL.CREATE_NOTIFICATION;

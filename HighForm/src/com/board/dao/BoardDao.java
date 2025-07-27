@@ -43,6 +43,19 @@ public class BoardDao {
 	   }
    }
    
+   // 게시글 목록 View 생성
+   public void createBoardListView() throws SQLException {
+	   String createViewSQL = BoardSQL.CREATE_BOARD_LIST_VIEW;
+	   try(Connection conn = getConnection();
+			   CallableStatement psmt = conn.prepareCall(createViewSQL)){
+		   psmt.executeUpdate();
+		   System.out.println("게시글 목록 View 생성 완료");
+	   }catch(Exception e) {
+		   System.err.println("게시글 목록 View 생성 중 오류: " + e.getMessage());
+		   e.printStackTrace();
+	   }
+   }
+   
    // 게시물 작성
    public Long createBoard(Board board) {
 	    String sql = BoardSQL.CREATE_BOARD;
@@ -107,13 +120,11 @@ public class BoardDao {
 	
    
    
-   //게시물 리스트 호출
+   //게시물 리스트 호출 (View 사용)
    public List<BoardDto> getBoardList(BoardCategory type) {
-	    String getBoardSQL = BoardSQL.GET_BOARD_FROM_TYPE; // 순번 포함 쿼리
+	    String getBoardSQL = BoardSQL.GET_BOARD_FROM_TYPE; // View 사용 쿼리
 	    List<BoardDto> boardList = new ArrayList<>();
 	   
-	    
-	    
 	   try(Connection conn = getConnection();
 			PreparedStatement psmt = conn.prepareStatement(getBoardSQL)){
 		   
@@ -131,18 +142,17 @@ public class BoardDao {
 		        		rs.getString("type").equals(BoardCategory.BOARD.name()) ? BoardCategory.BOARD : rs.getString("type").equals(BoardCategory.DATA_ROOM.name()) ? BoardCategory.DATA_ROOM :  BoardCategory.NOTICE,
 		    			rs.getString("content"),
 		    			rs.getLong("id"),
-		    			rs.getLong("user_id")
+		    			rs.getLong("user_id"),
+		    			rs.getInt("comment_count"),
+		    			rs.getInt("file_count")
 		    			);
 
 	            boardList.add(dto);
 		    }
 		
-		   
-		   psmt.executeUpdate();
-		   
 		   return boardList;
 	   }catch(Exception e) {
-		   e.getStackTrace();
+		   System.err.println("게시글 목록 조회 중 오류: " + e.getMessage());
 		   e.printStackTrace();
 	   }
 	   return null;

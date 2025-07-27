@@ -15,13 +15,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import com.board.dao.BoardDao;
-import com.board.dao.CommentDao;
-import com.board.dao.FileLocationDao;
 import com.board.model.Board;
 import com.board.model.Comment;
 import com.board.model.FileLocation;
-import com.util.RedisLoginService;
+import com.board.service.BoardService;
+import com.board.service.CommentService;
+import com.board.service.FileService;
 
 
 import javafx.event.ActionEvent;
@@ -69,17 +68,16 @@ public class PostDetailController implements Initializable {
     
     private static Long boardId;
     
-    private final BoardDao boardDao;
-    private final CommentDao commentDao;
-    private final FileLocationDao fileLocationDao;
-    private RedisLoginService redisService = new RedisLoginService();
+    private final BoardService boardService;
+    private final CommentService commentService;
+    private final FileService fileService;
     
     
     // 의존성 주입 
     public PostDetailController() {
-		this.boardDao = new BoardDao().getInstance();
-		this.commentDao = new CommentDao().getInstance();
-    this.fileLocationDao = FileLocationDao.getInstance();
+		this.boardService = BoardService.getInstance();
+		this.commentService = CommentService.getInstance();
+        this.fileService = FileService.getInstance();
 
         // 반드시 public, 파라미터 없음
     }
@@ -100,7 +98,7 @@ public class PostDetailController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         comments = new ArrayList<>();
         
-        Map<String, String> userInfo = redisService.getLoginUserFromRedis();
+        Map<String, String> userInfo = boardService.getCurrentUserInfo();
         UserName = userInfo.get("name");
         UserRole = userInfo.get("role");
         UserId = Long.valueOf(userInfo.get("id"));
@@ -124,12 +122,12 @@ public class PostDetailController implements Initializable {
     	
     	// TODO :: DB에서 데이터 호출
         System.out.println("게시물 ID : " + boardId);
-        Board board = boardDao.getBoard(boardId);
+        Board board = boardService.getBoard(boardId);
         
         boardData = board;
         
         // 샘플 댓글 데이터
-        comments = commentDao.getCommentsByBoardId(boardId, UserName);
+        comments = commentService.getCommentsByBoardId(boardId);
     }
     
     
@@ -140,7 +138,7 @@ public class PostDetailController implements Initializable {
         contentLabel.setText(boardData.getContent());
         
         // 첨부파일 표시
-        List<FileLocation> files = fileLocationDao.getFilesByBoardId(boardId);
+        List<FileLocation> files = fileService.getFilesByBoardId(boardId);
         if (!files.isEmpty()) {
             attachmentBox.setVisible(true);
             attachmentList.getChildren().clear();
@@ -269,7 +267,7 @@ public class PostDetailController implements Initializable {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             // 게시글 삭제 로직 (미구현)
-        	boardDao.deleteBoard(boardId);
+        	boardService.deleteBoardWithFiles(boardId);
             showAlert("삭제", "게시글이 삭제되었습니다.");
             handleBack(event);
         }
@@ -285,20 +283,11 @@ public class PostDetailController implements Initializable {
         }
         
         // 새 댓글 생성
-        Comment newComment = Comment.builder()
-                .boardId(boardId)
-                .parentId(0L)  // 최상위 댓글
-                .author(UserName)
-                .content(commentText)
-                .userId(UserId)  // TODO: 실제 사용자 ID로 변경
-                .build();
-        
-        // DB에 저장
-        Long commentId = commentDao.createComment(newComment);
+        Long commentId = commentService.createNewComment(boardId, commentText, null);
         if (commentId != null) {
             commentTextArea.clear();
             // 댓글 목록 새로고침
-            comments = commentDao.getCommentsByBoardId(boardId, UserName);
+            comments = commentService.getCommentsByBoardId(boardId);
 
             displayComments();
             showAlert("성공", "댓글이 작성되었습니다.");
@@ -320,10 +309,10 @@ public class PostDetailController implements Initializable {
             String newContent = result.get().trim();
             
             // DB 업데이트
-            boolean success = commentDao.updateComment(comment.getId(), newContent);
+            boolean success = commentService.updateComment(comment.getId(), newContent);
             if (success) {
                 // 댓글 목록 새로고침
-                comments = commentDao.getCommentsByBoardId(boardId, UserName);
+                comments = commentService.getCommentsByBoardId(boardId);
                 displayComments();
                 showAlert("성공", "댓글이 수정되었습니다.");
             } else {
@@ -340,10 +329,10 @@ public class PostDetailController implements Initializable {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             // 댓글과 대댓글 모두 삭제
-            boolean success = commentDao.deleteCommentWithReplies(comment.getId());
+            boolean success = commentService.deleteCommentWithReplies(comment.getId());
             if (success) {
                 // 댓글 목록 새로고침
-                comments = commentDao.getCommentsByBoardId(boardId, UserName);
+                comments = commentService.getCommentsByBoardId(boardId);
                 displayComments();
                 showAlert("성공", "댓글이 삭제되었습니다.");
             } else {
@@ -361,20 +350,11 @@ public class PostDetailController implements Initializable {
         }
         
         // 대댓글 생성
-        Comment reply = Comment.builder()
-                .boardId(boardId)
-                .parentId(parentComment.getId())  // 부모 댓글 ID
-                .author(UserName)
-                .content(replyText)
-                .userId(UserId)  // TODO: 실제 사용자 ID로 변경
-                .build();
-        
-        // DB에 저장
-        Long replyId = commentDao.createComment(reply);
+        Long replyId = commentService.createNewComment(boardId, replyText, parentComment.getId());
         if (replyId != null) {
             commentTextArea.clear();
             // 댓글 목록 새로고침
-            comments = commentDao.getCommentsByBoardId(boardId, UserName);
+            comments = commentService.getCommentsByBoardId(boardId);
             displayComments();
             showAlert("성공", "답글이 작성되었습니다.");
         } else {

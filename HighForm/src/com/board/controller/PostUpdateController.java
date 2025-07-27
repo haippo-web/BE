@@ -5,12 +5,12 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
-import com.board.dao.BoardDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.dto.BoardDto;
 import com.board.model.dto.BoardWriteRequestDto;
-import com.util.RedisLoginService;
+import com.board.service.BoardService;
+import com.board.service.FileService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -29,9 +29,9 @@ public class PostUpdateController {
     private PostDetailController postDetailController;
     private BoardCategory selectedType = BoardCategory.DATA_ROOM;
     private String attachmentPath = "";
-    private final BoardDao boardDao;
+    private final BoardService boardService;
+    private final FileService fileService;
     private static Long boardId;
-    private RedisLoginService redisService = new RedisLoginService();
     private String UserName = ""; // 현재 로그인한 사용자 (실제로는 세션에서 가져와야 함)
     private String UserRole = "";
     private Long UserId = null;
@@ -42,7 +42,8 @@ public class PostUpdateController {
     }
     
     public PostUpdateController() {
-		this.boardDao = new BoardDao().getInstance();
+		this.boardService = BoardService.getInstance();
+        this.fileService = FileService.getInstance();
         // 반드시 public, 파라미터 없음
     }
     
@@ -58,7 +59,7 @@ public class PostUpdateController {
     
     @FXML
     public void initialize() {
-        Map<String, String> userInfo = redisService.getLoginUserFromRedis();
+        Map<String, String> userInfo = boardService.getCurrentUserInfo();
         UserName = userInfo.get("name");
         UserRole = userInfo.get("role");
         UserId = Long.valueOf(userInfo.get("id"));
@@ -112,7 +113,7 @@ public class PostUpdateController {
         }
         
         // 변경된 값만 업데이트
-        boolean success = boardDao.updateBoard(boardId, updatedBoard);
+        boolean success = boardService.updateBoardWithFile(boardId, updatedBoard, selectedFile);
         
         if (success) {
             showAlert("수정 완료", "게시글이 수정되었습니다.");

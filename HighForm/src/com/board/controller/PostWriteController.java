@@ -4,13 +4,12 @@ import java.io.File;
 import java.text.ParseException;
 import java.util.Map;
 
-import com.board.dao.BoardDao;
-import com.board.dao.FileLocationDao;
 import com.board.model.Board;
 import com.board.model.BoardCategory;
 import com.board.model.dto.BoardWriteRequestDto;
+import com.board.service.BoardService;
+import com.board.service.FileService;
 import com.login.model.User;
-import com.util.RedisLoginService;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -32,10 +31,9 @@ public class PostWriteController {
 
     private BoardCategory selectedType = BoardCategory.DATA_ROOM;
     private String attachmentPath = "";
-    private final BoardDao boardDao;
+    private final BoardService boardService;
     private File selectedFile;
-    private final FileLocationDao fileLocationDao;
-    private RedisLoginService redisService = new RedisLoginService();
+    private final FileService fileService;
     private String UserName = ""; // 현재 로그인한 사용자 (실제로는 세션에서 가져와야 함)
     private String UserRole = "";
     private Long UserId = null;
@@ -48,8 +46,8 @@ public class PostWriteController {
     }
     
     public PostWriteController() {
-		this.boardDao = new BoardDao().getInstance();
-        this.fileLocationDao = FileLocationDao.getInstance();
+		this.boardService = BoardService.getInstance();
+        this.fileService = FileService.getInstance();
         // 반드시 public, 파라미터 없음
     }
     
@@ -66,7 +64,7 @@ public class PostWriteController {
     
     @FXML
     public void initialize() {
-        Map<String, String> userInfo = redisService.getLoginUserFromRedis();
+        Map<String, String> userInfo = boardService.getCurrentUserInfo();
         UserName = userInfo.get("name");
         UserRole = userInfo.get("role");
         UserId = Long.valueOf(userInfo.get("id"));
@@ -112,24 +110,13 @@ public class PostWriteController {
         }
         
         try {
-            // 1. 게시글 먼저 저장
+            // 1. 게시글과 파일 함께 저장
             BoardWriteRequestDto newPost = new BoardWriteRequestDto(1, title, author, selectedType, content, null);
             Board board = newPost.toEntity(newPost, null, userId);
-            Long boardId = boardDao.createBoard(board);
-            
-            // 2. 첨부파일이 있다면 파일 저장
-            if (selectedFile != null) {
-                try {
-                    Long fileId = fileLocationDao.saveFile(selectedFile, userId, boardId);
-                    System.out.println("파일 저장 완료: " + fileId);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    showAlert("경고", "파일 업로드 중 오류가 발생했습니다.");
-                }
-            }
+            Long boardId = boardService.createBoardWithFile(board, selectedFile, userId);
             
             // 3. DB에서 최신 게시글 정보 가져오기
-            Board boardEntity = boardDao.getBoard(boardId);
+            Board boardEntity = boardService.getBoard(boardId);
             
             if (boardController != null) {
                 boardController.addNewPost(boardEntity);

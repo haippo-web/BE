@@ -27,6 +27,8 @@ public class BoardDto {
 	private StringProperty attachmentPath;
 	private Long boardId;
 	private Long userId;
+	private IntegerProperty commentCount;  // 댓글 수
+	private IntegerProperty fileCount;     // 파일 수
     
     public BoardDto(int no, String title, String author, Date date, BoardCategory type,  String content, Long boardId, Long userId) {
         this.no = new SimpleIntegerProperty(no);
@@ -38,6 +40,23 @@ public class BoardDto {
         this.attachmentPath = new SimpleStringProperty("");
         this.boardId = boardId;
         this.userId = userId;
+        this.commentCount = new SimpleIntegerProperty(0);
+        this.fileCount = new SimpleIntegerProperty(0);
+    }
+    
+    // View 결과를 위한 생성자 (댓글 수, 파일 수 포함)
+    public BoardDto(int no, String title, String author, Date date, BoardCategory type, String content, Long boardId, Long userId, int commentCount, int fileCount) {
+        this.no = new SimpleIntegerProperty(no);
+        this.title = new SimpleStringProperty(title);
+        this.author = new SimpleStringProperty(author);
+        this.date = new SimpleStringProperty(date != null ? new SimpleDateFormat("yyyy-MM-dd").format(date) : null);
+        this.type = type;
+        this.content = new SimpleStringProperty(content);
+        this.attachmentPath = new SimpleStringProperty("");
+        this.boardId = boardId;
+        this.userId = userId;
+        this.commentCount = new SimpleIntegerProperty(commentCount);
+        this.fileCount = new SimpleIntegerProperty(fileCount);
     }
 
     // Getters and Setters
@@ -64,6 +83,11 @@ public class BoardDto {
     
     public void setBoardId(Long id) {this.boardId = id;}
     
+    public void setCommentCount(int commentCount) { this.commentCount.set(commentCount); }
+    public IntegerProperty commentCountProperty() { return commentCount; }
+    
+    public void setFileCount(int fileCount) { this.fileCount.set(fileCount); }
+    public IntegerProperty fileCountProperty() { return fileCount; }
    
 
 }

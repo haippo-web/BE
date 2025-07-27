@@ -7,8 +7,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import com.notification.model.Notification;
-import com.util.RedisLoginService;
-import com.notification.dao.NotificationDao;
+import com.notification.service.NotificationService;
 import java.util.List;
 import java.util.Map;
 
@@ -16,17 +15,20 @@ public class NotificationPopupController {
     @FXML private VBox notificationList;
     @FXML private Button closeButton;
     
-    private NotificationDao notificationDao = NotificationDao.getInstance();
+    private final NotificationService notificationService;
     private static Long currentUserId;
-    private RedisLoginService redisService = new RedisLoginService();
     private String UserName = ""; // 현재 로그인한 사용자 (실제로는 세션에서 가져와야 함)
     private String UserRole = "";
     private Long UserId = null;
     
+    public NotificationPopupController() {
+        this.notificationService = NotificationService.getInstance();
+    }
+    
     
     @FXML
     public void initialize() {
-        Map<String, String> userInfo = redisService.getLoginUserFromRedis();
+        Map<String, String> userInfo = notificationService.getCurrentUserInfo();
         UserName = userInfo.get("name");
         UserRole = userInfo.get("role");
         UserId = Long.valueOf(userInfo.get("id"));
@@ -42,7 +44,7 @@ public class NotificationPopupController {
         if (UserId == null) return;
         
         notificationList.getChildren().clear();
-        List<Notification> notifications = notificationDao.getAllNotifications(UserId);
+        List<Notification> notifications = notificationService.getCurrentUserNotifications();
         
         for (Notification notification : notifications) {
             VBox notificationItem = createNotificationItem(notification);
@@ -81,8 +83,8 @@ public class NotificationPopupController {
     }
     
     private void handleReadNotification(Long notificationId) {
-        notificationDao.markAsRead(notificationId);
-        notificationDao.deleteNotification(notificationId);
+        notificationService.markAsRead(notificationId);
+        notificationService.deleteNotification(notificationId);
         loadNotifications(); // 목록 새로고침
     }
     

@@ -26,6 +26,39 @@ public class NotificationSQL {
                 )
             """;
     
+    // 오래된 알림 자동 삭제 프로시저 생성
+    public static final String CREATE_CLEANUP_PROCEDURE =
+            """
+            CREATE OR REPLACE PROCEDURE CLEANUP_OLD_NOTIFICATIONS(
+                p_days_old IN NUMBER DEFAULT 30,
+                p_result OUT NUMBER
+            ) AS
+                v_deleted_count NUMBER := 0;
+            BEGIN
+                -- 지정된 일수보다 오래된 읽은 알림 삭제
+                DELETE FROM notification 
+                WHERE is_read = 'Y' 
+                AND created_at < SYSDATE - p_days_old;
+                
+                v_deleted_count := SQL%ROWCOUNT;
+                p_result := v_deleted_count;
+                
+                -- 정리 로그 기록 (선택사항)
+                IF v_deleted_count > 0 THEN
+                    INSERT INTO notification_cleanup_log (cleanup_date, days_old, deleted_count)
+                    VALUES (SYSDATE, p_days_old, v_deleted_count);
+                END IF;
+                
+                DBMS_OUTPUT.PUT_LINE('오래된 알림 ' || v_deleted_count || '건 삭제 완료');
+                
+            EXCEPTION
+                WHEN OTHERS THEN
+                    p_result := 0;
+                    DBMS_OUTPUT.PUT_LINE('알림 정리 중 오류: ' || SQLERRM);
+                    RAISE;
+            END CLEANUP_OLD_NOTIFICATIONS;
+            """;
+    
     public static final String CREATE_NOTIFICATION =
             """
                 INSERT INTO notification (id, title, content, type, user_id, created_at, is_read)
@@ -65,4 +98,7 @@ public class NotificationSQL {
                 SELECT COUNT(*) FROM notification 
                 WHERE user_id = ? AND is_read = 'N'
             """;
+    
+    // 오래된 알림 정리 프로시저 호출
+    public static final String CLEANUP_OLD_NOTIFICATIONS = "{call CLEANUP_OLD_NOTIFICATIONS(?, ?)}";
 }
